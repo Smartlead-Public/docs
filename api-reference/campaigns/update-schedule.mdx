@@ -1,0 +1,243 @@
+---
+title: "Update Campaign Schedule"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/schedule"
+description: "Configures when and how frequently campaign emails are sent."
+---
+<Note>
+Configures when and how frequently campaign emails are sent Sets timezone (IANA format), sending hours (start/end in 24-hour format), active days of week (0=Sunday through 6=Saturday), and minimum time between consecutive emails (in minutes)
+</Note>
+
+## Overview
+
+Configures when and how frequently campaign emails are sent
+
+**Key Features**:
+- Validates timezone string and time format before saving
+
+
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  The ID of the campaign to update
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="schedule" type="object" required>
+  Sending schedule configuration
+  
+  <Expandable title="Schedule Object">
+    <ParamField body="timezone" type="string" required>
+      IANA timezone (e.g., "America/New_York", "Europe/London")
+    </ParamField>
+    
+    <ParamField body="days" type="array" required>
+      Days of week to send (0=Sunday, 1=Monday, ..., 6=Saturday)
+      
+      Example: `[1, 2, 3, 4, 5]` for Monday-Friday
+    </ParamField>
+    
+    <ParamField body="start_hour" type="string" required>
+      Start sending time (24-hour format, e.g., "09:00")
+    </ParamField>
+    
+    <ParamField body="end_hour" type="string" required>
+      Stop sending time (24-hour format, e.g., "17:00")
+    </ParamField>
+    
+    <ParamField body="min_time_btw_emails" type="number">
+      Minimum minutes between consecutive emails
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/schedule?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schedule": {
+      "timezone": "America/New_York",
+      "days": [1, 2, 3, 4, 5],
+      "start_hour": "09:00",
+      "end_hour": "17:00",
+      "min_time_btw_emails": 120
+    }
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+
+schedule = {
+    "schedule": {
+        "timezone": "America/New_York",
+        "days": [1, 2, 3, 4, 5],  # Monday-Friday
+        "start_hour": "09:00",
+        "end_hour": "17:00",
+        "min_time_btw_emails": 120  # 2 hours between emails
+    }
+}
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/schedule",
+    params={"api_key": API_KEY},
+    json=schedule
+)
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+
+const schedule = {
+  schedule: {
+    timezone: 'America/New_York',
+    days: [1, 2, 3, 4, 5],
+    start_hour: '09:00',
+    end_hour: '17:00',
+    min_time_btw_emails: 120
+  }
+};
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/schedule?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(schedule)
+  }
+);
+```
+
+</RequestExample>
+
+
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key. Check your authentication.
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types, required fields, and value constraints.
+</ResponseField>
+
+<ResponseField name="429" type="Rate Limit Exceeded">
+  Too many requests. Please slow down and retry after the rate limit resets.
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred. Please try again or contact support if the issue persists.
+</ResponseField>
+
+<ResponseField name="503" type="Service Unavailable">
+  API is temporarily unavailable or under maintenance. Please try again later.
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "success": true,
+  "data": {}
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Resource not found"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "Invalid parameters provided"
+}
+```
+
+</ResponseExample>
+
+## Schedule Best Practices
+
+### Business Hours
+Send during recipient's business hours:
+- **B2B**: 9 AM - 5 PM local time
+- **B2C**: 10 AM - 8 PM local time
+- **Global**: Consider multiple timezones
+
+### Days of Week
+```
+Monday-Friday [1,2,3,4,5]  - Best for B2B
+Tuesday-Thursday [2,3,4]    - Highest open rates
+All 7 days [0,1,2,3,4,5,6] - For B2C or urgent campaigns
+```
+
+### Time Between Emails
+- **120+ minutes**: Appears more natural
+- **60-120 minutes**: Moderate pacing
+- **30-60 minutes**: Aggressive (use carefully)
+
+<Tip>
+  Longer delays between emails (2-3 hours) result in better deliverability and appear more natural to recipients.
+</Tip>
+
+## Common Timezones
+
+- `America/New_York` - US Eastern
+- `America/Los_Angeles` - US Pacific
+- `America/Chicago` - US Central
+- `Europe/London` - UK
+- `Europe/Paris` - Central Europe
+- `Asia/Tokyo` - Japan
+- `Asia/Dubai` - UAE
+- `Asia/Kolkata` - India
+- `Australia/Sydney` - Australia
+
+[See full list of timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+
+
+
+## Implementation Details
+
+Schedule timezone must be valid IANA timezone. Start/end hours in 24-hour format. Min time between emails prevents rapid-fire sending.
+
+**Response Format**: object
+
+
+## Related Endpoints
+
+- [Get Campaign by ID](/api-reference/campaigns/get-by-id)
+- [Update Campaign Settings](/api-reference/campaigns/update-settings)
+- [Update Campaign Status](/api-reference/campaigns/update-status)
+

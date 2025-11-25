@@ -1,0 +1,245 @@
+---
+title: "Reply to Lead Email"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/reply-email-thread"
+description: "Send a reply to a lead within a campaign conversation thread"
+---
+
+<Note>
+Sends reply from the campaign's email account. Maintains thread context. Supports scheduling, CC/BCC, attachments, and signature inclusion.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  The ID of the campaign containing the conversation
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="email_stats_id" type="string" required>
+  The email statistics ID from the original message. Get this from inbox endpoints.
+</ParamField>
+
+<ParamField body="email_body" type="string" required>
+  The reply message content (HTML or plain text supported)
+</ParamField>
+
+<ParamField body="to_email" type="string">
+  Recipient email address (optional - defaults to original sender)
+</ParamField>
+
+<ParamField body="to_first_name" type="string">
+  Recipient's first name for personalization
+</ParamField>
+
+<ParamField body="to_last_name" type="string">
+  Recipient's last name
+</ParamField>
+
+<ParamField body="scheduled_time" type="string">
+  ISO 8601 timestamp to schedule reply for later. Leave empty to send immediately.
+</ParamField>
+
+<ParamField body="reply_message_id" type="string">
+  Original message ID to maintain threading
+</ParamField>
+
+<ParamField body="cc" type="string">
+  Comma-separated CC email addresses
+</ParamField>
+
+<ParamField body="bcc" type="string">
+  Comma-separated BCC email addresses
+</ParamField>
+
+<ParamField body="add_signature" type="boolean">
+  Whether to include email account signature (default: false)
+</ParamField>
+
+<ParamField body="attachments" type="array">
+  Array of attachment objects
+  
+  <Expandable title="Attachment Object">
+    <ParamField body="file_name" type="string">
+      Attachment filename
+    </ParamField>
+    
+    <ParamField body="file_url" type="string" required>
+      URL to attachment file
+    </ParamField>
+    
+    <ParamField body="file_type" type="string">
+      MIME type (e.g., "application/pdf")
+    </ParamField>
+    
+    <ParamField body="file_size" type="number">
+      File size in bytes
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/reply-email-thread?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email_stats_id": "0361acf6-e13b-4ef9-aca5-f3a02b9c6e70",
+    "email_body": "Thanks for your interest! Here'\''s the information you requested...",
+    "add_signature": true
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+
+# Reply to interested lead
+payload = {
+    "email_stats_id": "0361acf6-e13b-4ef9-aca5-f3a02b9c6e70",
+    "email_body": "Thanks for your interest! Here's the information you requested...",
+    "add_signature": True
+}
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/reply-email-thread",
+    params={"api_key": API_KEY},
+    json=payload
+)
+
+if response.status_code == 200:
+    print("Reply sent successfully!")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+
+const payload = {
+  email_stats_id: '0361acf6-e13b-4ef9-aca5-f3a02b9c6e70',
+  email_body: 'Thanks for your interest! Here\\'s the information you requested...',
+  add_signature: true
+};
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/reply-email-thread?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }
+);
+
+const result = await response.json();
+console.log('Reply sent!');
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Reply sent successfully
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid parameters or malformed request
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid API key
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  Campaign or email statistics not found
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Required fields missing or invalid
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "success": true,
+  "message": "Reply sent successfully",
+  "email_id": "reply_abc123"
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Email statistics not found for provided email_stats_id"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "email_body is required"
+}
+```
+
+</ResponseExample>
+
+## Use Cases
+
+### Simple Reply
+```python
+# Quick reply to interested lead
+requests.post(url, params={"api_key": KEY}, json={
+    "email_stats_id": stats_id,
+    "email_body": "Happy to help! Let me know if you have questions."
+})
+```
+
+### Scheduled Reply
+```python
+# Schedule reply for tomorrow 9 AM
+from datetime import datetime, timedelta
+tomorrow_9am = (datetime.now() + timedelta(days=1)).replace(hour=9, minute=0)
+
+requests.post(url, params={"api_key": KEY}, json={
+    "email_stats_id": stats_id,
+    "email_body": "Following up on your inquiry...",
+    "scheduled_time": tomorrow_9am.isoformat()
+})
+```
+
+### Reply with CC
+```python
+# Reply and CC your manager
+requests.post(url, params={"api_key": KEY}, json={
+    "email_stats_id": stats_id,
+    "email_body": "Here's the proposal discussed...",
+    "cc": "manager@company.com",
+    "add_signature": True
+})
+```
+
+## Getting email_stats_id
+
+The `email_stats_id` is returned by all Master Inbox endpoints:
+
+```json From inbox endpoints
+{
+  "email_stats_id": "0361acf6-e13b-4ef9-aca5-f3a02b9c6e70",
+  "lead_email": "interested@example.com",
+  ...
+}
+```
+
+## Related Endpoints
+
+- [Get Inbox Messages](/api-reference/inbox/get-messages)
+- [Get Unread Replies](/api-reference/inbox/get-unread)
+- [Forward Email](/api-reference/inbox/forward)
+- [Update Lead Category](/api-reference/inbox/update-category)
