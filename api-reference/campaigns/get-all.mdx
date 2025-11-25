@@ -3,8 +3,9 @@ title: "Get All Campaigns"
 api: "GET https://server.smartlead.ai/api/v1/campaigns/"
 description: "Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule set"
 ---
+
 <Note>
-Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule settings, tracking configuration, AI matching preferences, and sending limits Essential for dashboard displays, campaign selection interfaces, and bulk operations across portfolio.
+  Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule settings, tracking configuration, AI matching preferences, and sending limits Essential for dashboard displays, campaign selection interfaces, and bulk operations across portfolio.
 </Note>
 
 ## Overview
@@ -12,12 +13,11 @@ Retrieves all email campaigns for the authenticated user with comprehensive camp
 Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule settings, tracking configuration, AI matching preferences, and sending limits
 
 **Key Features**:
+
 - Returns campaigns ordered by ID descending (newest first)
 - Supports optional client_id filtering for agency/white-label accounts managing multiple clients
 - When include_tags=true, returns campaign tags with tag IDs, names, and colors for categorization and filtering
 - Returns direct array of campaign objects (not wrapped)
-
-
 
 ## Query Parameters
 
@@ -29,7 +29,7 @@ Retrieves all email campaigns for the authenticated user with comprehensive camp
   Filter campaigns by specific client ID
 </ParamField>
 
-<ParamField query="include_tags" type="boolean" default="false">
+<ParamField query="include_tags" default="false" type="boolean">
   Include campaign tags in the response
 </ParamField>
 
@@ -41,113 +41,91 @@ Retrieves all email campaigns for the authenticated user with comprehensive camp
 
 <ResponseField name="campaigns" type="array">
   Array of campaign objects
-  
+
   <Expandable title="Campaign Object Fields">
     <ResponseField name="id" type="number">
       Unique campaign identifier
     </ResponseField>
-    
     <ResponseField name="user_id" type="number">
       ID of the user who owns this campaign
     </ResponseField>
-    
     <ResponseField name="name" type="string">
       Campaign name set by user
     </ResponseField>
-    
     <ResponseField name="status" type="string">
       Current campaign status: `ACTIVE`, `PAUSED`, `STOPPED`, `ARCHIVED`, `DRAFTED`
     </ResponseField>
-    
     <ResponseField name="created_at" type="string">
       ISO 8601 timestamp when campaign was created
     </ResponseField>
-    
     <ResponseField name="updated_at" type="string">
       ISO 8601 timestamp of last modification
     </ResponseField>
-    
     <ResponseField name="track_settings" type="array">
       Tracking configuration. Array can contain:
+
       - `"DONT_EMAIL_OPEN"` - Disable open tracking
       - `"DONT_LINK_CLICK"` - Disable click tracking
       - Empty array `[]` - Track everything
     </ResponseField>
-    
     <ResponseField name="scheduler_cron_value" type="object">
       Sending schedule configuration
-      
+
       <Expandable title="Schedule Object">
         <ResponseField name="tz" type="string">
           Timezone (IANA format, e.g., "America/New_York")
         </ResponseField>
-        
         <ResponseField name="days" type="array">
           Days of week to send (0=Sunday, 1=Monday, ..., 6=Saturday)
         </ResponseField>
-        
         <ResponseField name="startHour" type="string">
           Start sending time (24-hour format, e.g., "09:00")
         </ResponseField>
-        
         <ResponseField name="endHour" type="string">
           Stop sending time (24-hour format, e.g., "17:00")
         </ResponseField>
       </Expandable>
     </ResponseField>
-    
     <ResponseField name="min_time_btwn_emails" type="number">
       Minimum minutes to wait between consecutive emails. Higher values (120+) appear more natural and improve deliverability.
     </ResponseField>
-    
     <ResponseField name="max_leads_per_day" type="number">
       Maximum number of leads to contact per day across all email accounts
     </ResponseField>
-    
     <ResponseField name="stop_lead_settings" type="string">
       When to stop emailing a lead: `REPLY_TO_AN_EMAIL`, `OPENED_EMAIL`, `CLICKED_LINK`, or `NEVER`
     </ResponseField>
-    
     <ResponseField name="schedule_start_time" type="string">
       Scheduled start time for campaign (ISO 8601 format), `null` if starting immediately
     </ResponseField>
-    
     <ResponseField name="enable_ai_esp_matching" type="boolean">
       When `true`, SmartLead's AI automatically matches leads with optimal email accounts based on provider and deliverability history
     </ResponseField>
-    
     <ResponseField name="send_as_plain_text" type="boolean">
       When `true`, emails are sent as plain text instead of HTML for better deliverability with technical audiences
     </ResponseField>
-    
     <ResponseField name="follow_up_percentage" type="number">
       Percentage of leads that receive follow-up emails (0-100)
     </ResponseField>
-    
     <ResponseField name="unsubscribe_text" type="string">
       Custom unsubscribe footer text
     </ResponseField>
-    
     <ResponseField name="parent_campaign_id" type="number">
       If this is a subsequence, references the parent campaign ID. `null` for main campaigns.
     </ResponseField>
-    
     <ResponseField name="client_id" type="number">
       Associated client ID for agency/white-label accounts. `null` for direct user campaigns.
     </ResponseField>
-    
     <ResponseField name="tags" type="array">
       Campaign tags (only included if `include_tags=true`)
-      
+
       <Expandable title="Tag Object">
         <ResponseField name="tag_id" type="number">
           Tag identifier
         </ResponseField>
-        
         <ResponseField name="tag_name" type="string">
           Tag name
         </ResponseField>
-        
         <ResponseField name="tag_color" type="string">
           Tag color (hex format, e.g., "#FF5733")
         </ResponseField>
@@ -161,6 +139,7 @@ Retrieves all email campaigns for the authenticated user with comprehensive camp
 ```bash cURL
 curl -X GET "https://server.smartlead.ai/api/v1/campaigns/?api_key=YOUR_API_KEY&include_tags=true"
 ```
+
 
 ```python Python
 import requests
@@ -180,6 +159,7 @@ campaigns = response.json()
 print(f"Total campaigns: {len(campaigns['campaigns'])}")
 ```
 
+
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
@@ -196,6 +176,7 @@ getAllCampaigns().then(campaigns => {
   console.log(`Found ${campaigns.length} campaigns`);
 });
 ```
+
 
 ```php PHP
 <?php
@@ -255,10 +236,6 @@ echo "Total campaigns: " . count($data['campaigns']);
 ]
 ```
 
-<Note>
-  **Response Format**: This endpoint returns a direct array of campaigns, not wrapped in a success object. Each campaign contains comprehensive configuration including schedule, tracking settings, AI preferences, and sending limits.
-</Note>
-
 
 ```json 401 - Unauthorized
 {
@@ -266,11 +243,13 @@ echo "Total campaigns: " . count($data['campaigns']);
 }
 ```
 
+
 ```json 404 - Not Found
 {
   "error": "Resource not found"
 }
 ```
+
 
 ```json 422 - Validation Error
 {
@@ -353,4 +332,3 @@ campaigns = response.json()
 - [Create Campaign](/api-reference/campaigns/create)
 - [Update Campaign Status](/api-reference/campaigns/update-status)
 - [Get Campaign Statistics](/api-reference/campaigns/statistics)
-
