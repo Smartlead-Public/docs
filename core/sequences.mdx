@@ -1,0 +1,191 @@
+---
+title: "Email Sequences"
+description: "Understanding email sequences and follow-ups"
+---
+
+## What are Sequences?
+
+Sequences are automated follow-up emails that are sent based on time delays and conditions. A typical sequence might look like:
+
+<Steps>
+  <Step title="Email 1 (Day 0)">
+    Initial outreach email
+  </Step>
+  
+  <Step title="Email 2 (Day 3)">
+    First follow-up if no reply
+  </Step>
+  
+  <Step title="Email 3 (Day 7)">
+    Second follow-up if no reply
+  </Step>
+  
+  <Step title="Email 4 (Day 14)">
+    Final follow-up
+  </Step>
+</Steps>
+
+## Sequence Structure
+
+Each sequence has:
+
+- **Sequence Number**: 1, 2, 3, etc.
+- **Subject Line**: Email subject (can use variables)
+- **Email Body**: Message content (supports HTML and plain text)
+- **Delay**: Days to wait before sending
+- **Conditions**: When to send (optional)
+
+## Example Sequence
+
+```json
+{
+  "seq_number": 1,
+  "subject": "Quick question about {{company_name}}",
+  "email_body": "Hi {{first_name}},\n\nI noticed {{company_name}} is in the {{industry}} space...",
+  "seq_delay_details": {
+    "delay_in_days": 0
+  }
+}
+```
+
+## Personalization Variables
+
+Use these in subject and body:
+
+### Standard Fields
+- `{{first_name}}` - Lead's first name
+- `{{last_name}}` - Lead's last name
+- `{{email}}` - Lead's email
+- `{{company_name}}` - Company name
+- `{{website}}` - Company website
+- `{{location}}` - Lead's location
+
+### Custom Fields
+Any custom field you add:
+- `{{job_title}}`
+- `{{industry}}`
+- `{{company_size}}`
+- `{{pain_point}}`
+- Any other custom field
+
+### Usage Example
+```
+Subject: {{first_name}}, question about {{company_name}}'s {{industry}} strategy
+
+Hi {{first_name}},
+
+I noticed {{company_name}} is based in {{location}} and works in the {{industry}} space.
+
+As a {{job_title}}, you might be interested in...
+
+Best regards,
+Your Name
+```
+
+## Sequence Delays
+
+Configure delays between emails:
+
+```json
+{
+  "seq_delay_details": {
+    "delay_in_days": 3
+  }
+}
+```
+
+**Recommended Delays**:
+- Email 1 → Email 2: 2-4 days
+- Email 2 → Email 3: 3-5 days
+- Email 3 → Email 4: 5-7 days
+- Email 4 → Email 5: 7-14 days
+
+## Sequence Variants (A/B Testing)
+
+Test multiple versions of the same sequence:
+
+```json
+{
+  "seq_number": 1,
+  "seq_variants": [
+    {
+      "variant_id": "A",
+      "subject": "Quick question",
+      "email_body": "Version A...",
+      "distribution": 50
+    },
+    {
+      "variant_id": "B",
+      "subject": "Thoughts on your process?",
+      "email_body": "Version B...",
+      "distribution": 50
+    }
+  ]
+}
+```
+
+## Stop Conditions
+
+Configure when to stop sending:
+
+- **Reply to Email**: Stop on any reply (recommended)
+- **Email Opened**: Stop after they open
+- **Link Clicked**: Stop after click
+- **Never**: Send full sequence regardless
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Keep It Short">
+    First email: 50-125 words for best response rates
+  </Accordion>
+
+  <Accordion title="Value First">
+    Lead with value, not your product. What's in it for them?
+  </Accordion>
+
+  <Accordion title="Clear CTA">
+    One clear call-to-action per email
+  </Accordion>
+
+  <Accordion title="Test Variants">
+    A/B test subject lines and messaging
+  </Accordion>
+
+  <Accordion title="Space Out Follow-ups">
+    Don't be too aggressive - 3-5 days between emails
+  </Accordion>
+</AccordionGroup>
+
+## Sequence Types
+
+### 1. Standard Sequence
+```
+Email 1: Initial outreach
+Email 2: Value add / case study
+Email 3: Different angle
+Email 4: Permission to close
+```
+
+### 2. Value Sequence
+```
+Email 1: Free resource offer
+Email 2: Additional resources
+Email 3: Soft pitch
+Email 4: Hard pitch
+```
+
+### 3. Problem-Solution
+```
+Email 1: Identify problem
+Email 2: Your solution
+Email 3: Case study / proof
+Email 4: Call to action
+```
+
+## Related Endpoints
+
+- [Get Campaign Sequences](/api-reference/campaigns/get-sequences)
+- [Update Campaign Sequences](/api-reference/campaigns/update-sequences)
+- [Create Campaign](/api-reference/campaigns/create)
+

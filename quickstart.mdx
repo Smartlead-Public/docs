@@ -1,80 +1,334 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quickstart'
+description: 'Start sending cold emails in under 5 minutes'
 ---
 
-## Get started in three steps
+## Get Your API Key
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Sign up for SmartLead">
+    If you haven't already, create an account at [app.smartlead.ai](https://app.smartlead.ai/signup)
+  </Step>
+  
+  <Step title="Navigate to Settings">
+    Go to your dashboard and click on Settings → API
+  </Step>
+  
+  <Step title="Generate API Key">
+    Click "Generate New API Key" and copy it securely
+  </Step>
+</Steps>
 
-### Step 1: Set up your local environment
+<Warning>
+  Keep your API key secure! Never commit it to version control or expose it in client-side code.
+</Warning>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+## Make Your First Request
 
-### Step 2: Deploy your changes
+Let's fetch all your campaigns:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+<CodeGroup>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+```bash cURL
+curl -X GET "https://server.smartlead.ai/api/v1/campaigns/?api_key=YOUR_API_KEY"
+```
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+```python Python
+import requests
 
-### Step 3: Go live
+api_key = "YOUR_API_KEY"
+url = "https://server.smartlead.ai/api/v1/campaigns/"
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+response = requests.get(url, params={"api_key": api_key})
+campaigns = response.json()
 
-## Next steps
+print(f"Total campaigns: {len(campaigns.get('campaigns', []))}")
+```
 
-Now that you have your docs running, explore these key features:
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = 'https://server.smartlead.ai/api/v1';
+
+async function getCampaigns() {
+  const response = await fetch(
+    `${BASE_URL}/campaigns/?api_key=${API_KEY}`
+  );
+  const data = await response.json();
+  
+  console.log(`Total campaigns: ${data.campaigns.length}`);
+  return data.campaigns;
+}
+
+getCampaigns();
+```
+
+```php PHP
+<?php
+$api_key = 'YOUR_API_KEY';
+$base_url = 'https://server.smartlead.ai/api/v1';
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "$base_url/campaigns/?api_key=$api_key");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+echo "Total campaigns: " . count($data['campaigns']);
+?>
+```
+
+</CodeGroup>
+
+## Create Your First Campaign
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/new?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My First Campaign",
+    "track_settings": {
+      "track_open": true,
+      "track_click": true
+    }
+  }'
+```
+
+```python Python
+import requests
+
+api_key = "YOUR_API_KEY"
+url = "https://server.smartlead.ai/api/v1/campaigns/new"
+
+payload = {
+    "name": "My First Campaign",
+    "track_settings": {
+        "track_open": True,
+        "track_click": True
+    }
+}
+
+response = requests.post(
+    url, 
+    params={"api_key": api_key},
+    json=payload
+)
+
+campaign = response.json()
+print(f"Campaign created with ID: {campaign['campaign']['id']}")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = 'https://server.smartlead.ai/api/v1';
+
+async function createCampaign() {
+  const response = await fetch(
+    `${BASE_URL}/campaigns/new?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: 'My First Campaign',
+        track_settings: {
+          track_open: true,
+          track_click: true,
+        },
+      }),
+    }
+  );
+  
+  const data = await response.json();
+  console.log(`Campaign created with ID: ${data.campaign.id}`);
+  return data.campaign;
+}
+
+createCampaign();
+```
+
+</CodeGroup>
+
+## Add Email Account
+
+Before sending emails, you need to add at least one email account:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/save?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from_name": "John Doe",
+    "from_email": "john@example.com",
+    "user_name": "john@example.com",
+    "password": "your_email_password",
+    "smtp_host": "smtp.example.com",
+    "smtp_port": 587,
+    "imap_host": "imap.example.com",
+    "imap_port": 993,
+    "max_email_per_day": 50,
+    "warmup_enabled": true,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 2,
+    "reply_rate_percentage": 30
+  }'
+```
+
+```python Python
+import requests
+
+api_key = "YOUR_API_KEY"
+url = "https://server.smartlead.ai/api/v1/email-accounts/save"
+
+payload = {
+    "from_name": "John Doe",
+    "from_email": "john@example.com",
+    "user_name": "john@example.com",
+    "password": "your_email_password",
+    "smtp_host": "smtp.example.com",
+    "smtp_port": 587,
+    "imap_host": "imap.example.com",
+    "imap_port": 993,
+    "max_email_per_day": 50,
+    "warmup_enabled": True,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 2,
+    "reply_rate_percentage": 30
+}
+
+response = requests.post(
+    url,
+    params={"api_key": api_key},
+    json=payload
+)
+
+account = response.json()
+print(f"Email account added with ID: {account['email_account']['id']}")
+```
+
+</CodeGroup>
+
+## Add Leads to Campaign
+
+Now add some leads to your campaign:
+
+```python Python
+import requests
+
+api_key = "YOUR_API_KEY"
+campaign_id = 123  # Replace with your campaign ID
+url = f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads"
+
+leads = [
+    {
+        "first_name": "Jane",
+        "last_name": "Doe",
+        "email": "jane.doe@example.com",
+        "company_name": "Acme Corp",
+        "custom_fields": {
+            "job_title": "CEO",
+            "industry": "Technology"
+        }
+    },
+    {
+        "first_name": "John",
+        "last_name": "Smith",
+        "email": "john.smith@techco.com",
+        "company_name": "Tech Co",
+        "custom_fields": {
+            "job_title": "CTO"
+        }
+    }
+]
+
+response = requests.post(
+    url,
+    params={"api_key": api_key},
+    json={"lead_list": leads}
+)
+
+result = response.json()
+print(f"Added {result['added_count']} leads successfully")
+```
+
+## Create Email Sequences
+
+Add email sequences to your campaign:
+
+```python Python
+import requests
+
+api_key = "YOUR_API_KEY"
+campaign_id = 123
+url = f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences"
+
+sequences = [
+    {
+        "seq_number": 1,
+        "subject": "Quick question about {{company_name}}",
+        "email_body": "Hi {{first_name}},\n\nI noticed {{company_name}} is...",
+        "seq_delay_details": {
+            "delay_in_days": 0
+        }
+    },
+    {
+        "seq_number": 2,
+        "subject": "Following up - {{company_name}}",
+        "email_body": "Hi {{first_name}},\n\nFollowing up on my previous email...",
+        "seq_delay_details": {
+            "delay_in_days": 3
+        }
+    }
+]
+
+response = requests.post(
+    url,
+    params={"api_key": api_key},
+    json={"sequences": sequences}
+)
+
+print("Sequences created successfully!")
+```
+
+## Start Your Campaign
+
+Finally, start your campaign:
+
+```bash
+curl -X PATCH "https://server.smartlead.ai/api/v1/campaigns/123/status?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "ACTIVE"}'
+```
+
+<Check>
+  Congratulations! Your first campaign is now running. You can monitor its performance in the dashboard or via the analytics API.
+</Check>
+
+## What's Next?
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Set Up Webhooks" icon="webhook" href="/core/webhooks">
+    Receive real-time notifications when leads reply
+  </Card>
+  <Card title="Master Inbox" icon="inbox" href="/api-reference/inbox/get-messages">
+    Manage all your campaign replies in one place
+  </Card>
+  <Card title="Advanced Sequences" icon="list" href="/core/sequences">
+    Learn about A/B testing and conditional logic
+  </Card>
+  <Card title="Analytics" icon="chart-line" href="/api-reference/analytics/overview">
+    Track your campaign performance in detail
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Need Help?
+
+- Check out our [comprehensive guides](/guides/getting-started)
+- Join our [Discord community](https://discord.gg/smartlead)
+- Email us at support@smartlead.ai
+

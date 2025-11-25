@@ -1,0 +1,221 @@
+---
+title: "Delete Campaign"
+api: "DELETE https://server.smartlead.ai/api/v1/campaigns/{campaign_id}"
+description: "Permanently delete a campaign and all associated data"
+---
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  The ID of the campaign to delete
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<Warning>
+  **This action is permanent and cannot be undone!**
+  
+  Deleting a campaign will remove:
+  - All campaign sequences
+  - All lead associations
+  - All statistics and analytics data
+  - All webhook configurations
+  - All email threads and history
+  
+  Consider using **ARCHIVED** status instead if you want to keep data.
+</Warning>
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://server.smartlead.ai/api/v1/campaigns/123?api_key=YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+
+# Confirm before deleting
+confirm = input(f"Delete campaign {campaign_id}? (yes/no): ")
+if confirm.lower() == 'yes':
+    response = requests.delete(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}",
+        params={"api_key": API_KEY}
+    )
+    
+    if response.status_code == 200:
+        print("Campaign deleted successfully")
+    else:
+        print(f"Error: {response.text}")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+
+// Confirm before deleting
+const confirmed = confirm(`Delete campaign ${campaignId}? This cannot be undone!`);
+
+if (confirmed) {
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/campaigns/${campaignId}?api_key=${API_KEY}`,
+    { method: 'DELETE' }
+  );
+  
+  console.log('Campaign deleted');
+}
+```
+
+</RequestExample>
+
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key. Check your authentication.
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types, required fields, and value constraints.
+</ResponseField>
+
+<ResponseField name="429" type="Rate Limit Exceeded">
+  Too many requests. Please slow down and retry after the rate limit resets.
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred. Please try again or contact support if the issue persists.
+</ResponseField>
+
+<ResponseField name="503" type="Service Unavailable">
+  API is temporarily unavailable or under maintenance. Please try again later.
+</ResponseField>
+
+<ResponseExample>
+
+```json Success
+{
+  "success": true,
+  "message": "Campaign deleted successfully"
+}
+```
+
+```json Error - Campaign Active
+{
+  "success": false,
+  "error": {
+    "code": "CAMPAIGN_ACTIVE",
+    "message": "Cannot delete active campaign. Please stop it first."
+  }
+}
+```
+
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Resource not found"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "Invalid parameters provided"
+}
+```
+
+</ResponseExample>
+
+## Before Deleting
+
+<AccordionGroup>
+  <Accordion title="Export Your Data">
+    Export leads, statistics, and any important data before deleting
+    
+    ```bash
+    # Export leads first
+    curl "https://server.smartlead.ai/api/v1/campaigns/123/leads-export?api_key=YOUR_KEY"
+    ```
+  </Accordion>
+
+  <Accordion title="Stop the Campaign">
+    Some systems require campaigns to be stopped before deletion
+    
+    ```bash
+    # Stop first
+    curl -X PATCH "https://server.smartlead.ai/api/v1/campaigns/123/status?api_key=YOUR_KEY" \
+      -d '{"status": "STOPPED"}'
+    
+    # Then delete
+    curl -X DELETE "https://server.smartlead.ai/api/v1/campaigns/123?api_key=YOUR_KEY"
+    ```
+  </Accordion>
+
+  <Accordion title="Consider Archiving Instead">
+    If you might need the data later, use ARCHIVED status instead
+    
+    ```bash
+    curl -X PATCH "https://server.smartlead.ai/api/v1/campaigns/123/status?api_key=YOUR_KEY" \
+      -d '{"status": "ARCHIVED"}'
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Alternative: Archive Campaign
+
+Instead of deleting, you can archive:
+
+<CodeGroup>
+
+```bash Archive Instead
+curl -X PATCH "https://server.smartlead.ai/api/v1/campaigns/123/status?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "ARCHIVED"}'
+```
+
+</CodeGroup>
+
+**Benefits of Archiving**:
+- ✅ Keeps all data
+- ✅ Reversible
+- ✅ Can analyze later
+- ✅ Hides from active list
+
+
+
+## Implementation Details
+
+PERMANENT deletion. Cannot be undone. Exports data before deleting if you need it later.
+
+**Response Format**: object
+
+
+## Related Endpoints
+
+- [Update Campaign Status](/api-reference/campaigns/update-status)
+- [Get Campaign by ID](/api-reference/campaigns/get-by-id)
+- [Get All Campaigns](/api-reference/campaigns/get-all)
+
