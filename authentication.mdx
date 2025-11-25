@@ -1,0 +1,198 @@
+---
+title: 'Authentication'
+description: 'Learn how to authenticate with the SmartLead API'
+---
+
+## Overview
+
+SmartLead API uses API keys for authentication. Your API key carries many privileges, so be sure to keep it secure!
+
+## Getting Your API Key
+
+<Steps>
+  <Step title="Login to SmartLead">
+    Visit [app.smartlead.ai](https://app.smartlead.ai) and log in to your account
+  </Step>
+  
+  <Step title="Navigate to Settings">
+    Click on your profile icon and select "Settings" → "API Keys"
+  </Step>
+  
+  <Step title="Generate New Key">
+    Click "Generate New API Key" button
+  </Step>
+  
+  <Step title="Copy and Store Securely">
+    Copy the generated API key and store it securely. This key will not be shown again.
+  </Step>
+</Steps>
+
+<Warning>
+  API keys are equivalent to your password. Never commit them to version control, share them publicly, or expose them in client-side code.
+</Warning>
+
+## Using Your API Key
+
+### Query Parameter Method (Recommended)
+
+Pass your API key as a query parameter in the URL:
+
+```bash
+GET https://server.smartlead.ai/api/v1/campaigns/?api_key=YOUR_API_KEY
+```
+
+### Request Body Method
+
+For POST/PATCH requests, you can also include the API key in the request body:
+
+```json
+{
+  "api_key": "YOUR_API_KEY",
+  "name": "My Campaign"
+}
+```
+
+## Example Requests
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://server.smartlead.ai/api/v1/campaigns/?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://server.smartlead.ai/api/v1"
+
+# Using query parameter
+response = requests.get(
+    f"{BASE_URL}/campaigns/",
+    params={"api_key": API_KEY}
+)
+
+campaigns = response.json()
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = 'https://server.smartlead.ai/api/v1';
+
+async function fetchCampaigns() {
+  const response = await fetch(
+    `${BASE_URL}/campaigns/?api_key=${API_KEY}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  
+  const data = await response.json();
+  return data.campaigns;
+}
+```
+
+```php PHP
+<?php
+$api_key = 'YOUR_API_KEY';
+$base_url = 'https://server.smartlead.ai/api/v1';
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "$base_url/campaigns/?api_key=$api_key");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Content-Type: application/json'
+));
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+?>
+```
+
+</CodeGroup>
+
+## Authentication Errors
+
+If your API key is invalid or missing, you'll receive a 401 Unauthorized response:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid or missing API key"
+  }
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Store API Keys Securely">
+    - Use environment variables or secure key management systems
+    - Never hardcode API keys in your source code
+    - Rotate your API keys periodically
+  </Accordion>
+
+  <Accordion title="Use Environment Variables">
+    ```bash
+    # .env file
+    SMARTLEAD_API_KEY=your_api_key_here
+    ```
+    
+    ```python
+    import os
+    API_KEY = os.getenv('SMARTLEAD_API_KEY')
+    ```
+  </Accordion>
+
+  <Accordion title="Handle 401 Errors Gracefully">
+    Always check for authentication errors and handle them appropriately in your application.
+  </Accordion>
+</AccordionGroup>
+
+## Rate Limiting
+
+Your API key is subject to rate limiting based on your subscription plan. See [Rate Limits](/guides/rate-limits) for more information.
+
+## Multiple API Keys
+
+You can generate multiple API keys for different applications or environments:
+
+- **Production Key**: For your live application
+- **Development Key**: For testing and development
+- **Integration Keys**: For specific third-party integrations
+
+<Tip>
+  Generate separate API keys for different environments to better manage access and track usage.
+</Tip>
+
+## Regenerating API Keys
+
+If you suspect your API key has been compromised:
+
+1. Log in to your dashboard
+2. Navigate to Settings → API Keys
+3. Click "Regenerate" next to the compromised key
+4. Update your application with the new key
+
+<Warning>
+  Regenerating an API key will immediately invalidate the old key. Make sure to update all applications using the old key.
+</Warning>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Create a Campaign" icon="rocket" href="/api-reference/campaigns/create">
+    Learn how to create your first campaign via API
+  </Card>
+  <Card title="Add Email Accounts" icon="envelope" href="/api-reference/email-accounts/add-smtp">
+    Set up your sending email accounts
+  </Card>
+</CardGroup>
+

@@ -1,0 +1,257 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "SmartLead API",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#07C983"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:support@smartlead.ai"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Dashboard",
+    "url": "https://app.smartlead.ai"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/smartlead"
+    },
+    {
+      "name": "Blog",
+      "icon": "newspaper",
+      "url": "https://smartlead.ai/blog"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "authentication"
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "pages": [
+        "core/campaigns",
+        "core/leads",
+        "core/email-accounts",
+        "core/sequences",
+        "core/webhooks"
+      ]
+    },
+    {
+      "group": "Campaign Management",
+      "pages": [
+        "api-reference/campaigns/get-all",
+        "api-reference/campaigns/get-by-id",
+        "api-reference/campaigns/create",
+        "api-reference/campaigns/update-status",
+        "api-reference/campaigns/update-settings",
+        "api-reference/campaigns/update-schedule",
+        "api-reference/campaigns/delete",
+        "api-reference/campaigns/get-sequences",
+        "api-reference/campaigns/update-sequences",
+        "api-reference/campaigns/get-email-accounts",
+        "api-reference/campaigns/add-email-accounts",
+        "api-reference/campaigns/remove-email-accounts"
+      ]
+    },
+    {
+      "group": "Campaign Statistics",
+      "pages": [
+        "api-reference/campaigns/statistics",
+        "api-reference/campaign-statistics/get-by-id",
+        "api-reference/campaign-statistics/get-by-date-range",
+        "api-reference/campaign-statistics/top-level",
+        "api-reference/campaign-statistics/top-level-by-date",
+        "api-reference/campaign-statistics/lead-statistics",
+        "api-reference/campaign-statistics/mailbox-statistics"
+      ]
+    },
+    {
+      "group": "Lead Management",
+      "pages": [
+        "api-reference/leads/get-by-email",
+        "api-reference/leads/get-by-campaign",
+        "api-reference/leads/add-to-campaign",
+        "api-reference/leads/update",
+        "api-reference/leads/delete",
+        "api-reference/leads/pause",
+        "api-reference/leads/resume",
+        "api-reference/leads/unsubscribe",
+        "api-reference/leads/categories",
+        "api-reference/leads/activities",
+        "api-reference/leads/export"
+      ]
+    },
+    {
+      "group": "Email Account Management",
+      "pages": [
+        "api-reference/email-accounts/get-all",
+        "api-reference/email-accounts/get-by-id",
+        "api-reference/email-accounts/add-smtp",
+        "api-reference/email-accounts/add-oauth",
+        "api-reference/email-accounts/update",
+        "api-reference/email-accounts/delete",
+        "api-reference/email-accounts/warmup-settings",
+        "api-reference/email-accounts/warmup-stats",
+        "api-reference/email-accounts/suspend",
+        "api-reference/email-accounts/unsuspend"
+      ]
+    },
+    {
+      "group": "Master Inbox",
+      "pages": [
+        "api-reference/inbox/get-messages",
+        "api-reference/inbox/get-sent",
+        "api-reference/inbox/get-unread",
+        "api-reference/inbox/get-important",
+        "api-reference/inbox/get-snoozed",
+        "api-reference/inbox/get-scheduled",
+        "api-reference/inbox/get-reminders",
+        "api-reference/inbox/get-archived",
+        "api-reference/inbox/get-by-id",
+        "api-reference/inbox/get-untracked",
+        "api-reference/inbox/reply",
+        "api-reference/inbox/forward",
+        "api-reference/inbox/mark-read",
+        "api-reference/inbox/update-category",
+        "api-reference/inbox/update-revenue",
+        "api-reference/inbox/create-task",
+        "api-reference/inbox/create-note",
+        "api-reference/inbox/block-domains",
+        "api-reference/inbox/resume-lead",
+        "api-reference/inbox/set-reminder",
+        "api-reference/inbox/push-to-subsequence"
+      ]
+    },
+    {
+      "group": "Smart Delivery",
+      "pages": [
+        "api-reference/smart-delivery/provider-ids",
+        "api-reference/smart-delivery/create-manual-test",
+        "api-reference/smart-delivery/create-automated-test",
+        "api-reference/smart-delivery/test-details",
+        "api-reference/smart-delivery/delete-tests-bulk",
+        "api-reference/smart-delivery/stop-automated-test",
+        "api-reference/smart-delivery/list-tests",
+        "api-reference/smart-delivery/provider-report",
+        "api-reference/smart-delivery/geo-report",
+        "api-reference/smart-delivery/sender-report",
+        "api-reference/smart-delivery/spam-filter-report",
+        "api-reference/smart-delivery/dkim-details",
+        "api-reference/smart-delivery/spf-details",
+        "api-reference/smart-delivery/rdns-report",
+        "api-reference/smart-delivery/sender-list",
+        "api-reference/smart-delivery/blacklists",
+        "api-reference/smart-delivery/domain-blacklist",
+        "api-reference/smart-delivery/test-email-content",
+        "api-reference/smart-delivery/ip-blacklist-count",
+        "api-reference/smart-delivery/reply-headers",
+        "api-reference/smart-delivery/schedule-history",
+        "api-reference/smart-delivery/ip-details",
+        "api-reference/smart-delivery/mailbox-summary",
+        "api-reference/smart-delivery/mailbox-count",
+        "api-reference/smart-delivery/get-folders",
+        "api-reference/smart-delivery/create-folder",
+        "api-reference/smart-delivery/get-folder-by-id",
+        "api-reference/smart-delivery/delete-folder"
+      ]
+    },
+    {
+      "group": "Smart Senders",
+      "pages": [
+        "api-reference/smart-senders/search-domain",
+        "api-reference/smart-senders/get-vendors",
+        "api-reference/smart-senders/auto-generate",
+        "api-reference/smart-senders/place-order",
+        "api-reference/smart-senders/domain-list"
+      ]
+    },
+    {
+      "group": "Webhooks",
+      "pages": [
+        "api-reference/webhooks/create",
+        "api-reference/webhooks/get",
+        "api-reference/webhooks/update",
+        "api-reference/webhooks/delete",
+        "api-reference/webhooks/events"
+      ]
+    },
+    {
+      "group": "Global Analytics",
+      "pages": [
+        "api-reference/analytics/overview",
+        "api-reference/analytics/campaign-list",
+        "api-reference/analytics/client-list",
+        "api-reference/analytics/month-wise-client-count",
+        "api-reference/analytics/day-wise-stats",
+        "api-reference/analytics/day-wise-sent-time",
+        "api-reference/analytics/day-wise-positive-reply",
+        "api-reference/analytics/day-wise-positive-sent-time",
+        "api-reference/analytics/campaign-performance",
+        "api-reference/analytics/client-performance",
+        "api-reference/analytics/email-wise-health",
+        "api-reference/analytics/domain-wise-health",
+        "api-reference/analytics/mailbox-health",
+        "api-reference/analytics/provider-performance",
+        "api-reference/analytics/team-board-stats",
+        "api-reference/analytics/lead-stats",
+        "api-reference/analytics/lead-category-response",
+        "api-reference/analytics/leads-for-first-reply",
+        "api-reference/analytics/followup-reply-rate",
+        "api-reference/analytics/lead-to-reply-time",
+        "api-reference/analytics/campaign-response-stats",
+        "api-reference/analytics/campaign-status-stats"
+      ]
+    },
+    {
+      "group": "Utilities",
+      "pages": [
+        "api-reference/utilities/verify-email",
+        "api-reference/utilities/send-single-email",
+        "api-reference/utilities/domain-block-list"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/getting-started",
+        "guides/campaign-setup",
+        "guides/email-warmup",
+        "guides/lead-management",
+        "guides/webhook-integration",
+        "guides/error-handling",
+        "guides/rate-limits",
+        "guides/best-practices"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "twitter": "https://twitter.com/smartlead_ai",
+    "linkedin": "https://www.linkedin.com/company/smartlead-ai"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "SmartLead API",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#07C983"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:support@smartlead.ai"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Dashboard",
+    "url": "https://app.smartlead.ai"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/smartlead"
+    },
+    {
+      "name": "Blog",
+      "icon": "newspaper",
+      "url": "https://smartlead.ai/blog"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "authentication"
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "pages": [
+        "core/campaigns",
+        "core/webhooks"
+      ]
+    },
+    {
+      "group": "API Reference - Campaigns",
+      "pages": [
+        "api-reference/campaigns/get-all",
+        "api-reference/campaigns/create"
+      ]
+    },
+    {
+      "group": "API Reference - Leads",
+      "pages": [
+        "api-reference/leads/add-to-campaign"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "twitter": "https://twitter.com/smartlead_ai",
+    "linkedin": "https://www.linkedin.com/company/smartlead-ai"
+  }
+}
+

@@ -1,0 +1,176 @@
+---
+title: "Get Campaign Sequences"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences"
+description: "Retrieves all email sequences configured for a campaign, ordered by sequence number."
+---
+<Note>
+Retrieves all email sequences configured for a campaign, ordered by sequence number Essential for sequence editors, email preview interfaces, A/B testing configuration, and understanding campaign flow
+</Note>
+
+## Overview
+
+Retrieves all email sequences configured for a campaign, ordered by sequence number
+
+**Key Features**:
+- Returns complete sequence data including subject lines, email bodies (HTML/plain text), delay configurations, and A/B test variants if configured
+- Shows delayInDays for each sequence indicating spacing between emails
+
+<Warning>
+Includes sequence IDs required for updates
+</Warning>
+
+
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  The campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+response = requests.get(
+    "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences",
+    params={"api_key": API_KEY}
+)
+
+result = response.json()
+print(result)
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/sequences?api_key=${API_KEY}`
+);
+
+const result = await response.json();
+console.log(result);
+```
+
+</RequestExample>
+
+
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key. Check your authentication.
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types, required fields, and value constraints.
+</ResponseField>
+
+<ResponseField name="429" type="Rate Limit Exceeded">
+  Too many requests. Please slow down and retry after the rate limit resets.
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred. Please try again or contact support if the issue persists.
+</ResponseField>
+
+<ResponseField name="503" type="Service Unavailable">
+  API is temporarily unavailable or under maintenance. Please try again later.
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "success": true,
+  "data": {}
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Resource not found"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "Invalid parameters provided"
+}
+```
+
+</ResponseExample>
+
+## Response Fields
+
+<ResponseField name="id" type="number">
+  Sequence ID
+</ResponseField>
+
+<ResponseField name="seq_number" type="number">
+  Sequence position (1, 2, 3, etc.)
+</ResponseField>
+
+<ResponseField name="subject" type="string">
+  Email subject line (can include variables)
+</ResponseField>
+
+<ResponseField name="email_body" type="string">
+  Email content (HTML or plain text)
+</ResponseField>
+
+<ResponseField name="seq_delay_details" type="object">
+  Delay configuration
+  
+  <Expandable title="Delay Details">
+    <ResponseField name="delayInDays" type="number">
+      Number of days to wait before sending this sequence
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+
+
+## Implementation Details
+
+Returns sequences ordered by seq_number. Includes variant information if A/B testing is configured.
+
+**Response Format**: array
+
+
+## Related Endpoints
+
+- [Update Campaign Sequences](/api-reference/campaigns/update-sequences)
+- [Create Campaign](/api-reference/campaigns/create)
+- [Sequences Concept Guide](/core/sequences)
+
