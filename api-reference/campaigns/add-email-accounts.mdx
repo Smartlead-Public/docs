@@ -3,8 +3,9 @@ title: "Add Email Accounts to Campaign"
 api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/email-accounts"
 description: "Associates one or more email accounts with a campaign for automatic sender rotation."
 ---
+
 <Note>
-Associates one or more email accounts with a campaign for automatic sender rotation SmartLead distributes emails across added accounts to maximize deliverability, avoid ESP limits, and build sender reputation
+  Associates one or more email accounts with a campaign for automatic sender rotation SmartLead distributes emails across added accounts to maximize deliverability, avoid ESP limits, and build sender reputation
 </Note>
 
 ## Overview
@@ -12,13 +13,12 @@ Associates one or more email accounts with a campaign for automatic sender rotat
 Associates one or more email accounts with a campaign for automatic sender rotation
 
 **Key Features**:
+
 - Validates account ownership and connection status before adding
 
 <Warning>
-Accounts must be successfully connected (is_smtp_success=true, is_imap_success=true) and not suspended
+  Accounts must be successfully connected (is_smtp_success=true, is_imap_success=true) and not suspended
 </Warning>
-
-
 
 ## Path Parameters
 
@@ -36,7 +36,7 @@ Accounts must be successfully connected (is_smtp_success=true, is_imap_success=t
 
 <ParamField body="email_account_ids" type="array" required>
   Array of email account IDs to add to the campaign
-  
+
   Example: `[456, 457, 458]`
 </ParamField>
 
@@ -47,6 +47,7 @@ curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/email-accounts?ap
   -H "Content-Type: application/json" \
   -d '{"email_account_ids": [456, 457, 458]}'
 ```
+
 
 ```python Python
 import requests
@@ -67,6 +68,7 @@ response = requests.post(
 print("Email accounts added successfully!")
 ```
 
+
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 const campaignId = 123;
@@ -84,8 +86,6 @@ const response = await fetch(
 ```
 
 </RequestExample>
-
-
 
 ## Response Codes
 
@@ -130,17 +130,20 @@ const response = await fetch(
 }
 ```
 
+
 ```json 401 - Unauthorized
 {
   "message": "Invalid API Key"
 }
 ```
 
+
 ```json 404 - Not Found
 {
   "error": "Resource not found"
 }
 ```
+
 
 ```json 422 - Validation Error
 {
@@ -157,7 +160,7 @@ const response = await fetch(
 </Tip>
 
 <Tip>
-  **Ensure Warmup**: Only add accounts that are warmed up (reputation >80%)
+  **Ensure Warmup**: Only add accounts that are warmed up (reputation \>80%)
 </Tip>
 
 <Tip>
@@ -167,12 +170,11 @@ const response = await fetch(
 ## Account Rotation
 
 SmartLead automatically rotates between added accounts to:
+
 - Distribute sending load
 - Improve deliverability
 - Build sender reputation
 - Maximize daily volume
-
-
 
 ## Implementation Details
 
@@ -180,10 +182,8 @@ Accounts are immediately available for rotation. Ensure accounts are warmed up b
 
 **Response Format**: object
 
-
 ## Related Endpoints
 
 - [Get Campaign Email Accounts](/api-reference/campaigns/get-email-accounts)
 - [Remove Email Accounts](/api-reference/campaigns/remove-email-accounts)
 - [Get All Email Accounts](/api-reference/email-accounts/get-all)
-
