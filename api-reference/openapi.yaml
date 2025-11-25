@@ -1,0 +1,4595 @@
+openapi: 3.1.1
+info:
+  title: SmartLead API
+  version: 1.0.0
+  description: |
+    # SmartLead API Documentation
+    
+    Welcome to the SmartLead API! SmartLead is a comprehensive cold email outreach platform that helps you manage email campaigns, leads, email accounts, and analytics.
+    
+    ## Base URL
+    
+    All API requests should be made to:
+    ```
+    https://server.smartlead.ai/api
+    ```
+    
+    ## Authentication
+    
+    SmartLead uses API keys for authentication. Include your API key as a query parameter in all requests:
+    ```
+    ?api_key=YOUR_API_KEY
+    ```
+    
+    You can generate your API key from your SmartLead dashboard under Settings > API Keys.
+    
+    ## Rate Limiting
+    
+    API requests are rate-limited to ensure fair usage. If you exceed the rate limit, you'll receive a 429 error.
+    
+    ## Support
+    
+    For API support, contact support@smartlead.ai or visit https://smartlead.ai
+    
+  contact:
+    name: SmartLead Support
+    email: support@smartlead.ai
+    url: https://smartlead.ai
+  license:
+    name: Proprietary
+    url: https://smartlead.ai/terms
+  
+servers:
+  - url: https://server.smartlead.ai/api
+    description: Production server
+  - url: https://staging.smartlead.ai/api
+    description: Staging server (for testing)
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Campaigns
+    description: Create, manage, and monitor email campaigns
+  - name: Campaign Statistics
+    description: Retrieve detailed campaign performance metrics
+  - name: Leads
+    description: Manage leads and prospects across campaigns
+  - name: Email Accounts
+    description: Configure and manage email sending accounts
+  - name: Master Inbox
+    description: Unified inbox for all campaign communications
+  - name: Analytics
+    description: Global analytics and reporting across all campaigns
+  - name: Webhooks
+    description: Configure webhooks for real-time event notifications
+  - name: Smart Delivery
+    description: Email deliverability testing and monitoring
+  - name: Smart Senders
+    description: Automated email account provisioning marketplace
+  - name: Utilities
+    description: Utility endpoints for various operations
+  - name: Authentication
+    description: User authentication and account management
+
+paths:
+  # ==========================================
+  # CAMPAIGN MANAGEMENT ENDPOINTS
+  # ==========================================
+  
+  /v1/campaigns/:
+    get:
+      tags:
+        - Campaigns
+      summary: Get All Campaigns
+      description: |
+        Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule settings, tracking configuration, AI matching preferences, and sending limits.
+        
+        **Key Features:**
+        - Returns campaigns ordered by ID descending (newest first)
+        - Supports optional client_id filtering for agency/white-label accounts
+        - When include_tags=true, returns campaign tags with IDs, names, and colors
+        - Returns direct array of campaign objects (not wrapped)
+      operationId: getAllCampaigns
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: client_id
+          in: query
+          description: Filter campaigns by specific client ID (for agency accounts)
+          required: false
+          schema:
+            type: integer
+        - name: include_tags
+          in: query
+          description: Include campaign tags in the response
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Campaigns retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Campaign'
+              example:
+                - id: 2710262
+                  user_id: 196026
+                  created_at: "2025-11-25T10:43:46.826Z"
+                  updated_at: "2025-11-25T14:02:21.776Z"
+                  status: "ACTIVE"
+                  name: "Cold Outreach Q1 2024"
+                  track_settings: ["DONT_EMAIL_OPEN", "DONT_LINK_CLICK"]
+                  scheduler_cron_value:
+                    tz: "America/New_York"
+                    days: [1, 2, 3, 4, 5]
+                    endHour: "19:00"
+                    startHour: "09:00"
+                  min_time_btwn_emails: 24
+                  max_leads_per_day: 100
+                  stop_lead_settings: "REPLY_TO_AN_EMAIL"
+                  enable_ai_esp_matching: true
+                  send_as_plain_text: false
+                  follow_up_percentage: 20
+                  client_id: null
+                  tags:
+                    - tag_id: 1
+                      tag_name: "Q1"
+                      tag_color: "#FF5733"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}:
+    get:
+      tags:
+        - Campaigns
+      summary: Get Campaign by ID
+      description: |
+        Retrieves detailed information about a specific campaign by its ID. Returns complete campaign configuration including all settings, schedule, and metadata.
+        
+        **Features:**
+        - Verifies campaign ownership
+        - Returns 404 if campaign not found
+        - Optionally includes tags when include_tags=true
+      operationId: getCampaignById
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          description: Unique identifier of the campaign
+          required: true
+          schema:
+            type: integer
+        - name: include_tags
+          in: query
+          description: Include campaign tags in response
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Campaign details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Campaigns
+      summary: Delete Campaign
+      description: |
+        Permanently deletes a campaign and all associated data including leads, sequences, and statistics.
+        
+        **Warning:** This operation cannot be undone. All campaign data will be permanently deleted.
+      operationId: deleteCampaign
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          description: Unique identifier of the campaign to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Campaign deleted successfully"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/create:
+    post:
+      tags:
+        - Campaigns
+      summary: Create Campaign
+      description: |
+        Creates a new email campaign with default settings in DRAFTED status. Campaign name defaults to 'Untitled Campaign' if not provided.
+        
+        **Default Settings:**
+        - Status: DRAFTED
+        - Track Settings: Not set (configure later)
+        - Schedule: Not set (configure later)
+        - Sequences: Empty (add later)
+        - Email Accounts: None (add later)
+        - Leads: None (add later)
+        
+        **Next Steps After Creation:**
+        1. Add email sequences
+        2. Add email accounts
+        3. Add leads
+        4. Configure schedule
+        5. Configure settings
+        6. Start campaign
+      operationId: createCampaign
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Campaign name. Defaults to "Untitled Campaign" if not provided
+                  example: "Q1 2024 Cold Outreach"
+                client_id:
+                  type: integer
+                  nullable: true
+                  description: Associate campaign with a specific client (for agency accounts)
+                  example: null
+      responses:
+        '200':
+          description: Campaign created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+                    description: Unique identifier for the newly created campaign
+                    example: 125
+                  name:
+                    type: string
+                    description: Campaign name
+                    example: "Q1 2024 Cold Outreach"
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: ISO 8601 timestamp when campaign was created
+                    example: "2024-01-25T10:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/status:
+    post:
+      tags:
+        - Campaigns
+      summary: Update Campaign Status
+      description: |
+        Updates the campaign status to START, PAUSED, or STOPPED.
+        
+        **Status Values:**
+        - `START`: Activates the campaign (validates sequences, accounts, and leads first)
+        - `PAUSED`: Temporarily pauses the campaign
+        - `STOPPED`: Stops the campaign permanently
+        
+        **Validation on START:**
+        - Campaign must have at least one email sequence
+        - Campaign must have at least one email account
+        - Campaign must have at least one lead
+      operationId: updateCampaignStatus
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [START, PAUSED, STOPPED]
+                  description: New campaign status
+                  example: "START"
+      responses:
+        '200':
+          description: Campaign status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/settings:
+    post:
+      tags:
+        - Campaigns
+      summary: Update Campaign Settings
+      description: |
+        Updates campaign settings including tracking, limits, and stop conditions.
+        
+        **Configurable Settings:**
+        - Email tracking (open/click tracking)
+        - Daily lead limits
+        - Stop lead conditions
+        - AI ESP matching
+        - Plain text sending
+        - Follow-up percentage
+        - Custom unsubscribe text
+      operationId: updateCampaignSettings
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignSettings'
+      responses:
+        '200':
+          description: Campaign settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/schedule:
+    post:
+      tags:
+        - Campaigns
+      summary: Update Campaign Schedule
+      description: |
+        Configures the campaign sending schedule including timezone, days of week, and sending hours.
+        
+        **Schedule Configuration:**
+        - Timezone (IANA format)
+        - Days of week to send (0=Sunday, 6=Saturday)
+        - Start and end hours (24-hour format)
+        - Minimum time between emails
+      operationId: updateCampaignSchedule
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignSchedule'
+      responses:
+        '200':
+          description: Campaign schedule updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/sequences:
+    get:
+      tags:
+        - Campaigns
+      summary: Get Campaign Sequences
+      description: |
+        Retrieves all email sequences (initial email + follow-ups) configured for a campaign.
+        
+        Returns an array of sequence objects ordered by sequence number.
+      operationId: getCampaignSequences
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sequences retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailSequence'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Campaigns
+      summary: Update Campaign Sequences
+      description: |
+        Updates or replaces email sequences for a campaign. This endpoint accepts an array of sequence objects.
+        
+        **Sequence Configuration:**
+        - seq_number: Sequence order (1 for initial email, 2+ for follow-ups)
+        - subject: Email subject line (supports variables)
+        - email_body: Email content (HTML or plain text, supports variables)
+        - seq_delay_details: Delay configuration before sending
+        
+        **Variable Support:**
+        - {{first_name}}, {{last_name}}, {{company}}, etc.
+      operationId: updateCampaignSequences
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sequences
+              properties:
+                sequences:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/EmailSequenceInput'
+      responses:
+        '200':
+          description: Sequences updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/email-accounts:
+    get:
+      tags:
+        - Campaigns
+      summary: Get Campaign Email Accounts
+      description: |
+        Retrieves all email accounts associated with a campaign. These are the sender accounts used to send emails in this campaign.
+      operationId: getCampaignEmailAccounts
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailAccount'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Campaigns
+      summary: Add Email Accounts to Campaign
+      description: |
+        Associates one or more email accounts with a campaign. These accounts will be used to send emails in this campaign.
+        
+        **Requirements:**
+        - Email accounts must exist and be verified
+        - Email accounts must belong to the user
+      operationId: addEmailAccountsToCampaign
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email_account_ids
+              properties:
+                email_account_ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: Array of email account IDs to add
+                  example: [456, 457, 458]
+      responses:
+        '200':
+          description: Email accounts added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Campaigns
+      summary: Remove Email Accounts from Campaign
+      description: |
+        Removes email accounts from a campaign. Leads currently assigned to these accounts will be reassigned to remaining accounts.
+      operationId: removeEmailAccountsFromCampaign
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email_account_ids
+              properties:
+                email_account_ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: Array of email account IDs to remove
+                  example: [456]
+      responses:
+        '200':
+          description: Email accounts removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/leads:
+    get:
+      tags:
+        - Leads
+      summary: Get Campaign Leads
+      description: |
+        Retrieves all leads in a campaign with comprehensive filtering, sorting, and pagination options.
+        
+        **Filtering Options:**
+        - Status (Active, Paused, Completed, etc.)
+        - Email sequence number
+        - Email status (Opened, Clicked, Replied, etc.)
+        - Date ranges
+        - Search by name or email
+        
+        **Returns:**
+        - Paginated list of leads
+        - Lead contact information
+        - Campaign progress
+        - Email activity
+        - Custom fields
+      operationId: getCampaignLeads
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Number of records to skip for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Maximum number of records to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: status
+          in: query
+          description: Filter by lead status
+          schema:
+            type: string
+            enum: [ACTIVE, PAUSED, COMPLETED, UNSUBSCRIBED, BOUNCED]
+        - name: email_sequence_number
+          in: query
+          description: Filter by specific sequence number
+          schema:
+            type: integer
+        - name: email_status
+          in: query
+          description: Filter by email status
+          schema:
+            type: string
+            enum: [Sent, Opened, Clicked, Replied, Bounced]
+      responses:
+        '200':
+          description: Leads retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leads:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Lead'
+                  total_count:
+                    type: integer
+                    description: Total number of leads matching the filter
+                  offset:
+                    type: integer
+                  limit:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Leads
+      summary: Add Leads to Campaign
+      description: |
+        Adds new leads to a campaign. Maximum 400 leads per request.
+        
+        **Required Fields:**
+        - email (must be valid and unique)
+        
+        **Optional Fields:**
+        - first_name, last_name
+        - company_name
+        - phone_number
+        - website
+        - Any custom fields defined in your account
+        
+        **Settings:**
+        - ignore_global_block_list: Skip global blocklist check
+        - ignore_unsubscribe: Add leads even if previously unsubscribed
+      operationId: addLeadsToCampaign
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lead_list
+              properties:
+                lead_list:
+                  type: array
+                  maxItems: 400
+                  items:
+                    $ref: '#/components/schemas/LeadInput'
+                settings:
+                  type: object
+                  properties:
+                    ignore_global_block_list:
+                      type: boolean
+                      default: false
+                    ignore_unsubscribe:
+                      type: boolean
+                      default: false
+      responses:
+        '200':
+          description: Leads added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  inserted_count:
+                    type: integer
+                    description: Number of leads successfully added
+                  duplicate_count:
+                    type: integer
+                    description: Number of duplicate leads skipped
+                  blocked_count:
+                    type: integer
+                    description: Number of leads blocked by filters
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/leads/{lead_id}:
+    delete:
+      tags:
+        - Leads
+      summary: Delete Lead from Campaign
+      description: |
+        Removes a specific lead from a campaign. This does not delete the lead globally, only from this campaign.
+      operationId: deleteLeadFromCampaign
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Leads
+      summary: Update Lead
+      description: |
+        Updates lead information such as name, company, phone, or custom fields.
+      operationId: updateLead
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadUpdate'
+      responses:
+        '200':
+          description: Lead updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/leads/{lead_id}/pause:
+    post:
+      tags:
+        - Leads
+      summary: Pause Lead
+      description: |
+        Temporarily pauses a lead. No more emails will be sent until the lead is resumed.
+      operationId: pauseLead
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead paused successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/leads/{lead_id}/resume:
+    post:
+      tags:
+        - Leads
+      summary: Resume Lead
+      description: |
+        Resumes a paused lead. The campaign will continue sending emails to this lead.
+      operationId: resumeLead
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead resumed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/leads/{lead_id}/unsubscribe:
+    post:
+      tags:
+        - Leads
+      summary: Unsubscribe Lead from Campaign
+      description: |
+        Unsubscribes a lead from a specific campaign. The lead will no longer receive emails from this campaign.
+      operationId: unsubscribeLeadFromCampaign
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead unsubscribed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/leads/{lead_id}/category:
+    post:
+      tags:
+        - Leads
+      summary: Update Lead Category
+      description: |
+        Updates the category/label assigned to a lead (e.g., "Interested", "Not Interested", "Meeting Scheduled").
+      operationId: updateLeadCategory
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - category_id
+              properties:
+                category_id:
+                  type: integer
+                  description: ID of the category to assign
+      responses:
+        '200':
+          description: Lead category updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/statistics:
+    get:
+      tags:
+        - Campaign Statistics
+      summary: Get Campaign Statistics
+      description: |
+        Retrieves detailed statistics for a campaign including email sent, opened, clicked, replied, bounced, and unsubscribed counts.
+        
+        Supports filtering and pagination.
+      operationId: getCampaignStatistics
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignStatistics'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/analytics:
+    get:
+      tags:
+        - Campaign Statistics
+      summary: Get Campaign Analytics
+      description: |
+        Retrieves comprehensive campaign analytics including performance metrics over time.
+      operationId: getCampaignAnalytics
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignAnalytics'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/reply-email-thread:
+    post:
+      tags:
+        - Master Inbox
+      summary: Reply to Email Thread
+      description: |
+        Sends a reply to an existing email conversation in a campaign.
+      operationId: replyToEmailThread
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lead_id
+                - message
+              properties:
+                lead_id:
+                  type: integer
+                  description: ID of the lead to reply to
+                message:
+                  type: string
+                  description: Reply message content
+                attachments:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of attachment URLs
+      responses:
+        '200':
+          description: Reply sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/campaigns/{campaign_id}/forward-email:
+    post:
+      tags:
+        - Master Inbox
+      summary: Forward Email
+      description: |
+        Forwards an email conversation to another email address.
+      operationId: forwardEmail
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reply_id
+                - forward_to
+              properties:
+                reply_id:
+                  type: integer
+                  description: ID of the email to forward
+                forward_to:
+                  type: string
+                  format: email
+                  description: Recipient email address
+                message:
+                  type: string
+                  description: Optional message to include
+      responses:
+        '200':
+          description: Email forwarded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # EMAIL ACCOUNT MANAGEMENT ENDPOINTS
+  # ==========================================
+
+  /v1/email-accounts/:
+    get:
+      tags:
+        - Email Accounts
+      summary: Get All Email Accounts
+      description: |
+        Retrieves all email accounts configured for the authenticated user.
+        
+        Returns complete account details including connection status, warmup settings, and daily limits.
+      operationId: getAllEmailAccounts
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Email accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailAccount'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/email-accounts/{account_id}:
+    get:
+      tags:
+        - Email Accounts
+      summary: Get Email Account by ID
+      description: |
+        Retrieves details of a specific email account by ID.
+      operationId: getEmailAccountById
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email account details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailAccount'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Email Accounts
+      summary: Update Email Account
+      description: |
+        Updates an existing email account's configuration including SMTP/IMAP settings, sending limits, and warmup settings.
+      operationId: updateEmailAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailAccountUpdate'
+      responses:
+        '200':
+          description: Email account updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Email Accounts
+      summary: Delete Email Account
+      description: |
+        Permanently deletes an email account. This will remove it from all campaigns.
+      operationId: deleteEmailAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email account deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/email-accounts/save:
+    post:
+      tags:
+        - Email Accounts
+      summary: Add SMTP Email Account
+      description: |
+        Adds a new SMTP/IMAP email account for sending campaigns.
+        
+        **Required Information:**
+        - SMTP host, port, username, password
+        - IMAP host, port, username, password
+        - From name and email
+        - Warmup settings
+      operationId: addSmtpEmailAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailAccountInput'
+      responses:
+        '200':
+          description: Email account added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+                    description: ID of the newly created email account
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/email-accounts/save-oauth:
+    post:
+      tags:
+        - Email Accounts
+      summary: Add OAuth Email Account
+      description: |
+        Adds a Gmail or Microsoft 365 email account using OAuth authentication.
+      operationId: addOauthEmailAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailAccountOAuthInput'
+      responses:
+        '200':
+          description: OAuth email account added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/email-accounts/{account_id}/warmup:
+    post:
+      tags:
+        - Email Accounts
+      summary: Update Warmup Settings
+      description: |
+        Updates email warmup configuration for an account.
+        
+        **Warmup helps improve deliverability by gradually increasing sending volume.**
+      operationId: updateWarmupSettings
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarmupSettings'
+      responses:
+        '200':
+          description: Warmup settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/email-accounts/{account_id}/warmup-stats:
+    get:
+      tags:
+        - Email Accounts
+      summary: Get Warmup Statistics
+      description: |
+        Retrieves warmup statistics and progress for an email account.
+      operationId: getWarmupStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Warmup statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmupStats'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/email-accounts/suspend/{accountId}:
+    put:
+      tags:
+        - Email Accounts
+      summary: Suspend Email Account
+      description: |
+        Temporarily suspends an email account. No emails will be sent from this account until unsuspended.
+      operationId: suspendEmailAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email account suspended successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/email-accounts/unsuspend/{accountId}:
+    delete:
+      tags:
+        - Email Accounts
+      summary: Unsuspend Email Account
+      description: |
+        Reactivates a suspended email account, allowing it to send emails again.
+      operationId: unsuspendEmailAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email account unsuspended successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # LEADS ENDPOINTS
+  # ==========================================
+
+  /v1/leads/:
+    get:
+      tags:
+        - Leads
+      summary: Get Lead by Email
+      description: |
+        Retrieves lead information by email address across all campaigns.
+      operationId: getLeadByEmail
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: email
+          in: query
+          required: true
+          description: Email address of the lead
+          schema:
+            type: string
+            format: email
+      responses:
+        '200':
+          description: Lead retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/leads/{lead_id}/campaigns:
+    get:
+      tags:
+        - Leads
+      summary: Get Lead Campaigns
+      description: |
+        Retrieves all campaigns that a specific lead is part of.
+      operationId: getLeadCampaigns
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead campaigns retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    campaign_id:
+                      type: integer
+                    campaign_name:
+                      type: string
+                    status:
+                      type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/leads/fetch-categories:
+    get:
+      tags:
+        - Leads
+      summary: Get Lead Categories
+      description: |
+        Retrieves all lead categories/labels configured for the user.
+      operationId: getLeadCategories
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeadCategory'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/leads/{lead_id}/unsubscribe:
+    post:
+      tags:
+        - Leads
+      summary: Unsubscribe Lead Globally
+      description: |
+        Unsubscribes a lead from all campaigns. The lead will no longer receive any emails.
+      operationId: unsubscribeLeadGlobally
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: lead_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead unsubscribed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # MASTER INBOX ENDPOINTS
+  # ==========================================
+
+  /v1/master-inbox/sent:
+    post:
+      tags:
+        - Master Inbox
+      summary: Get Sent Emails
+      description: |
+        Retrieves sent emails with comprehensive filtering and pagination.
+      operationId: getSentEmails
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboxFilter'
+      responses:
+        '200':
+          description: Sent emails retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/master-inbox/inbox-replies:
+    post:
+      tags:
+        - Master Inbox
+      summary: Get Inbox Replies
+      description: |
+        Retrieves all inbox replies with filtering options.
+      operationId: getInboxReplies
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboxFilter'
+      responses:
+        '200':
+          description: Inbox replies retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/master-inbox/unread-replies:
+    post:
+      tags:
+        - Master Inbox
+      summary: Get Unread Replies
+      description: |
+        Retrieves all unread replies.
+      operationId: getUnreadReplies
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboxFilter'
+      responses:
+        '200':
+          description: Unread replies retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/master-inbox/important:
+    post:
+      tags:
+        - Master Inbox
+      summary: Get Important Emails
+      description: |
+        Retrieves emails marked as important.
+      operationId: getImportantEmails
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboxFilter'
+      responses:
+        '200':
+          description: Important emails retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # ANALYTICS ENDPOINTS
+  # ==========================================
+
+  /v1/analytics/overall-stats-v2:
+    get:
+      tags:
+        - Analytics
+      summary: Get Overall Statistics
+      description: |
+        Retrieves comprehensive statistics across all campaigns for a date range.
+        
+        **Metrics included:**
+        - Total emails sent
+        - Open rate
+        - Click rate
+        - Reply rate
+        - Bounce rate
+        - Unsubscribe rate
+      operationId: getOverallStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - $ref: '#/components/parameters/StartDateParam'
+        - $ref: '#/components/parameters/EndDateParam'
+        - $ref: '#/components/parameters/TimezoneParam'
+        - name: client_ids
+          in: query
+          description: Comma-separated list of client IDs to filter
+          schema:
+            type: string
+        - name: campaign_ids
+          in: query
+          description: Comma-separated list of campaign IDs to filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OverallStats'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/analytics/day-wise-overall-stats:
+    get:
+      tags:
+        - Analytics
+      summary: Get Day-Wise Statistics
+      description: |
+        Retrieves daily statistics breakdown for a date range.
+      operationId: getDayWiseStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - $ref: '#/components/parameters/StartDateParam'
+        - $ref: '#/components/parameters/EndDateParam'
+        - $ref: '#/components/parameters/TimezoneParam'
+        - name: client_ids
+          in: query
+          schema:
+            type: string
+        - name: campaign_ids
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Day-wise statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyStats'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/analytics/campaign/overall-stats:
+    get:
+      tags:
+        - Analytics
+      summary: Get Campaign-Wise Performance
+      description: |
+        Retrieves performance statistics broken down by campaign.
+      operationId: getCampaignWisePerformance
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - $ref: '#/components/parameters/StartDateParam'
+        - $ref: '#/components/parameters/EndDateParam'
+        - $ref: '#/components/parameters/TimezoneParam'
+        - name: client_ids
+          in: query
+          schema:
+            type: string
+        - name: campaign_ids
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Campaign-wise performance retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CampaignPerformance'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # WEBHOOKS ENDPOINTS
+  # ==========================================
+
+  /v1/webhook/create:
+    post:
+      tags:
+        - Webhooks
+      summary: Create Webhook
+      description: |
+        Creates a new webhook to receive real-time notifications for campaign events.
+        
+        **Supported Events:**
+        - LEAD_REPLIED
+        - LEAD_OPENED
+        - LEAD_CLICKED
+        - LEAD_BOUNCED
+        - LEAD_UNSUBSCRIBED
+        - LEAD_CREATED
+        - And more...
+      operationId: createWebhook
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookInput'
+      responses:
+        '200':
+          description: Webhook created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  webhook_id:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhook/{webhook_id}:
+    get:
+      tags:
+        - Webhooks
+      summary: Get Webhook Details
+      description: |
+        Retrieves details of a specific webhook.
+      operationId: getWebhookDetails
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: webhook_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Webhook details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhook/update/{webhook_id}:
+    put:
+      tags:
+        - Webhooks
+      summary: Update Webhook
+      description: |
+        Updates an existing webhook configuration.
+      operationId: updateWebhook
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: webhook_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookUpdate'
+      responses:
+        '200':
+          description: Webhook updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhook/delete/{webhook_id}:
+    delete:
+      tags:
+        - Webhooks
+      summary: Delete Webhook
+      description: |
+        Deletes a webhook. You will no longer receive notifications for this webhook.
+      operationId: deleteWebhook
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: webhook_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Webhook deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # LEAD LIST MANAGEMENT ENDPOINTS
+  # ==========================================
+
+  /v1/lead-list/:
+    post:
+      tags:
+        - Leads
+      summary: Create Lead List
+      description: |
+        Creates a new lead list/group to organize your leads.
+      operationId: createLeadList
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - listName
+              properties:
+                listName:
+                  type: string
+                  description: Name of the lead list
+      responses:
+        '200':
+          description: Lead list created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+                  listName:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    get:
+      tags:
+        - Leads
+      summary: Get All Lead Lists
+      description: |
+        Retrieves all lead lists with filtering and pagination.
+      operationId: getAllLeadLists
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: listName
+          in: query
+          description: Filter by list name
+          schema:
+            type: string
+        - name: tagIds
+          in: query
+          description: Comma-separated tag IDs to filter
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Lead lists retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lists:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LeadList'
+                  total_count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/lead-list/{id}:
+    get:
+      tags:
+        - Leads
+      summary: Get Lead List by ID
+      description: |
+        Retrieves a specific lead list by ID.
+      operationId: getLeadListById
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      tags:
+        - Leads
+      summary: Update Lead List
+      description: |
+        Updates a lead list's name.
+      operationId: updateLeadList
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - listName
+              properties:
+                listName:
+                  type: string
+      responses:
+        '200':
+          description: Lead list updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Leads
+      summary: Delete Lead List
+      description: |
+        Deletes a lead list. This does not delete the leads themselves, only the list.
+      operationId: deleteLeadList
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead list deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/lead-list/{id}/import:
+    post:
+      tags:
+        - Leads
+      summary: Import Leads to List
+      description: |
+        Imports leads from a CSV file to a specific lead list.
+      operationId: importLeadsToList
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - leadList
+                - fileName
+              properties:
+                leadList:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/LeadInput'
+                fileName:
+                  type: string
+                emailFieldsAdded:
+                  type: object
+                customFields:
+                  type: object
+                  nullable: true
+                csvSettings:
+                  type: object
+                  properties:
+                    ignoreGlobalBlockList:
+                      type: boolean
+      responses:
+        '200':
+          description: Leads imported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  imported_count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/lead-list/assign-tags:
+    post:
+      tags:
+        - Leads
+      summary: Assign Tags to Lead Lists
+      description: |
+        Assigns or removes tags from lead lists (max 10 lists and 10 tags per request).
+      operationId: assignTagsToLeadLists
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - listIds
+              properties:
+                listIds:
+                  type: array
+                  items:
+                    type: integer
+                  minItems: 1
+                  maxItems: 10
+                tagIds:
+                  type: array
+                  items:
+                    type: integer
+                  minItems: 1
+                  maxItems: 10
+                removeTagIds:
+                  type: array
+                  items:
+                    type: integer
+                  minItems: 1
+                  maxItems: 10
+      responses:
+        '200':
+          description: Tags assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # SINGLE EMAIL SENDING
+  # ==========================================
+
+  /v1/send-email/initiate:
+    post:
+      tags:
+        - Utilities
+      summary: Send Single Email
+      description: |
+        Sends a single transactional email outside of campaigns.
+        
+        **Use Cases:**
+        - One-off email communications
+        - Transactional emails
+        - Testing email accounts
+        
+        **Note:** You must provide either `fromEmail` or `fromEmailId`, but not both.
+      operationId: sendSingleEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - to
+                - subject
+                - body
+              properties:
+                to:
+                  type: string
+                  format: email
+                  description: Recipient email address
+                subject:
+                  type: string
+                  description: Email subject
+                body:
+                  type: string
+                  description: Email body (HTML or plain text)
+                fromEmail:
+                  type: string
+                  format: email
+                  description: Sender email address (use this OR fromEmailId)
+                fromEmailId:
+                  type: integer
+                  description: Sender email account ID (use this OR fromEmail)
+                fromName:
+                  type: string
+                  description: Sender name
+                replyTo:
+                  type: string
+                  format: email
+                  description: Reply-to email address
+                attachments:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - filename
+                      - content
+                      - mimeType
+                    properties:
+                      filename:
+                        type: string
+                      content:
+                        type: string
+                        description: Base64 encoded file content
+                      mimeType:
+                        type: string
+      responses:
+        '200':
+          description: Email sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  message_id:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/send-email/track-email/{trackId}:
+    get:
+      tags:
+        - Utilities
+      summary: Track Email Open
+      description: |
+        Tracking pixel endpoint - records when an email is opened.
+        
+        **Note:** This is typically called automatically by email clients, not directly by API users.
+      operationId: trackEmailOpen
+      parameters:
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tracking recorded
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  # ==========================================
+  # SUBSCRIPTION AND USER ENDPOINTS
+  # ==========================================
+
+  /v1/subscription/credits-stats:
+    get:
+      tags:
+        - Utilities
+      summary: Get Credits Statistics
+      description: |
+        Retrieves account credit usage and remaining credits.
+      operationId: getCreditsStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Credits statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_credits:
+                    type: integer
+                  used_credits:
+                    type: integer
+                  remaining_credits:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/users/get-by-api-key:
+    get:
+      tags:
+        - Authentication
+      summary: Get User by API Key
+      description: |
+        Retrieves user information based on the provided API key.
+      operationId: getUserByApiKey
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # ADDITIONAL ANALYTICS ENDPOINTS
+  # ==========================================
+
+  /v1/analytics/campaign/list:
+    get:
+      tags:
+        - Analytics
+      summary: Get Campaign List for Analytics
+      description: |
+        Retrieves a list of all campaigns with basic metrics.
+      operationId: getCampaignListAnalytics
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: client_ids
+          in: query
+          description: Comma-separated client IDs
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Campaign list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    campaign_id:
+                      type: integer
+                    campaign_name:
+                      type: string
+                    status:
+                      type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/analytics/day-wise-positive-reply-stats:
+    get:
+      tags:
+        - Analytics
+      summary: Get Day-Wise Positive Reply Statistics
+      description: |
+        Retrieves daily positive reply statistics for a date range.
+      operationId: getDayWisePositiveReplyStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - $ref: '#/components/parameters/StartDateParam'
+        - $ref: '#/components/parameters/EndDateParam'
+        - $ref: '#/components/parameters/TimezoneParam'
+        - name: client_ids
+          in: query
+          schema:
+            type: string
+        - name: campaign_ids
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    positive_replies:
+                      type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/analytics/mailbox/overall-stats:
+    get:
+      tags:
+        - Analytics
+      summary: Get Mailbox Statistics
+      description: |
+        Retrieves overall mailbox/email account performance statistics.
+      operationId: getMailboxStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - $ref: '#/components/parameters/StartDateParam'
+        - $ref: '#/components/parameters/EndDateParam'
+        - $ref: '#/components/parameters/TimezoneParam'
+        - name: client_ids
+          in: query
+          schema:
+            type: string
+        - name: email_account_ids
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Mailbox statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    email_account_id:
+                      type: integer
+                    email:
+                      type: string
+                    sent:
+                      type: integer
+                    opened:
+                      type: integer
+                    clicked:
+                      type: integer
+                    replied:
+                      type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/analytics/lead/overall-stats:
+    get:
+      tags:
+        - Analytics
+      summary: Get Lead Statistics
+      description: |
+        Retrieves overall lead statistics and conversion metrics.
+      operationId: getLeadStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - $ref: '#/components/parameters/StartDateParam'
+        - $ref: '#/components/parameters/EndDateParam'
+        - $ref: '#/components/parameters/TimezoneParam'
+        - name: client_ids
+          in: query
+          schema:
+            type: string
+        - name: campaign_ids
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lead statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_leads:
+                    type: integer
+                  active_leads:
+                    type: integer
+                  contacted_leads:
+                    type: integer
+                  replied_leads:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/analytics/lead/category-wise-response:
+    get:
+      tags:
+        - Analytics
+      summary: Get Category-Wise Lead Responses
+      description: |
+        Retrieves lead response statistics broken down by category.
+      operationId: getCategoryWiseResponses
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - $ref: '#/components/parameters/StartDateParam'
+        - $ref: '#/components/parameters/EndDateParam'
+        - $ref: '#/components/parameters/TimezoneParam'
+        - name: client_ids
+          in: query
+          schema:
+            type: string
+        - name: campaign_ids
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category-wise responses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: integer
+                    category_name:
+                      type: string
+                    lead_count:
+                      type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # SMART DELIVERY ENDPOINTS
+  # ==========================================
+
+  /v1/smart-delivery/provider-ids:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Provider IDs
+      description: |
+        Get region-wise email provider IDs for spam testing configuration.
+        
+        **Note:** Smart Delivery is a premium feature. Contact support@smartlead.ai for access.
+      operationId: getProviderIds
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Provider IDs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/automated-test:
+    post:
+      tags:
+        - Smart Delivery
+      summary: Create Automated Placement Test
+      description: |
+        Create automated recurring spam test with scheduled monitoring.
+      operationId: createAutomatedTest
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_account_id:
+                  type: integer
+                test_name:
+                  type: string
+                schedule:
+                  type: string
+      responses:
+        '200':
+          description: Automated test created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/manual-test:
+    post:
+      tags:
+        - Smart Delivery
+      summary: Create Manual Placement Test
+      description: |
+        Create one-time manual spam placement test.
+      operationId: createManualTest
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_account_id:
+                  type: integer
+                test_name:
+                  type: string
+      responses:
+        '200':
+          description: Manual test created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/tests:
+    get:
+      tags:
+        - Smart Delivery
+      summary: List All Tests
+      description: |
+        Retrieve list of all spam placement tests.
+      operationId: listTests
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Tests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/test/{test_id}:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Test Details
+      description: |
+        Get detailed results of a specific placement test.
+      operationId: getTestDetails
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: test_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Test details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/test/{test_id}/email-content:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Test Email Content
+      description: |
+        Retrieve the email content used in a specific test.
+      operationId: getTestEmailContent
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: test_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email content retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/automated-test/{test_id}/stop:
+    post:
+      tags:
+        - Smart Delivery
+      summary: Stop Automated Test
+      description: |
+        Stop a running automated placement test.
+      operationId: stopAutomatedTest
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: test_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Automated test stopped successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/tests/bulk-delete:
+    post:
+      tags:
+        - Smart Delivery
+      summary: Bulk Delete Tests
+      description: |
+        Delete multiple placement tests at once.
+      operationId: bulkDeleteTests
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - test_ids
+              properties:
+                test_ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Tests deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/folders:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Folders
+      description: |
+        Retrieve all test folders for organization.
+      operationId: getFolders
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Folders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Smart Delivery
+      summary: Create Folder
+      description: |
+        Create a new folder to organize tests.
+      operationId: createFolder
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Folder created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/folder/{folder_id}:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Folder by ID
+      description: |
+        Get details of a specific folder.
+      operationId: getFolderById
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: folder_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Folder retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Smart Delivery
+      summary: Delete Folder
+      description: |
+        Delete a test folder.
+      operationId: deleteFolder
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: folder_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Folder deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/mailbox-summary:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Mailbox Summary
+      description: |
+        Get summary of mailbox deliverability metrics.
+      operationId: getMailboxSummary
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Mailbox summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/mailbox-count:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Mailbox Count
+      description: |
+        Get count of monitored mailboxes.
+      operationId: getMailboxCount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Mailbox count retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/sender-list:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Sender List
+      description: |
+        Get list of all configured senders for testing.
+      operationId: getSenderList
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Sender list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/sender-report:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Sender Report
+      description: |
+        Get detailed deliverability report for a sender.
+      operationId: getSenderReport
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Sender report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/provider-report:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Provider Report
+      description: |
+        Get placement report broken down by email provider.
+      operationId: getProviderReport
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Provider report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/geo-report:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Geographic Report
+      description: |
+        Get placement report broken down by geographic region.
+      operationId: getGeoReport
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Geographic report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/spam-filter-report:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Spam Filter Report
+      description: |
+        Get report on spam filter performance and placement.
+      operationId: getSpamFilterReport
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Spam filter report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/schedule-history:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Schedule History
+      description: |
+        Get history of scheduled automated tests.
+      operationId: getScheduleHistory
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Schedule history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/blacklists:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Blacklist Status
+      description: |
+        Check if domains or IPs are on email blacklists.
+      operationId: getBlacklists
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Blacklist status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/domain-blacklist:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Domain Blacklist Status
+      description: |
+        Check domain blacklist status across major blacklist providers.
+      operationId: getDomainBlacklist
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Domain blacklist status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/ip-blacklist-count:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get IP Blacklist Count
+      description: |
+        Get count of blacklists an IP appears on.
+      operationId: getIpBlacklistCount
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: IP blacklist count retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/spf-details:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get SPF Details
+      description: |
+        Get SPF (Sender Policy Framework) configuration details.
+      operationId: getSpfDetails
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: SPF details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/dkim-details:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get DKIM Details
+      description: |
+        Get DKIM (DomainKeys Identified Mail) configuration details.
+      operationId: getDkimDetails
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: DKIM details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/rdns-report:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Reverse DNS Report
+      description: |
+        Get reverse DNS (rDNS) configuration report.
+      operationId: getRdnsReport
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: rDNS report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/ip-details:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get IP Details
+      description: |
+        Get detailed information about IP reputation and configuration.
+      operationId: getIpDetails
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: IP details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-delivery/reply-headers:
+    get:
+      tags:
+        - Smart Delivery
+      summary: Get Reply Headers
+      description: |
+        Get email header analysis from test replies.
+      operationId: getReplyHeaders
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Reply headers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # SMART SENDERS ENDPOINTS
+  # ==========================================
+
+  /v1/smart-senders/vendors:
+    get:
+      tags:
+        - Smart Senders
+      summary: Get Vendors
+      description: |
+        Get list of mailbox vendors with pricing and service details.
+        
+        **Note:** Smart Senders is a marketplace feature. Contact support@smartlead.ai for access.
+      operationId: getVendors
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Vendors retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-senders/domain/search:
+    get:
+      tags:
+        - Smart Senders
+      summary: Search Domain
+      description: |
+        Search for available domains for mailbox purchase.
+      operationId: searchDomain
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Domain search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-senders/domains:
+    get:
+      tags:
+        - Smart Senders
+      summary: Get Domain List
+      description: |
+        Get list of purchased or available domains.
+      operationId: getDomainList
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      responses:
+        '200':
+          description: Domain list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-senders/order:
+    post:
+      tags:
+        - Smart Senders
+      summary: Place Order
+      description: |
+        Place an order for mailbox purchase from a vendor.
+      operationId: placeOrder
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - vendor_id
+                - quantity
+              properties:
+                vendor_id:
+                  type: integer
+                quantity:
+                  type: integer
+                domain:
+                  type: string
+      responses:
+        '200':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  order_id:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/smart-senders/auto-generate:
+    post:
+      tags:
+        - Smart Senders
+      summary: Auto-Generate Mailboxes
+      description: |
+        Automatically generate and configure mailboxes.
+      operationId: autoGenerateMailboxes
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - count
+              properties:
+                count:
+                  type: integer
+                domain:
+                  type: string
+      responses:
+        '200':
+          description: Mailboxes generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  mailboxes:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# ==========================================
+# COMPONENTS
+# ==========================================
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: api_key
+      description: |
+        Your SmartLead API key. You can generate this from your dashboard under Settings > API Keys.
+        
+        Include this as a query parameter in all API requests:
+        ```
+        ?api_key=YOUR_API_KEY
+        ```
+
+  parameters:
+    ApiKeyParam:
+      name: api_key
+      in: query
+      description: Your SmartLead API key for authentication
+      required: true
+      schema:
+        type: string
+      example: "sk_live_1234567890abcdef"
+    
+    StartDateParam:
+      name: start_date
+      in: query
+      description: Start date for analytics (ISO 8601 format)
+      required: true
+      schema:
+        type: string
+        format: date
+      example: "2024-01-01"
+    
+    EndDateParam:
+      name: end_date
+      in: query
+      description: End date for analytics (ISO 8601 format)
+      required: true
+      schema:
+        type: string
+        format: date
+      example: "2024-01-31"
+    
+    TimezoneParam:
+      name: timezone
+      in: query
+      description: Timezone for date calculations (IANA format)
+      required: false
+      schema:
+        type: string
+        default: "UTC"
+      example: "America/New_York"
+
+  schemas:
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique campaign identifier
+          example: 2710262
+        user_id:
+          type: integer
+          description: ID of the user who owns this campaign
+        name:
+          type: string
+          description: Campaign name
+          example: "Q1 2024 Cold Outreach"
+        status:
+          type: string
+          enum: [ACTIVE, PAUSED, STOPPED, ARCHIVED, DRAFTED]
+          description: Current campaign status
+        created_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when campaign was created
+        updated_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of last modification
+        track_settings:
+          type: array
+          items:
+            type: string
+            enum: [DONT_EMAIL_OPEN, DONT_LINK_CLICK]
+          description: Tracking configuration
+        scheduler_cron_value:
+          type: object
+          properties:
+            tz:
+              type: string
+              example: "America/New_York"
+            days:
+              type: array
+              items:
+                type: integer
+              example: [1, 2, 3, 4, 5]
+            startHour:
+              type: string
+              example: "09:00"
+            endHour:
+              type: string
+              example: "19:00"
+        min_time_btwn_emails:
+          type: integer
+          description: Minimum minutes between emails
+        max_leads_per_day:
+          type: integer
+          description: Maximum leads per day
+        stop_lead_settings:
+          type: string
+          enum: [REPLY_TO_AN_EMAIL, OPENED_EMAIL, CLICKED_LINK, NEVER]
+        enable_ai_esp_matching:
+          type: boolean
+        send_as_plain_text:
+          type: boolean
+        follow_up_percentage:
+          type: integer
+        client_id:
+          type: integer
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              tag_id:
+                type: integer
+              tag_name:
+                type: string
+              tag_color:
+                type: string
+
+    CampaignSettings:
+      type: object
+      properties:
+        track_settings:
+          type: array
+          items:
+            type: string
+            enum: [DONT_EMAIL_OPEN, DONT_LINK_CLICK]
+        max_leads_per_day:
+          type: integer
+        stop_lead_settings:
+          type: string
+          enum: [REPLY_TO_AN_EMAIL, OPENED_EMAIL, CLICKED_LINK, NEVER]
+        enable_ai_esp_matching:
+          type: boolean
+        send_as_plain_text:
+          type: boolean
+        follow_up_percentage:
+          type: integer
+        unsubscribe_text:
+          type: string
+
+    CampaignSchedule:
+      type: object
+      required:
+        - timezone
+        - days
+        - startHour
+        - endHour
+      properties:
+        timezone:
+          type: string
+          description: IANA timezone
+          example: "America/New_York"
+        days:
+          type: array
+          items:
+            type: integer
+          description: Days of week (0=Sunday, 6=Saturday)
+          example: [1, 2, 3, 4, 5]
+        startHour:
+          type: string
+          description: Start sending time (24-hour format)
+          example: "09:00"
+        endHour:
+          type: string
+          description: End sending time (24-hour format)
+          example: "17:00"
+        min_time_btw_emails:
+          type: integer
+          description: Minimum minutes between emails
+          example: 24
+
+    EmailSequence:
+      type: object
+      properties:
+        id:
+          type: integer
+        seq_number:
+          type: integer
+          description: Sequence order (1, 2, 3...)
+        subject:
+          type: string
+          description: Email subject line
+        email_body:
+          type: string
+          description: Email content (supports HTML and variables)
+        seq_delay_details:
+          type: object
+          properties:
+            delay_in_days:
+              type: integer
+
+    EmailSequenceInput:
+      type: object
+      required:
+        - seq_number
+        - subject
+        - email_body
+        - seq_delay_details
+      properties:
+        seq_number:
+          type: integer
+          description: Sequence order (1 for initial, 2+ for follow-ups)
+        subject:
+          type: string
+          description: Email subject line (supports variables)
+        email_body:
+          type: string
+          description: Email content (HTML or plain text)
+        seq_delay_details:
+          type: object
+          required:
+            - delay_in_days
+          properties:
+            delay_in_days:
+              type: integer
+              description: Days to wait before sending
+
+    Lead:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        company_name:
+          type: string
+        phone_number:
+          type: string
+        website:
+          type: string
+        custom_fields:
+          type: object
+        status:
+          type: string
+          enum: [ACTIVE, PAUSED, COMPLETED, UNSUBSCRIBED, BOUNCED]
+        campaign_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    LeadInput:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Lead email address (required)
+        first_name:
+          type: string
+        last_name:
+          type: string
+        company_name:
+          type: string
+        phone_number:
+          type: string
+        website:
+          type: string
+        custom_fields:
+          type: object
+          additionalProperties: true
+
+    LeadUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        company_name:
+          type: string
+        phone_number:
+          type: string
+        website:
+          type: string
+        custom_fields:
+          type: object
+
+    LeadCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        color:
+          type: string
+
+    EmailAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        from_name:
+          type: string
+        from_email:
+          type: string
+          format: email
+        smtp_host:
+          type: string
+        smtp_port:
+          type: integer
+        imap_host:
+          type: string
+        imap_port:
+          type: integer
+        warmup_enabled:
+          type: boolean
+        total_warmup_per_day:
+          type: integer
+        daily_rampup:
+          type: integer
+        max_email_per_day:
+          type: integer
+        is_suspended:
+          type: boolean
+        connection_status:
+          type: string
+          enum: [CONNECTED, DISCONNECTED, ERROR]
+
+    EmailAccountInput:
+      type: object
+      required:
+        - from_name
+        - from_email
+        - user_name
+        - password
+        - smtp_host
+        - smtp_port
+        - imap_host
+        - imap_port
+        - warmup_enabled
+      properties:
+        from_name:
+          type: string
+        from_email:
+          type: string
+          format: email
+        user_name:
+          type: string
+        password:
+          type: string
+        smtp_host:
+          type: string
+        smtp_port:
+          type: integer
+        imap_host:
+          type: string
+        imap_port:
+          type: integer
+        warmup_enabled:
+          type: boolean
+        total_warmup_per_day:
+          type: integer
+        daily_rampup:
+          type: integer
+        max_email_per_day:
+          type: integer
+
+    EmailAccountOAuthInput:
+      type: object
+      required:
+        - from_name
+        - from_email
+        - token
+        - type
+      properties:
+        from_name:
+          type: string
+        from_email:
+          type: string
+          format: email
+        token:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+            expiry_date:
+              type: integer
+        type:
+          type: string
+          enum: [gmail, microsoft]
+        warmup_enabled:
+          type: boolean
+
+    EmailAccountUpdate:
+      type: object
+      properties:
+        from_name:
+          type: string
+        max_email_per_day:
+          type: integer
+        signature:
+          type: string
+        custom_tracking_url:
+          type: string
+        bcc:
+          type: string
+
+    WarmupSettings:
+      type: object
+      properties:
+        warmup_enabled:
+          type: boolean
+        total_warmup_per_day:
+          type: integer
+        daily_rampup:
+          type: integer
+        reply_rate_percentage:
+          type: integer
+
+    WarmupStats:
+      type: object
+      properties:
+        total_sent:
+          type: integer
+        total_inbox:
+          type: integer
+        total_spam:
+          type: integer
+        warmup_reputation:
+          type: number
+        days_in_warmup:
+          type: integer
+
+    CampaignStatistics:
+      type: object
+      properties:
+        total_leads:
+          type: integer
+        emails_sent:
+          type: integer
+        emails_opened:
+          type: integer
+        emails_clicked:
+          type: integer
+        emails_replied:
+          type: integer
+        emails_bounced:
+          type: integer
+        unsubscribed:
+          type: integer
+        open_rate:
+          type: number
+        click_rate:
+          type: number
+        reply_rate:
+          type: number
+        bounce_rate:
+          type: number
+
+    CampaignAnalytics:
+      type: object
+      properties:
+        campaign_id:
+          type: integer
+        metrics:
+          type: object
+        time_series:
+          type: array
+          items:
+            type: object
+
+    OverallStats:
+      type: object
+      properties:
+        total_sent:
+          type: integer
+        total_opened:
+          type: integer
+        total_clicked:
+          type: integer
+        total_replied:
+          type: integer
+        total_bounced:
+          type: integer
+        open_rate:
+          type: number
+        click_rate:
+          type: number
+        reply_rate:
+          type: number
+
+    DailyStats:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        sent:
+          type: integer
+        opened:
+          type: integer
+        clicked:
+          type: integer
+        replied:
+          type: integer
+
+    CampaignPerformance:
+      type: object
+      properties:
+        campaign_id:
+          type: integer
+        campaign_name:
+          type: string
+        sent:
+          type: integer
+        opened:
+          type: integer
+        clicked:
+          type: integer
+        replied:
+          type: integer
+        open_rate:
+          type: number
+        click_rate:
+          type: number
+        reply_rate:
+          type: number
+
+    InboxFilter:
+      type: object
+      properties:
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+        filters:
+          type: object
+          properties:
+            search:
+              type: string
+            campaignId:
+              oneOf:
+                - type: integer
+                - type: array
+                  items:
+                    type: integer
+            emailAccountId:
+              oneOf:
+                - type: integer
+                - type: array
+                  items:
+                    type: integer
+
+    InboxResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+        total_count:
+          type: integer
+
+    WebhookInput:
+      type: object
+      required:
+        - webhook_url
+        - association_type
+      properties:
+        name:
+          type: string
+        webhook_url:
+          type: string
+          format: uri
+        event_type:
+          type: string
+        email_campaign_id:
+          type: integer
+        association_type:
+          type: integer
+          enum: [1, 2, 3]
+
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        webhook_url:
+          type: string
+        event_type:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    WebhookUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        webhook_url:
+          type: string
+        event_type:
+          type: string
+
+    LeadList:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique lead list identifier
+        listName:
+          type: string
+          description: Name of the lead list
+        user_id:
+          type: integer
+          description: Owner user ID
+        lead_count:
+          type: integer
+          description: Number of leads in this list
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              tag_id:
+                type: integer
+              tag_name:
+                type: string
+              tag_color:
+                type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User email address
+        name:
+          type: string
+          description: User full name
+        company:
+          type: string
+          description: Company name
+        account_type:
+          type: string
+          enum: [FREE, STARTER, PRO, ENTERPRISE]
+          description: Account subscription type
+        api_key:
+          type: string
+          description: User API key
+        created_at:
+          type: string
+          format: date-time
+        is_agency:
+          type: boolean
+          description: Whether user has agency features enabled
+        client_id:
+          type: integer
+          nullable: true
+          description: Associated client ID if user is a client
+        subscription_status:
+          type: string
+          enum: [ACTIVE, CANCELED, EXPIRED, TRIAL]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        details:
+          type: object
+          description: Additional error details
+
+  responses:
+    UnauthorizedError:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Invalid API Key"
+          example:
+            message: "Invalid API Key"
+    
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Resource not found"
+    
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Invalid parameters provided"
+    
+    BadRequestError:
+      description: Bad request - Invalid request parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Invalid request parameters"
+    
+    RateLimitError:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Too many requests. Please slow down and retry later."
+    
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal server error occurred"
+
