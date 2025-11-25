@@ -1,7 +1,7 @@
 ---
 title: "IP Blacklist Count"
-api: "GET https://server.smartlead.ai/api/smart-delivery/ip-blacklist-count"
-description: "Count of IP blacklistings"
+api: "GET https://server.smartlead.ai/api/v1/smart-delivery/ip-blacklist-count"
+description: "Get count of blacklists your IP appears on for quick health check"
 ---
 
 <Note>
@@ -20,7 +20,7 @@ description: "Count of IP blacklistings"
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/smart-delivery/ip-blacklist-count?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/smart-delivery/ip-blacklist-count?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://server.smartlead.ai/api/smart-delivery/ip-blacklist-count",
+    "https://server.smartlead.ai/api/v1/smart-delivery/ip-blacklist-count",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/smart-delivery/ip-blacklist-count?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/smart-delivery/ip-blacklist-count?api_key=${API_KEY}`
 );
 
 const result = await response.json();

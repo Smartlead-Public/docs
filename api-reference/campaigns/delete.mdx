@@ -1,8 +1,17 @@
 ---
 title: "Delete Campaign"
 api: "DELETE https://server.smartlead.ai/api/v1/campaigns/{campaign_id}"
-description: "Permanently delete a campaign and all associated data"
+description: "Permanently and irreversibly deletes a campaign and ALL associated data: sequences, lead-campaign mappings, email statis"
 ---
+<Note>
+Strongly recommended: Export all important data first and consider using ARCHIVED status instead to preserve data while hiding from active views.
+</Note>
+
+<Warning>
+Permanently and irreversibly deletes a campaign and ALL associated data: sequences, lead-campaign mappings, email statistics, webhook configurations, scheduled emails, and conversation history
+</Warning>
+
+
 
 ## Path Parameters
 

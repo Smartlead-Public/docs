@@ -1,8 +1,20 @@
 ---
 title: "Update Campaign Schedule"
 api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/schedule"
-description: "Configure when emails are sent"
+description: "Configures when and how frequently campaign emails are sent."
 ---
+<Note>
+Configures when and how frequently campaign emails are sent Sets timezone (IANA format), sending hours (start/end in 24-hour format), active days of week (0=Sunday through 6=Saturday), and minimum time between consecutive emails (in minutes)
+</Note>
+
+## Overview
+
+Configures when and how frequently campaign emails are sent
+
+**Key Features**:
+- Validates timezone string and time format before saving
+
+
 
 ## Path Parameters
 

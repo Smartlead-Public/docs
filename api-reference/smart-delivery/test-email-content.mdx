@@ -1,7 +1,7 @@
 ---
 title: "Test Email Content"
-api: "GET https://server.smartlead.ai/api/smart-delivery/email-content"
-description: "Get spam test email content"
+api: "GET https://server.smartlead.ai/api/v1/smart-delivery/email-content"
+description: "Get actual email content from a specific spam test"
 ---
 
 <Note>
@@ -20,7 +20,7 @@ description: "Get spam test email content"
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/smart-delivery/email-content?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/smart-delivery/email-content?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://server.smartlead.ai/api/smart-delivery/email-content",
+    "https://server.smartlead.ai/api/v1/smart-delivery/email-content",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/smart-delivery/email-content?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/smart-delivery/email-content?api_key=${API_KEY}`
 );
 
 const result = await response.json();

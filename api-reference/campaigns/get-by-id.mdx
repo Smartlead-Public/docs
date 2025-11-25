@@ -1,8 +1,22 @@
 ---
 title: "Get Campaign by ID"
 api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}"
-description: "Retrieve detailed information about a specific campaign"
+description: "Retrieves comprehensive details for a specific campaign including all configuration settings, schedule, tracking prefere"
 ---
+<Note>
+Retrieves comprehensive details for a specific campaign including all configuration settings, schedule, tracking preferences, AI options, and associated metadata For client API keys, additionally filters by client_id
+</Note>
+
+## Overview
+
+Retrieves comprehensive details for a specific campaign including all configuration settings, schedule, tracking preferences, AI options, and associated metadata
+
+**Key Features**:
+- Automatically validates campaign ownership - returns 404 if campaign doesn't exist or user lacks access
+- Returns single campaign object with all 18 CAMPAIGN_ATTRIBUTES fields including: status, track_settings array, complete scheduler_cron_value object, sending limits, stop conditions, AI ESP matching preferences, and plain text mode
+- Optionally includes campaign tags with tag IDs, names, and colors
+
+
 
 ## Path Parameters
 

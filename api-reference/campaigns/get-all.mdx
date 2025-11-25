@@ -1,8 +1,23 @@
 ---
 title: "Get All Campaigns"
 api: "GET https://server.smartlead.ai/api/v1/campaigns/"
-description: "Retrieve all email campaigns for your account"
+description: "Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule set"
 ---
+<Note>
+Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule settings, tracking configuration, AI matching preferences, and sending limits Essential for dashboard displays, campaign selection interfaces, and bulk operations across portfolio.
+</Note>
+
+## Overview
+
+Retrieves all email campaigns for the authenticated user with comprehensive campaign data including status, schedule settings, tracking configuration, AI matching preferences, and sending limits
+
+**Key Features**:
+- Returns campaigns ordered by ID descending (newest first)
+- Supports optional client_id filtering for agency/white-label accounts managing multiple clients
+- When include_tags=true, returns campaign tags with tag IDs, names, and colors for categorization and filtering
+- Returns direct array of campaign objects (not wrapped)
+
+
 
 ## Query Parameters
 

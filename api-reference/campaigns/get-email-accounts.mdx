@@ -1,8 +1,21 @@
 ---
 title: "Get Campaign Email Accounts"
 api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/email-accounts"
-description: "Retrieve all email accounts associated with a campaign"
+description: "Retrieves all email accounts (sender accounts) associated with and actively rotating for this specific campaign."
 ---
+<Note>
+Retrieves all email accounts (sender accounts) associated with and actively rotating for this specific campaign Essential for monitoring sender distribution, checking account health, and troubleshooting delivery issues.
+</Note>
+
+## Overview
+
+Retrieves all email accounts (sender accounts) associated with and actively rotating for this specific campaign
+
+**Key Features**:
+- Returns account details including from_email, from_name, type (SMTP/GMAIL/OUTLOOK), daily sending limits, warmup status and reputation, connection status (is_smtp_success/is_imap_success), and number of campaigns using each account
+- Shows which accounts SmartLead will rotate between when sending campaign emails
+
+
 
 ## Path Parameters
 

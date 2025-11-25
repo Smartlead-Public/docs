@@ -1,7 +1,7 @@
 ---
 title: "Create Folder"
-api: "POST https://server.smartlead.ai/api/smart-delivery/folders"
-description: "Create test folder"
+api: "POST https://server.smartlead.ai/api/v1/smart-delivery/folders"
+description: "Create new folder for organizing spam tests"
 ---
 
 <Note>
@@ -20,7 +20,7 @@ description: "Create test folder"
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/smart-delivery/folders?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/smart-delivery/folders?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"key": "value"}'
 ```
@@ -31,7 +31,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.post(
-    "https://server.smartlead.ai/api/smart-delivery/folders",
+    "https://server.smartlead.ai/api/v1/smart-delivery/folders",
     params={"api_key": API_KEY},
     json={"key": "value"}
 )
@@ -44,7 +44,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/smart-delivery/folders?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/smart-delivery/folders?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

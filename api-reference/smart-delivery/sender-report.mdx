@@ -1,7 +1,7 @@
 ---
 title: "Sender Account Report"
-api: "GET https://server.smartlead.ai/api/smart-delivery/sender-report"
-description: "Per-account deliverability"
+api: "GET https://server.smartlead.ai/api/v1/smart-delivery/sender-report"
+description: "Get performance report by sender email account"
 ---
 
 <Note>
@@ -20,7 +20,7 @@ description: "Per-account deliverability"
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/smart-delivery/sender-report?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/smart-delivery/sender-report?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://server.smartlead.ai/api/smart-delivery/sender-report",
+    "https://server.smartlead.ai/api/v1/smart-delivery/sender-report",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/smart-delivery/sender-report?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/smart-delivery/sender-report?api_key=${API_KEY}`
 );
 
 const result = await response.json();

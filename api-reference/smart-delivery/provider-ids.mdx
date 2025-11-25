@@ -1,7 +1,7 @@
 ---
 title: "Get Provider IDs"
-api: "GET https://server.smartlead.ai/api/smart-delivery/provider-ids"
-description: "Get region-wise provider IDs"
+api: "GET https://server.smartlead.ai/api/v1/smart-delivery/provider-ids"
+description: "Get region-wise email provider IDs for spam testing configuration"
 ---
 
 <Note>
@@ -20,7 +20,7 @@ description: "Get region-wise provider IDs"
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/smart-delivery/provider-ids?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/smart-delivery/provider-ids?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://server.smartlead.ai/api/smart-delivery/provider-ids",
+    "https://server.smartlead.ai/api/v1/smart-delivery/provider-ids",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/smart-delivery/provider-ids?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/smart-delivery/provider-ids?api_key=${API_KEY}`
 );
 
 const result = await response.json();

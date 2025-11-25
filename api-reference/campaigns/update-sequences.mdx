@@ -1,8 +1,27 @@
 ---
 title: "Update Campaign Sequences"
 api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences"
-description: "Create or update email sequences for a campaign"
+description: "Create or update email sequences for multi-step campaigns"
 ---
+
+<Note>
+Creates new sequences (id: null) or updates existing ones. Each sequence needs: seq_number, email_body, and delay in days. Cannot modify while campaign is ACTIVE - pause first.
+</Note>
+
+## Overview
+
+Create new email sequences or update existing ones for a campaign. Sequences define your multi-step email outreach flow.
+
+**Key Features**:
+- Create new sequences by setting `id: null`
+- Update existing sequences by including their `id`
+- Configure delays between emails (0-365 days)
+- Add A/B testing variants with `seq_variants`
+- Subject line optional for follow-ups (uses "Re:" on previous)
+
+<Warning>
+Cannot modify sequences while campaign is **ACTIVE**. Pause campaign first, make changes, then resume.
+</Warning>
 
 ## Path Parameters
 

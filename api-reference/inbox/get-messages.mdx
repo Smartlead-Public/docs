@@ -1,8 +1,23 @@
 ---
 title: "Get Inbox Messages"
 api: "POST https://server.smartlead.ai/api/v1/master-inbox/inbox-replies"
-description: ""
+description: "Retrieves all replies from leads across all campaigns in your unified inbox."
 ---
+<Note>
+Retrieves all replies from leads across all campaigns in your unified inbox Essential for managing all campaign responses in one place.
+</Note>
+
+## Overview
+
+Retrieves all replies from leads across all campaigns in your unified inbox
+
+**Key Features**:
+- Supports advanced filtering by: campaign IDs (single or array, max 5), email account IDs (max 20), team member assignments (max 10), campaign tags (max 10), client IDs (max 10), lead categories (assigned/unassigned, specific category IDs), email status (Opened/Clicked/Replied), search text, and reply date ranges
+- Returns: reply content, lead details, campaign context, engagement metrics, and conversation thread
+- Supports pagination (limit 1-20) and sorting (REPLY_TIME_DESC/SENT_TIME_DESC)
+- Optional fetch_message_history parameter includes full thread
+
+
 
 ## Path Parameters
 

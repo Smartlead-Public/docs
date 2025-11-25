@@ -1,8 +1,25 @@
 ---
 title: "Get Campaign Sequences"
 api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences"
-description: "Retrieve all email sequences for a campaign"
+description: "Retrieves all email sequences configured for a campaign, ordered by sequence number."
 ---
+<Note>
+Retrieves all email sequences configured for a campaign, ordered by sequence number Essential for sequence editors, email preview interfaces, A/B testing configuration, and understanding campaign flow
+</Note>
+
+## Overview
+
+Retrieves all email sequences configured for a campaign, ordered by sequence number
+
+**Key Features**:
+- Returns complete sequence data including subject lines, email bodies (HTML/plain text), delay configurations, and A/B test variants if configured
+- Shows delayInDays for each sequence indicating spacing between emails
+
+<Warning>
+Includes sequence IDs required for updates
+</Warning>
+
+
 
 ## Path Parameters
 

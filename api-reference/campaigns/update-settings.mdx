@@ -1,8 +1,20 @@
 ---
 title: "Update Campaign Settings"
 api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/settings"
-description: "Update campaign configuration settings"
+description: "Updates campaign configuration including: tracking settings (enable/disable opens and clicks - array format with DONT_EM"
 ---
+<Note>
+Updates campaign configuration including: tracking settings (enable/disable opens and clicks - array format with DONT_EMAIL_OPEN/DONT_LINK_CLICK values), sending limits (max_leads_per_day, min_time_between_emails), stop conditions (when to stop emailing leads - REPLY_TO_AN_EMAIL/OPENED_EMAIL/CLIC...
+</Note>
+
+## Overview
+
+Updates campaign configuration including: tracking settings (enable/disable opens and clicks - array format with DONT_EMAIL_OPEN/DONT_LINK_CLICK values), sending limits (max_leads_per_day, min_time_between_emails), stop conditions (when to stop emailing leads - REPLY_TO_AN_EMAIL/OPENED_EMAIL/CLICKED_LINK), AI ESP matching (intelligently pair leads with optimal email accounts), plain text mode (send_as_plain_text for better deliverability with technical audiences), follow-up percentage, and unsubscribe text
+
+**Key Features**:
+- Validates settings before applying
+
+
 
 ## Path Parameters
 

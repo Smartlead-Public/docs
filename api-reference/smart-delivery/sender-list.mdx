@@ -1,7 +1,7 @@
 ---
 title: "Sender Account List"
-api: "GET https://server.smartlead.ai/api/smart-delivery/senders"
-description: "List all sender accounts"
+api: "GET https://server.smartlead.ai/api/v1/smart-delivery/senders"
+description: "List all sender accounts available for spam testing"
 ---
 
 <Note>
@@ -20,7 +20,7 @@ description: "List all sender accounts"
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/smart-delivery/senders?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/smart-delivery/senders?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://server.smartlead.ai/api/smart-delivery/senders",
+    "https://server.smartlead.ai/api/v1/smart-delivery/senders",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/smart-delivery/senders?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/smart-delivery/senders?api_key=${API_KEY}`
 );
 
 const result = await response.json();

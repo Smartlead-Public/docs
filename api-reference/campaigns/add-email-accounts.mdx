@@ -1,8 +1,24 @@
 ---
 title: "Add Email Accounts to Campaign"
 api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/email-accounts"
-description: "Associate email accounts with a campaign for sending"
+description: "Associates one or more email accounts with a campaign for automatic sender rotation."
 ---
+<Note>
+Associates one or more email accounts with a campaign for automatic sender rotation SmartLead distributes emails across added accounts to maximize deliverability, avoid ESP limits, and build sender reputation
+</Note>
+
+## Overview
+
+Associates one or more email accounts with a campaign for automatic sender rotation
+
+**Key Features**:
+- Validates account ownership and connection status before adding
+
+<Warning>
+Accounts must be successfully connected (is_smtp_success=true, is_imap_success=true) and not suspended
+</Warning>
+
+
 
 ## Path Parameters
 

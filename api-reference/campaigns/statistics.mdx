@@ -1,8 +1,22 @@
 ---
 title: "Get Campaign Statistics"
 api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/statistics"
-description: "Retrieve detailed performance statistics for a campaign"
+description: "Retrieves detailed email-level statistics for all emails sent in a campaign."
 ---
+<Note>
+Retrieves detailed email-level statistics for all emails sent in a campaign Essential for detailed campaign analysis, A/B test evaluation, lead engagement scoring, and identifying best-performing sequences
+</Note>
+
+## Overview
+
+Retrieves detailed email-level statistics for all emails sent in a campaign
+
+**Key Features**:
+- Returns individual email stats including opens, clicks, replies, bounces with precise timestamps
+- Supports comprehensive filtering by sequence number (1-20), email status (opened/clicked/replied/bounced), and date ranges
+- Includes pagination with configurable offset/limit (max 1000)
+
+
 
 ## Path Parameters
 

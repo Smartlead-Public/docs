@@ -229,16 +229,6 @@
       ]
     },
     {
-      "group": "Authentication",
-      "pages": [
-        "api-reference/auth/login",
-        "api-reference/auth/signup",
-        "api-reference/auth/forgot-password",
-        "api-reference/auth/reset-password",
-        "api-reference/auth/api-key"
-      ]
-    },
-    {
       "group": "Utilities",
       "pages": [
         "api-reference/utilities/verify-email",

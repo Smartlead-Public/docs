@@ -1,8 +1,20 @@
 ---
 title: "Remove Email Accounts from Campaign"
 api: "DELETE https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/email-accounts"
-description: "Remove email accounts from a campaign"
+description: "Disassociates email accounts from a campaign's sender rotation pool."
 ---
+<Note>
+Disassociates email accounts from a campaign's sender rotation pool Does NOT delete accounts themselves - only removes from this campaign
+</Note>
+
+## Overview
+
+Disassociates email accounts from a campaign's sender rotation pool
+
+**Key Features**:
+- Validates at least one account remains if campaign is ACTIVE (returns error if trying to remove all)
+
+
 
 ## Path Parameters
 
