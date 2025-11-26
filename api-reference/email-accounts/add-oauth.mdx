@@ -1,12 +1,12 @@
 ---
 title: "Add OAuth Email Account"
 api: "POST https://server.smartlead.ai/api/v1/email-accounts/save-oauth"
-description: "Connect Gmail or Outlook account via OAuth with automatic token refresh management"
+description: "Connect Gmail or Outlook account using OAuth 2.0 with automatic token refresh"
 ---
 
-## Path Parameters
-
-<Note>No path parameters</Note>
+<Note>
+Adds an OAuth-authenticated email account (Gmail or Outlook). SmartLead manages token refresh automatically. Use this endpoint after obtaining OAuth tokens from the respective provider.
+</Note>
 
 ## Query Parameters
 
@@ -14,18 +14,137 @@ description: "Connect Gmail or Outlook account via OAuth with automatic token re
   Your SmartLead API key
 </ParamField>
 
-
-
 ## Request Body
 
-<Note>No request body required</Note>
+<ParamField body="from_name" type="string" required>
+  Display name for outgoing emails
+</ParamField>
+
+<ParamField body="from_email" type="string" required>
+  Email address (must match OAuth account)
+</ParamField>
+
+<ParamField body="username" type="string" required>
+  Email username (typically same as from_email)
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Provider type. Valid values: `GMAIL`, `OUTLOOK`
+</ParamField>
+
+<ParamField body="token" type="object" required>
+  OAuth token object obtained from provider
+
+<Expandable title="Token properties">
+  <ParamField body="scope" type="string" required>
+    OAuth scopes granted (e.g., "https://mail.google.com/")
+  </ParamField>
+
+  <ParamField body="token_type" type="string" required>
+    Token type, must be `Bearer`
+  </ParamField>
+
+  <ParamField body="access_token" type="string">
+    OAuth access token
+  </ParamField>
+
+  <ParamField body="refresh_token" type="string">
+    OAuth refresh token for automatic renewal
+  </ParamField>
+
+  <ParamField body="expiry_date" type="number" required>
+    Token expiry timestamp (Unix timestamp in milliseconds)
+  </ParamField>
+
+  <ParamField body="id_token" type="string">
+    OpenID Connect ID token (optional)
+  </ParamField>
+
+  <ParamField body="expiry" type="string">
+    Token expiry ISO string (optional)
+  </ParamField>
+
+  <ParamField body="expires_in" type="number">
+    Seconds until token expires (optional)
+  </ParamField>
+
+  <ParamField body="ext_expires_in" type="number">
+    Extended expiry time for Microsoft tokens (optional)
+  </ParamField>
+</Expandable>
+</ParamField>
+
+<ParamField body="warmup_enabled" type="boolean" required>
+  Whether to enable email warmup for this account
+</ParamField>
+
+<ParamField body="use_whitelabel_credentials" type="boolean" required>
+  Whether to use whitelabel OAuth credentials. Must be `true` or `false`
+</ParamField>
+
+<ParamField body="id" type="number">
+  Email account ID (only for updates, null for new accounts)
+</ParamField>
+
+<ParamField body="max_email_per_day" type="number">
+  Maximum emails allowed per day (including warmup and campaigns)
+</ParamField>
+
+<ParamField body="custom_tracking_url" type="string">
+  Custom domain for tracking links
+</ParamField>
+
+<ParamField body="bcc" type="string">
+  BCC email address for all outgoing emails
+</ParamField>
+
+<ParamField body="time_to_wait_in_mins" type="number">
+  Minimum time to wait between emails in minutes
+</ParamField>
+
+<ParamField body="signature" type="string">
+  Email signature HTML
+</ParamField>
+
+<ParamField body="total_warmup_per_day" type="number">
+  Number of warmup emails per day (if warmup_enabled is true)
+</ParamField>
+
+<ParamField body="daily_rampup" type="number">
+  Daily increase in warmup email count
+</ParamField>
+
+<ParamField body="reply_rate_percentage" type="number">
+  Target reply rate percentage for warmup
+</ParamField>
+
+<ParamField body="client_id" type="number">
+  Client ID for multi-tenant accounts
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/save-oauth?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "from_name": "John Doe",
+    "from_email": "john@gmail.com",
+    "username": "john@gmail.com",
+    "type": "GMAIL",
+    "token": {
+      "scope": "https://mail.google.com/",
+      "token_type": "Bearer",
+      "access_token": "ya29.a0AfH6SMBx...",
+      "refresh_token": "1//0gvJf9X...",
+      "expiry_date": 1732627200000
+    },
+    "warmup_enabled": true,
+    "use_whitelabel_credentials": true,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 2,
+    "max_email_per_day": 50
+  }'
 ```
 
 ```python Python
@@ -33,30 +152,74 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
+# Gmail OAuth account
+payload = {
+    "from_name": "John Doe",
+    "from_email": "john@gmail.com",
+    "username": "john@gmail.com",
+    "type": "GMAIL",
+    "token": {
+        "scope": "https://mail.google.com/",
+        "token_type": "Bearer",
+        "access_token": "ya29.a0AfH6SMBx...",
+        "refresh_token": "1//0gvJf9X...",
+        "expiry_date": 1732627200000
+    },
+    "warmup_enabled": True,
+    "use_whitelabel_credentials": True,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 2,
+    "max_email_per_day": 50,
+    "time_to_wait_in_mins": 5
+}
+
 response = requests.post(
     "https://server.smartlead.ai/api/v1/email-accounts/save-oauth",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
-print(result)
+if result.get('ok'):
+    print(f"OAuth account added successfully. ID: {result['data']['id']}")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+
+// Outlook OAuth account
+const payload = {
+  from_name: 'Jane Smith',
+  from_email: 'jane@outlook.com',
+  username: 'jane@outlook.com',
+  type: 'OUTLOOK',
+  token: {
+    scope: 'https://outlook.office.com/.default',
+    token_type: 'Bearer',
+    access_token: 'EwBwA8l6BAAU...',
+    refresh_token: 'M.R3_BAY...',
+    expiry_date: 1732627200000
+  },
+  warmup_enabled: true,
+  use_whitelabel_credentials: true,
+  total_warmup_per_day: 15,
+  daily_rampup: 3,
+  max_email_per_day: 40
+};
 
 const response = await fetch(
   `https://server.smartlead.ai/api/v1/email-accounts/save-oauth?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 
 const result = await response.json();
-console.log(result);
+if (result.ok) {
+  console.log(`OAuth account added. ID: ${result.data.id}`);
+}
 ```
 
 </RequestExample>
@@ -66,43 +229,38 @@ console.log(result);
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
+  OAuth email account added successfully
 </ResponseField>
 
 <ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Invalid OAuth token or connection validation failed
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Missing required fields or invalid type value
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "message": "OAuth account added successfully",
+  "data": {
+    "id": 123,
+    "from_email": "john@gmail.com",
+    "type": "GMAIL",
+    "is_smtp_success": true,
+    "is_imap_success": true
+  }
 }
 ```
 
@@ -112,20 +270,59 @@ console.log(result);
 }
 ```
 
-```json 404 - Not Found
+```json 422 - Validation Error
 {
-  "error": "Resource not found"
+  "error": "type must be one of [GMAIL, OUTLOOK]"
 }
 ```
 
-```json 422 - Validation Error
+```json 400 - Token Error
 {
-  "error": "Invalid parameters provided"
+  "ok": false,
+  "message": "Invalid or expired OAuth token"
 }
 ```
 
 </ResponseExample>
 
+## OAuth Flow
+
+<Steps>
+<Step title="Obtain OAuth tokens from provider">
+  Use Google or Microsoft OAuth flow to obtain access and refresh tokens with appropriate mail scopes.
+  
+  <Info>
+  **Gmail Scope Required:** `https://mail.google.com/`
+  
+  **Outlook Scope Required:** `https://outlook.office.com/.default` or `https://outlook.office.com/SMTP.Send https://outlook.office.com/IMAP.AccessAsUser.All`
+  </Info>
+</Step>
+
+<Step title="Call this endpoint with tokens">
+  Send the OAuth tokens and account information to this endpoint. SmartLead will validate the connection.
+</Step>
+
+<Step title="Enable warmup if needed">
+  Set `warmup_enabled: true` and configure warmup parameters to gradually build sender reputation.
+</Step>
+</Steps>
+
+## Usage Notes
+
+<Warning>
+OAuth tokens must be fresh and have the correct mail scopes. Expired tokens will cause connection failures.
+</Warning>
+
+<Tip>
+Use `use_whitelabel_credentials: true` to leverage SmartLead's OAuth app for Gmail/Outlook. This simplifies the OAuth flow as you don't need to create your own OAuth application.
+</Tip>
+
+<Info>
+SmartLead automatically refreshes expired OAuth tokens using the refresh_token. Ensure the refresh_token is included in the token object.
+</Info>
+
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Add SMTP Email Account](/api-reference/email-accounts/add-smtp) - For non-OAuth accounts
+- [Update Email Account](/api-reference/email-accounts/update)
+- [Get All Email Accounts](/api-reference/email-accounts/get-all)

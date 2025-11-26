@@ -1,16 +1,18 @@
 ---
 title: "Update Warmup Settings"
-api: "PATCH https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}/warmup"
-description: "Configure email warmup to build sender reputation"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}/warmup"
+description: "Configure email warmup parameters to gradually build sender reputation"
 ---
+
+<Note>
+Email warmup helps establish sender reputation by gradually increasing daily email volume. Configure warmup to start with low volumes and progressively increase to avoid being flagged as spam.
+</Note>
 
 ## Path Parameters
 
 <ParamField path="email_account_id" type="number" required>
-  The email account id
+  The email account ID to configure warmup for
 </ParamField>
-
-
 
 ## Query Parameters
 
@@ -18,95 +20,146 @@ description: "Configure email warmup to build sender reputation"
   Your SmartLead API key
 </ParamField>
 
-
-
 ## Request Body
 
-<Note>No request body required</Note>
+<ParamField body="warmup_enabled" type="boolean" required>
+  Whether to enable or disable warmup for this account
+</ParamField>
+
+<ParamField body="total_warmup_per_day" type="number">
+  Number of warmup emails to send per day (minimum: 1, maximum: 50)
+</ParamField>
+
+<ParamField body="daily_rampup" type="number">
+  Daily increase in warmup email count (minimum: 5, maximum: 20)
+</ParamField>
+
+<ParamField body="reply_rate_percentage" type="number">
+  Target reply rate percentage for warmup emails (minimum: 20, maximum: 100)
+</ParamField>
+
+<ParamField body="warmup_key_id" type="string">
+  Warmup service key identifier
+</ParamField>
+
+<ParamField body="auto_adjust_warmup" type="boolean">
+  Whether to automatically adjust warmup volume based on performance
+</ParamField>
+
+<ParamField body="is_rampup_enabled" type="boolean">
+  Whether to enable gradual rampup of warmup volume
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X PATCH "https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}/warmup?api_key=YOUR_KEY" \
+# Enable warmup with configuration
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/123/warmup?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "warmup_enabled": true,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 5,
+    "reply_rate_percentage": 30,
+    "auto_adjust_warmup": true,
+    "is_rampup_enabled": true
+  }'
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+account_id = 123
 
-response = requests.patch(
-    "https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}/warmup",
+# Enable warmup
+payload = {
+    "warmup_enabled": True,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 5,
+    "reply_rate_percentage": 30,
+    "auto_adjust_warmup": True,
+    "is_rampup_enabled": True
+}
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/email-accounts/{account_id}/warmup",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
-print(result)
+if result.get('ok'):
+    print(f"Warmup configured: {payload['total_warmup_per_day']} emails/day")
+
+# Disable warmup
+disable_payload = {"warmup_enabled": False}
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/email-accounts/{account_id}/warmup",
+    params={"api_key": API_KEY},
+    json=disable_payload
+)
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const accountId = 123;
+
+// Enable warmup
+const payload = {
+  warmup_enabled: true,
+  total_warmup_per_day: 20,
+  daily_rampup: 5,
+  reply_rate_percentage: 30,
+  auto_adjust_warmup: true,
+  is_rampup_enabled: true
+};
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/email-accounts/${email_account_id}/warmup?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/email-accounts/${accountId}/warmup?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 
 const result = await response.json();
-console.log(result);
+if (result.ok) {
+  console.log(`Warmup configured: ${payload.total_warmup_per_day} emails/day`);
+}
 ```
 
 </RequestExample>
 
-
-
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Warmup settings updated successfully
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+  Email account not found
 </ResponseField>
 
 <ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Invalid parameter values (check min/max ranges)
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "message": "Warmup settings updated successfully"
 }
 ```
 
@@ -116,20 +169,40 @@ console.log(result);
 }
 ```
 
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
 ```json 422 - Validation Error
 {
-  "error": "Invalid parameters provided"
+  "error": "total_warmup_per_day must be less than or equal to 50"
 }
 ```
 
 </ResponseExample>
 
+## Warmup Best Practices
+
+<Tip>
+**Recommended Settings for New Accounts:**
+- Start with `total_warmup_per_day: 10-15`
+- Set `daily_rampup: 5` to increase gradually
+- Target `reply_rate_percentage: 25-30%`
+- Enable `auto_adjust_warmup: true` for automatic optimization
+</Tip>
+
+<Info>
+**Warmup Timeline:**
+- Week 1: 10-15 emails/day
+- Week 2: 15-25 emails/day
+- Week 3: 25-40 emails/day
+- Week 4+: 40-50 emails/day
+
+The `daily_rampup` automatically increases volume each day until reaching `total_warmup_per_day`.
+</Info>
+
+<Warning>
+Setting `total_warmup_per_day` too high for new accounts can trigger spam filters. Start conservatively and increase gradually based on warmup reputation scores.
+</Warning>
+
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Get Warmup Stats](/api-reference/email-accounts/warmup-stats)
+- [Get Email Account by ID](/api-reference/email-accounts/get-by-id)
+- [Add SMTP Email Account](/api-reference/email-accounts/add-smtp)

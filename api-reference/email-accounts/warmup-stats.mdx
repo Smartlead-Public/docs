@@ -1,16 +1,18 @@
 ---
 title: "Get Warmup Statistics"
 api: "GET https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}/warmup-stats"
-description: "Get warmup performance statistics with daily breakdown and reputation trend"
+description: "Retrieve daily warmup performance statistics for the past 7 days"
 ---
+
+<Note>
+Returns warmup email statistics for the last 7 days including emails sent, spam count, and daily performance metrics. Use this to monitor warmup progress and reputation building.
+</Note>
 
 ## Path Parameters
 
 <ParamField path="email_account_id" type="number" required>
-  The email account id
+  The email account ID to retrieve warmup stats for
 </ParamField>
-
-
 
 ## Query Parameters
 
@@ -18,41 +20,50 @@ description: "Get warmup performance statistics with daily breakdown and reputat
   Your SmartLead API key
 </ParamField>
 
-
-
-## Request Body
-
-<Note>No request body required</Note>
-
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}/warmup-stats?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/email-accounts/123/warmup-stats?api_key=YOUR_KEY"
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+account_id = 123
 
 response = requests.get(
-    "https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}/warmup-stats",
+    f"https://server.smartlead.ai/api/v1/email-accounts/{account_id}/warmup-stats",
     params={"api_key": API_KEY}
 )
 
-result = response.json()
-print(result)
+stats = response.json()
+print(f"Total warmup emails sent: {stats.get('total_sent', 0)}")
+print(f"Spam count: {stats.get('spam_count', 0)}")
+print(f"Daily breakdown:")
+for day in stats.get('daily_stats', []):
+    print(f"  {day['date']}: {day['sent']} sent, {day['spam']} spam")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const accountId = 123;
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/email-accounts/${email_account_id}/warmup-stats?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/email-accounts/${accountId}/warmup-stats?api_key=${API_KEY}`
 );
 
-const result = await response.json();
-console.log(result);
+const stats = await response.json();
+console.log(`Total warmup emails sent: ${stats.total_sent || 0}`);
+console.log(`Spam count: ${stats.spam_count || 0}`);
+
+// Display daily breakdown
+if (stats.daily_stats) {
+  console.log('Daily breakdown:');
+  stats.daily_stats.forEach(day => {
+    console.log(`  ${day.date}: ${day.sent} sent, ${day.spam} spam`);
+  });
+}
 ```
 
 </RequestExample>
@@ -62,43 +73,54 @@ console.log(result);
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Warmup statistics retrieved successfully
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Email account not found or you don't have access to it
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred or warmup service unavailable
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "total_sent": 140,
+  "spam_count": 3,
+  "reputation_score": 95,
+  "daily_stats": [
+    {
+      "date": "2025-11-20",
+      "sent": 15,
+      "spam": 0,
+      "delivered": 15,
+      "opened": 12,
+      "replied": 4
+    },
+    {
+      "date": "2025-11-21",
+      "sent": 18,
+      "spam": 1,
+      "delivered": 17,
+      "opened": 14,
+      "replied": 5
+    },
+    {
+      "date": "2025-11-22",
+      "sent": 20,
+      "spam": 0,
+      "delivered": 20,
+      "opened": 16,
+      "replied": 6
+    }
+  ]
 }
 ```
 
@@ -110,18 +132,36 @@ console.log(result);
 
 ```json 404 - Not Found
 {
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "message": "Email account not found",
+  "status": "error"
 }
 ```
 
 </ResponseExample>
 
+## Usage Notes
+
+<Info>
+Statistics are automatically aggregated for the last 7 days from the current date. The endpoint provides a snapshot of recent warmup performance to help you assess sender reputation progress.
+</Info>
+
+<Tip>
+Monitor these key metrics:
+- **Spam count** should remain very low (< 2% of total sent)
+- **Reputation score** should steadily increase toward 90-100
+- **Reply count** indicates healthy engagement with warmup emails
+</Tip>
+
+<Warning>
+If spam count is high or reputation is declining, consider:
+- Reducing `total_warmup_per_day` temporarily
+- Checking DNS records (SPF, DKIM, DMARC)
+- Reviewing email content quality
+- Contacting support if issues persist
+</Warning>
+
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Update Warmup Settings](/api-reference/email-accounts/warmup-settings)
+- [Get Email Account by ID](/api-reference/email-accounts/get-by-id)
+- [Suspend Email Account](/api-reference/email-accounts/suspend)

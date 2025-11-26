@@ -1,16 +1,18 @@
 ---
 title: "Update Email Account"
-api: "PATCH https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}"
-description: "Update email account settings including limits, tracking domain, signature, and client"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}"
+description: "Update email account settings including sending limits, tracking domain, signature, and client association"
 ---
+
+<Note>
+Updates specific email account settings without requiring re-authentication. Use this endpoint to modify daily limits, custom domains, signatures, and other non-credential settings.
+</Note>
 
 ## Path Parameters
 
 <ParamField path="email_account_id" type="number" required>
-  The email account id
+  The email account ID to update
 </ParamField>
-
-
 
 ## Query Parameters
 
@@ -18,49 +20,104 @@ description: "Update email account settings including limits, tracking domain, s
   Your SmartLead API key
 </ParamField>
 
-
-
 ## Request Body
 
-<Note>No request body required</Note>
+<ParamField body="max_email_per_day" type="number">
+  Maximum emails allowed per day (including warmup and campaign emails)
+</ParamField>
+
+<ParamField body="from_name" type="string">
+  Display name for outgoing emails
+</ParamField>
+
+<ParamField body="custom_tracking_url" type="string">
+  Custom domain for tracking links (e.g., "track.yourdomain.com")
+</ParamField>
+
+<ParamField body="bcc" type="string">
+  BCC email address for all outgoing emails
+</ParamField>
+
+<ParamField body="signature" type="string">
+  Email signature HTML
+</ParamField>
+
+<ParamField body="client_id" type="number">
+  Client ID to associate this email account with (for multi-tenant accounts)
+</ParamField>
+
+<ParamField body="time_to_wait_in_mins" type="number">
+  Minimum time to wait between emails in minutes
+</ParamField>
+
+<ParamField body="is_suspended" type="boolean">
+  Whether to suspend or unsuspend the account
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X PATCH "https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/123?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "max_email_per_day": 60,
+    "from_name": "John Doe - Sales",
+    "custom_tracking_url": "track.example.com",
+    "signature": "<p>Best regards,<br>John Doe<br>Sales Manager</p>",
+    "time_to_wait_in_mins": 10
+  }'
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+account_id = 123
 
-response = requests.patch(
-    "https://server.smartlead.ai/api/v1/email-accounts/{email_account_id}",
+payload = {
+    "max_email_per_day": 60,
+    "from_name": "John Doe - Sales",
+    "custom_tracking_url": "track.example.com",
+    "signature": "<p>Best regards,<br>John Doe<br>Sales Manager</p>",
+    "time_to_wait_in_mins": 10
+}
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/email-accounts/{account_id}",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
-print(result)
+if result.get('ok'):
+    print(f"Email account {account_id} updated successfully")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const accountId = 123;
+
+const payload = {
+  max_email_per_day: 60,
+  from_name: 'John Doe - Sales',
+  custom_tracking_url: 'track.example.com',
+  signature: '<p>Best regards,<br>John Doe<br>Sales Manager</p>',
+  time_to_wait_in_mins: 10
+};
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/email-accounts/${email_account_id}?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/email-accounts/${accountId}?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 
 const result = await response.json();
-console.log(result);
+if (result.ok) {
+  console.log(`Email account ${accountId} updated successfully`);
+}
 ```
 
 </RequestExample>
@@ -70,43 +127,31 @@ console.log(result);
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Email account updated successfully
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+  Email account not found or you don't have access to it
 </ResponseField>
 
 <ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Invalid field values
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "message": "Email account updated successfully"
 }
 ```
 
@@ -118,18 +163,32 @@ console.log(result);
 
 ```json 404 - Not Found
 {
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "error": "Email account not found"
 }
 ```
 
 </ResponseExample>
 
+## Usage Notes
+
+<Info>
+All fields are optional - only include the fields you want to update. Omitted fields remain unchanged.
+</Info>
+
+<Tip>
+Use this endpoint to:
+- Adjust daily sending limits as your account reputation improves
+- Add or update email signatures
+- Configure custom tracking domains
+- Change BCC settings for compliance
+</Tip>
+
+<Warning>
+To update SMTP/IMAP credentials or connection settings, use the Add SMTP Email Account endpoint with the account ID included to perform an update instead.
+</Warning>
+
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Get Email Account by ID](/api-reference/email-accounts/get-by-id)
+- [Add SMTP Email Account](/api-reference/email-accounts/add-smtp) - For credential updates
+- [Suspend Email Account](/api-reference/email-accounts/suspend)
