@@ -1,8 +1,30 @@
 ---
 title: "Get Unread Replies"
 api: "POST https://server.smartlead.ai/api/v1/master-inbox/unread-replies"
-description: "Fetch unread replies from leads with filtering by campaign, status, and categories"
+description: "Retrieve all unread replies from leads to ensure no important responses are missed"
 ---
+
+<Note>
+Critical for inbox management - get all unread replies in one view. Essential for ensuring timely responses to leads and preventing missed opportunities.
+</Note>
+
+## Overview
+
+Retrieves all unread replies from leads across all campaigns. This endpoint is essential for maintaining inbox zero and ensuring no lead response goes unnoticed.
+
+**Key Features**:
+- Unified view of all unread responses
+- Same comprehensive filtering as other inbox endpoints
+- Real-time unread count tracking
+- Optional full message history
+- Priority handling for urgent responses
+
+**Common Use Cases**:
+- **Daily inbox review**: Start your day with unread replies
+- **Team notifications**: Alert team members of unread messages
+- **SLA monitoring**: Track response times on unread messages
+- **Priority routing**: Identify high-value unread leads
+- **Dashboard metrics**: Display unread count badges
 
 ## Query Parameters
 
@@ -10,110 +32,717 @@ description: "Fetch unread replies from leads with filtering by campaign, status
   Your SmartLead API key
 </ParamField>
 
+<ParamField query="fetch_message_history" type="boolean" default="false">
+  Include full email thread history
+  
+  - `false`: Only latest message (recommended for list views)
+  - `true`: Complete conversation thread (use for detail views)
+</ParamField>
 
+## Request Body
+
+<ParamField body="offset" type="number" default="0">
+  Number of records to skip for pagination. Must be non-negative.
+</ParamField>
+
+<ParamField body="limit" type="number" default="20">
+  Number of records to return per page. Must be between 1 and 20.
+</ParamField>
+
+<ParamField body="filters" type="object">
+  Advanced filtering options to segment unread replies
+  
+  <Expandable title="filters properties">
+    <ParamField body="filters.search" type="string">
+      Search term to filter by lead email, name, or message content. Maximum 30 characters.
+    </ParamField>
+    
+    <ParamField body="filters.leadCategories" type="object">
+      Filter by lead category assignment
+      
+      <Expandable title="leadCategories properties">
+        <ParamField body="leadCategories.unassigned" type="boolean">
+          Include leads without category assignment
+        </ParamField>
+        
+        <ParamField body="leadCategories.isAssigned" type="boolean">
+          Include leads with category assignment
+        </ParamField>
+        
+        <ParamField body="leadCategories.categoryIdsNotIn" type="array">
+          Exclude specific category IDs (max 10 items)
+        </ParamField>
+        
+        <ParamField body="leadCategories.categoryIdsIn" type="array">
+          Include only specific category IDs (max 10 items)
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    
+    <ParamField body="filters.emailStatus" type="string or array">
+      Filter by email engagement status. Can be a single status or array.
+      
+      Valid values: `Opened`, `Clicked`, `Replied`, `Unsubscribed`, `Bounced`, `Accepted`, `Not Replied`
+      
+      **Note**: For unread endpoint, typically use `Replied` status
+    </ParamField>
+    
+    <ParamField body="filters.campaignId" type="number or array">
+      Filter by campaign ID(s)
+      
+      - Single: `12345`
+      - Multiple: `[12345, 12346, 12347]` (max 5 campaigns)
+    </ParamField>
+    
+    <ParamField body="filters.emailAccountId" type="number or array">
+      Filter by email account ID(s)
+      
+      - Single: `789`
+      - Multiple: `[789, 790, 791, ...]` (max 10 accounts)
+    </ParamField>
+    
+    <ParamField body="filters.campaignTeamMemberId" type="number or array">
+      Filter by assigned team member(s)
+      
+      - Single: `456`
+      - Multiple: `[456, 457, 458]` (max 10 members)
+    </ParamField>
+    
+    <ParamField body="filters.campaignTagId" type="number or array">
+      Filter by campaign tag(s)
+      
+      - Single: `5`
+      - Multiple: `[5, 6, 7]` (max 10 tags)
+    </ParamField>
+    
+    <ParamField body="filters.campaignClientId" type="number or array">
+      Filter by client ID(s)
+      
+      - Single: `100`
+      - Multiple: `[100, 101, 102]` (max 10 clients)
+    </ParamField>
+    
+    <ParamField body="filters.replyTimeBetween" type="array">
+      Filter by reply date range. Array of 2 ISO 8601 datetime strings.
+      
+      Format: `["start_datetime", "end_datetime"]`
+      
+      Example: `["2025-01-01T00:00:00Z", "2025-01-31T23:59:59Z"]`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="sortBy" type="string" default="REPLY_TIME_DESC">
+  Sort order for results
+  - `REPLY_TIME_DESC`: Most recent replies first (default, recommended)
+  - `SENT_TIME_DESC`: Most recently sent emails first
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/unread-replies?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/unread-replies?api_key=YOUR_KEY&fetch_message_history=false" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "offset": 0,
+    "limit": 20,
+    "filters": {
+      "emailStatus": "Replied",
+      "campaignId": [12345, 12346],
+      "leadCategories": {
+        "categoryIdsIn": [1]
+      }
+    },
+    "sortBy": "REPLY_TIME_DESC"
+  }'
 ```
 
 ```python Python
 import requests
+from datetime import datetime, timedelta
 
 API_KEY = "YOUR_API_KEY"
 
+# Example 1: Get all unread replies from today
+today_start = datetime.now().replace(hour=0, minute=0, second=0).isoformat() + 'Z'
+now = datetime.now().isoformat() + 'Z'
+
+payload = {
+    "offset": 0,
+    "limit": 20,
+    "filters": {
+        "emailStatus": "Replied",
+        "replyTimeBetween": [today_start, now]
+    },
+    "sortBy": "REPLY_TIME_DESC"
+}
+
 response = requests.post(
     "https://server.smartlead.ai/api/v1/master-inbox/unread-replies",
-    params={"api_key": API_KEY},
-    json={"key": "value"}
+    params={
+        "api_key": API_KEY,
+        "fetch_message_history": False
+    },
+    json=payload
 )
 
 result = response.json()
-print(result)
+print(f"Unread replies today: {result.get('total_count', 0)}")
+
+# Process each unread reply
+for message in result.get('messages', []):
+    lead = message['lead']
+    last_msg = message['last_message']
+    category = message.get('category', {}).get('name', 'Uncategorized')
+    
+    print(f"\n📧 {lead['email']} ({category})")
+    print(f"   Subject: {last_msg['subject']}")
+    print(f"   Replied: {last_msg['received_at']}")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
-const response = await fetch(
-  `https://server.smartlead.ai/api/v1/master-inbox/unread-replies?api_key=${API_KEY}`,
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
-  }
-);
+// Example 2: Get unread high-priority replies
+async function getUnreadPriorityReplies() {
+  const payload = {
+    offset: 0,
+    limit: 20,
+    filters: {
+      emailStatus: 'Replied',
+      leadCategories: {
+        categoryIdsIn: [1, 2]  // Interested, Meeting Request
+      },
+      campaignTagId: 5  // VIP tag
+    },
+    sortBy: 'REPLY_TIME_DESC'
+  };
 
-const result = await response.json();
-console.log(result);
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/master-inbox/unread-replies?api_key=${API_KEY}&fetch_message_history=false`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  const result = await response.json();
+  
+  console.log(`🔥 ${result.total_count} high-priority unread replies`);
+  
+  // Display with urgency indicator
+  for (const message of result.messages || []) {
+    const hoursAgo = (Date.now() - new Date(message.last_message.received_at)) / (1000 * 60 * 60);
+    const urgency = hoursAgo > 24 ? '🚨 URGENT' : hoursAgo > 12 ? '⚠️  HIGH' : '✅ NORMAL';
+    
+    console.log(`${urgency} - ${message.lead.email}`);
+  }
+  
+  return result;
+}
+
+getUnreadPriorityReplies();
+```
+
+```python Advanced: Team Unread Distribution
+# Example 3: Check unread count per team member
+team_members = [456, 457, 458, 459, 460]
+
+def get_team_unread_distribution(member_ids):
+    """Get unread count for each team member"""
+    distribution = {}
+    
+    for member_id in member_ids:
+        payload = {
+            "filters": {
+                "campaignTeamMemberId": member_id,
+                "emailStatus": "Replied"
+            },
+            "limit": 1  # Just need count
+        }
+        
+        response = requests.post(
+            "https://server.smartlead.ai/api/v1/master-inbox/unread-replies",
+            params={"api_key": API_KEY, "fetch_message_history": False},
+            json=payload
+        )
+        
+        data = response.json()
+        distribution[member_id] = data.get('total_count', 0)
+    
+    return distribution
+
+# Get distribution
+unread_by_member = get_team_unread_distribution(team_members)
+
+# Display results
+print("Team Unread Distribution:")
+for member_id, count in sorted(unread_by_member.items(), key=lambda x: x[1], reverse=True):
+    print(f"  Member {member_id}: {count} unread replies")
+
+# Alert if anyone has >20 unread
+for member_id, count in unread_by_member.items():
+    if count > 20:
+        print(f"⚠️  Alert: Member {member_id} has {count} unread (>20 threshold)")
 ```
 
 </RequestExample>
 
-
-
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Request successful - unread replies retrieved
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Request validation failed. Common issues:
+  - `limit` > 20
+  - More than 5 campaign IDs
+  - More than 10 items in other array filters
+  - Invalid date format
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
-}
-```
-
-```json 401 - Unauthorized
-{
-  "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
+  "messages": [
+    {
+      "id": "msg_unread_123",
+      "campaign_lead_map_id": "2433664091",
+      "lead": {
+        "email": "john@enterprise.com",
+        "first_name": "John",
+        "last_name": "Smith",
+        "company": "Enterprise Corp"
+      },
+      "campaign": {
+        "id": 12345,
+        "name": "Q1 Enterprise Outreach"
+      },
+      "email_account": {
+        "id": 789,
+        "email": "sales@yourcompany.com"
+      },
+      "last_message": {
+        "id": "email_abc789",
+        "subject": "Re: Demo Request",
+        "body": "Hi, thanks for reaching out. I'd like to schedule a demo for next week...",
+        "received_at": "2025-01-20T09:15:00Z",
+        "sent_from": "john@enterprise.com",
+        "sent_to": "sales@yourcompany.com"
+      },
+      "email_status": "Replied",
+      "category": {
+        "id": 2,
+        "name": "Meeting Request"
+      },
+      "assigned_to": {
+        "id": 456,
+        "name": "Jane Smith"
+      },
+      "is_read": false,
+      "is_important": true,
+      "tags": ["enterprise", "demo-request"],
+      "reply_age_hours": 2.5
+    }
+  ],
+  "total_count": 1,
+  "offset": 0,
+  "limit": 20
 }
 ```
 
 ```json 422 - Validation Error
 {
-  "error": "Invalid parameters provided"
+  "error": "campaignId array cannot exceed 5 items",
+  "field": "filters.campaignId",
+  "provided_count": 7,
+  "max_allowed": 5
 }
 ```
 
 </ResponseExample>
+
+## Common Workflows
+
+### Morning Inbox Zero Routine
+```python
+def morning_inbox_check():
+    """Start the day by processing unread replies"""
+    # Get all unread replies
+    payload = {
+        "filters": {"emailStatus": "Replied"},
+        "sortBy": "REPLY_TIME_DESC",
+        "limit": 20
+    }
+    
+    response = get_unread_replies(payload)
+    unread = response.get('messages', [])
+    
+    print(f"📬 Good morning! You have {len(unread)} unread replies\n")
+    
+    # Categorize by priority
+    high_priority = [m for m in unread if m.get('is_important')]
+    interested = [m for m in unread 
+                  if m.get('category', {}).get('id') == 1]
+    
+    print(f"🔥 {len(high_priority)} high-priority")
+    print(f"👍 {len(interested)} interested leads")
+    print(f"📋 {len(unread) - len(high_priority) - len(interested)} general")
+    
+    return unread
+```
+
+### Real-time Unread Counter
+```python
+def get_unread_count(filters=None):
+    """Quick unread count (no message content)"""
+    payload = {
+        "filters": filters or {"emailStatus": "Replied"},
+        "limit": 1  # Minimal data transfer
+    }
+    
+    response = get_unread_replies(payload)
+    return response.get('total_count', 0)
+
+# Usage for dashboard badge
+total_unread = get_unread_count()
+print(f"Unread badge: {total_unread}")
+
+# By campaign
+campaign_unread = get_unread_count({"campaignId": 12345})
+print(f"Campaign 12345: {campaign_unread} unread")
+```
+
+### Unread SLA Monitor
+```python
+def monitor_unread_sla(sla_hours=24):
+    """Alert on unread replies exceeding SLA"""
+    from datetime import datetime, timedelta
+    
+    sla_threshold = (datetime.now() - timedelta(hours=sla_hours)).isoformat() + 'Z'
+    
+    payload = {
+        "filters": {
+            "emailStatus": "Replied",
+            "replyTimeBetween": [
+                "2000-01-01T00:00:00Z",  # Beginning of time
+                sla_threshold
+            ]
+        },
+        "sortBy": "REPLY_TIME_DESC",
+        "limit": 20
+    }
+    
+    response = get_unread_replies(payload)
+    overdue = response.get('messages', [])
+    
+    if overdue:
+        print(f"⚠️  SLA BREACH: {len(overdue)} unread replies over {sla_hours}h old")
+        
+        for msg in overdue:
+            hours_old = (datetime.now() - 
+                        datetime.fromisoformat(msg['last_message']['received_at'].replace('Z', '+00:00'))).total_seconds() / 3600
+            
+            print(f"  - {msg['lead']['email']}: {hours_old:.1f}h old")
+    else:
+        print(f"✅ All unread replies within {sla_hours}h SLA")
+    
+    return overdue
+```
+
+### Priority Triage System
+```python
+def triage_unread_replies():
+    """Auto-categorize unread replies by urgency"""
+    payload = {
+        "filters": {"emailStatus": "Replied"},
+        "limit": 20
+    }
+    
+    response = get_unread_replies(payload)
+    messages = response.get('messages', [])
+    
+    triage = {
+        'urgent': [],      # >24h old, important, or meeting request
+        'high': [],        # Interested category or >12h old
+        'normal': [],      # Everything else
+        'low': []          # Already categorized as not interested
+    }
+    
+    from datetime import datetime
+    now = datetime.now()
+    
+    for msg in messages:
+        hours_old = (now - datetime.fromisoformat(
+            msg['last_message']['received_at'].replace('Z', '+00:00')
+        )).total_seconds() / 3600
+        
+        category_id = msg.get('category', {}).get('id')
+        is_important = msg.get('is_important', False)
+        
+        if hours_old > 24 or is_important or category_id == 2:
+            triage['urgent'].append(msg)
+        elif category_id == 1 or hours_old > 12:
+            triage['high'].append(msg)
+        elif category_id == 3:
+            triage['low'].append(msg)
+        else:
+            triage['normal'].append(msg)
+    
+    # Display triage results
+    print("\n📊 Unread Triage Report:")
+    print(f"🚨 Urgent:  {len(triage['urgent'])} - Respond immediately")
+    print(f"⚠️  High:    {len(triage['high'])} - Respond today")
+    print(f"📋 Normal:  {len(triage['normal'])} - Respond within 24h")
+    print(f"⬇️  Low:     {len(triage['low'])} - Can wait")
+    
+    return triage
+```
+
+### Batch Mark as Read
+```python
+def batch_review_unread(limit=10):
+    """Review and mark multiple unread as read"""
+    payload = {
+        "filters": {"emailStatus": "Replied"},
+        "sortBy": "REPLY_TIME_DESC",
+        "limit": limit
+    }
+    
+    response = get_unread_replies(payload, fetch_history=True)
+    messages = response.get('messages', [])
+    
+    for i, msg in enumerate(messages, 1):
+        print(f"\n[{i}/{len(messages)}] {msg['lead']['email']}")
+        print(f"Subject: {msg['last_message']['subject']}")
+        print(f"Preview: {msg['last_message']['body'][:100]}...")
+        
+        # Show full thread if available
+        if msg.get('message_history'):
+            print(f"Thread: {len(msg['message_history'])} messages")
+        
+        # Prompt for action (in real app, this would be UI)
+        action = input("Action [r]ead / [c]ategorize / [s]kip: ")
+        
+        if action == 'r':
+            # Mark as read using change-read-status endpoint
+            mark_as_read(msg['campaign_lead_map_id'])
+            print("✅ Marked as read")
+        elif action == 'c':
+            category = input("Category ID: ")
+            update_category(msg['campaign_lead_map_id'], int(category))
+            mark_as_read(msg['campaign_lead_map_id'])
+            print("✅ Categorized and marked as read")
+```
+
+## Filtering Best Practices
+
+### 1. Prioritize by Time
+```python
+# Today's unread (highest priority)
+today_unread = {
+    "filters": {
+        "emailStatus": "Replied",
+        "replyTimeBetween": [
+            datetime.now().replace(hour=0, minute=0).isoformat() + 'Z',
+            datetime.now().isoformat() + 'Z'
+        ]
+    }
+}
+
+# This week's unread
+week_start = (datetime.now() - timedelta(days=7)).isoformat() + 'Z'
+week_unread = {
+    "filters": {
+        "emailStatus": "Replied",
+        "replyTimeBetween": [week_start, datetime.now().isoformat() + 'Z']
+    }
+}
+```
+
+### 2. Combine Category Filters
+```python
+# Hot unread leads (interested or meeting requests)
+hot_unread = {
+    "filters": {
+        "emailStatus": "Replied",
+        "leadCategories": {
+            "categoryIdsIn": [1, 2]  # Interested, Meeting Request
+        }
+    }
+}
+
+# Unread but not junk
+quality_unread = {
+    "filters": {
+        "emailStatus": "Replied",
+        "leadCategories": {
+            "categoryIdsNotIn": [3, 4]  # Exclude Not Interested, Do Not Contact
+        }
+    }
+}
+```
+
+### 3. Team-specific Views
+```python
+# My team's unread
+my_team_ids = [456, 457, 458]
+team_unread = {
+    "filters": {
+        "emailStatus": "Replied",
+        "campaignTeamMemberId": my_team_ids
+    }
+}
+
+# Unassigned unread (needs triage)
+unassigned_unread = {
+    "filters": {
+        "emailStatus": "Replied",
+        "leadCategories": {"unassigned": True}
+    }
+}
+```
+
+### 4. Campaign-specific Monitoring
+```python
+# High-value campaign unread
+important_campaign_unread = {
+    "filters": {
+        "emailStatus": "Replied",
+        "campaignId": [12345, 12346],  # Enterprise campaigns
+        "campaignTagId": 5  # VIP tag
+    }
+}
+```
+
+## Performance Tips
+
+1. **Disable message history for counts**: 10x faster
+2. **Use limit=1 for counters**: Minimal data transfer
+3. **Filter by campaign**: Reduces query scope
+4. **Cache unread count**: Update every 5-10 minutes
+5. **Paginate large results**: Limit=20 is optimal
+
+## Real-time Monitoring
+
+```python
+import time
+
+def monitor_unread_realtime(interval=60):
+    """Monitor unread count in real-time"""
+    previous_count = 0
+    
+    while True:
+        current_count = get_unread_count()
+        
+        if current_count != previous_count:
+            if current_count > previous_count:
+                new_replies = current_count - previous_count
+                print(f"🔔 {new_replies} new unread reply(ies)! Total: {current_count}")
+                
+                # Fetch the new ones
+                payload = {
+                    "filters": {"emailStatus": "Replied"},
+                    "limit": new_replies
+                }
+                new_messages = get_unread_replies(payload)
+                
+                # Notify team
+                for msg in new_messages.get('messages', []):
+                    send_notification(f"New reply from {msg['lead']['email']}")
+            else:
+                print(f"✅ Unread count decreased to {current_count}")
+            
+            previous_count = current_count
+        
+        time.sleep(interval)  # Check every minute
+```
+
+## Integration Examples
+
+### Slack Notifications
+```python
+def send_unread_to_slack(webhook_url):
+    """Send unread summary to Slack"""
+    unread = get_unread_count()
+    
+    if unread > 0:
+        # Get details
+        payload = {"filters": {"emailStatus": "Replied"}, "limit": 5}
+        messages = get_unread_replies(payload).get('messages', [])
+        
+        slack_message = {
+            "text": f"📬 You have {unread} unread replies",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": f"*{unread} Unread Replies*"}
+                }
+            ]
+        }
+        
+        # Add top 5
+        for msg in messages:
+            slack_message["blocks"].append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"• *{msg['lead']['email']}*\n  _{msg['last_message']['subject']}_"
+                }
+            })
+        
+        requests.post(webhook_url, json=slack_message)
+```
+
+### Dashboard Widget
+```python
+def get_unread_dashboard_data():
+    """Get unread data for dashboard display"""
+    total = get_unread_count()
+    
+    # Get breakdown by category
+    interested = get_unread_count({"leadCategories": {"categoryIdsIn": [1]}})
+    meeting = get_unread_count({"leadCategories": {"categoryIdsIn": [2]}})
+    uncategorized = get_unread_count({"leadCategories": {"unassigned": True}})
+    
+    # Get age breakdown
+    today = get_unread_count({
+        "replyTimeBetween": [
+            datetime.now().replace(hour=0, minute=0).isoformat() + 'Z',
+            datetime.now().isoformat() + 'Z'
+        ]
+    })
+    
+    return {
+        "total": total,
+        "by_category": {
+            "interested": interested,
+            "meeting_request": meeting,
+            "uncategorized": uncategorized
+        },
+        "by_age": {
+            "today": today,
+            "older": total - today
+        }
+    }
+```
+
+## Related Endpoints
+
+- [Get Inbox Messages](/api-reference/inbox/get-messages) - All replies (read + unread)
+- [Mark Read Status](/api-reference/inbox/mark-read) - Mark as read/unread
+- [Get Important](/api-reference/inbox/get-important) - Flagged messages
+- [Get Assigned to Me](/api-reference/inbox/get-assigned) - Your assigned replies
+- [Update Category](/api-reference/inbox/update-category) - Categorize leads
+- [Reply to Message](/api-reference/inbox/reply) - Send reply

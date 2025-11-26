@@ -1,0 +1,406 @@
+---
+title: "Assign Team Member"
+api: "POST https://server.smartlead.ai/api/v1/master-inbox/update-team-member"
+description: "Assign or reassign a lead to a specific team member"
+---
+
+<Note>
+Assign leads to team members for personalized follow-up and workload distribution. Essential for team collaboration and performance tracking.
+</Note>
+
+## Overview
+
+Assigns a lead to a specific team member. This endpoint enables lead distribution across your team, reassignment between members, and tracking of individual performance.
+
+**Key Benefits**:
+- **Load balancing**: Distribute leads evenly across team
+- **Expertise matching**: Assign leads based on team member specialization
+- **Accountability**: Track which team member is responsible for each lead
+- **Performance metrics**: Measure individual team member results
+
+**Common Use Cases**:
+- Round-robin lead assignment
+- Geographic territory management
+- Industry expertise routing
+- Workload rebalancing
+- Manager reassignment
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="email_lead_map_id" type="number" required>
+  The ID of the lead-campaign mapping to update. This is the `campaign_lead_map_id` from inbox or campaign leads endpoints.
+</ParamField>
+
+<ParamField body="team_member_id" type="number" required>
+  The ID of the team member to assign this lead to. Get team member IDs from your team management settings.
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/update-team-member?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email_lead_map_id": 2433664091,
+    "team_member_id": 456
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+def assign_lead_to_member(lead_map_id, member_id):
+    """Assign a lead to a specific team member"""
+    payload = {
+        "email_lead_map_id": lead_map_id,
+        "team_member_id": member_id
+    }
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/update-team-member",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        print(f"Lead {lead_map_id} assigned to member {member_id}")
+        return response.json()
+    else:
+        print(f"Error: {response.json()}")
+        return None
+
+# Assign lead to Jane (ID: 456)
+assign_lead_to_member(2433664091, 456)
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+async function assignLeadToMember(leadMapId, memberId) {
+  const payload = {
+    email_lead_map_id: leadMapId,
+    team_member_id: memberId
+  };
+  
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/master-inbox/update-team-member?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
+  
+  const result = await response.json();
+  console.log(`Lead assigned to member ${memberId}`);
+  return result;
+}
+
+// Assign lead to Jane (ID: 456)
+assignLeadToMember(2433664091, 456);
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Team member assignment updated successfully
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid API key
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  Lead mapping or team member not found
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Invalid email_lead_map_id or team_member_id
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "success": true,
+  "message": "Team member assigned successfully",
+  "data": {
+    "email_lead_map_id": 2433664091,
+    "team_member_id": 456,
+    "assigned_at": "2025-01-20T15:30:00Z"
+  }
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Team member not found with ID 456"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "email_lead_map_id must be a valid number"
+}
+```
+
+</ResponseExample>
+
+## Assignment Strategies
+
+### Round-Robin Assignment
+```python
+team_members = [101, 102, 103, 104, 105]
+current_index = 0
+
+def assign_next_lead(lead_map_id):
+    global current_index
+    member_id = team_members[current_index]
+    assign_lead_to_member(lead_map_id, member_id)
+    current_index = (current_index + 1) % len(team_members)
+
+# Distribute leads evenly
+for lead in new_leads:
+    assign_next_lead(lead['campaign_lead_map_id'])
+```
+
+### Territory-Based Assignment
+```python
+territory_map = {
+    'US-WEST': 101,
+    'US-EAST': 102,
+    'EUROPE': 103,
+    'ASIA': 104
+}
+
+def assign_by_territory(lead_map_id, lead_territory):
+    member_id = territory_map.get(lead_territory)
+    if member_id:
+        assign_lead_to_member(lead_map_id, member_id)
+    else:
+        print(f"No member assigned for territory: {lead_territory}")
+```
+
+### Expertise-Based Routing
+```python
+expertise_routing = {
+    'SaaS': 101,
+    'E-commerce': 102,
+    'Healthcare': 103,
+    'Finance': 104
+}
+
+def assign_by_industry(lead_map_id, industry):
+    member_id = expertise_routing.get(industry, 101)  # Default to 101
+    assign_lead_to_member(lead_map_id, member_id)
+```
+
+### Workload Balancing
+```python
+def get_member_workload(member_id):
+    """Get current number of assigned leads"""
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/assigned-me",
+        params={"api_key": API_KEY},
+        json={"filters": {"campaignTeamMemberId": member_id}}
+    )
+    return response.json().get('total_count', 0)
+
+def assign_to_least_busy(lead_map_id, team_members):
+    """Assign to team member with fewest current leads"""
+    workloads = {m: get_member_workload(m) for m in team_members}
+    least_busy = min(workloads, key=workloads.get)
+    assign_lead_to_member(lead_map_id, least_busy)
+```
+
+## Bulk Assignment
+
+```python
+def bulk_assign_leads(lead_map_ids, team_member_id):
+    """Assign multiple leads to the same team member"""
+    results = []
+    
+    for lead_map_id in lead_map_ids:
+        try:
+            result = assign_lead_to_member(lead_map_id, team_member_id)
+            results.append({
+                'lead_map_id': lead_map_id,
+                'status': 'success',
+                'result': result
+            })
+        except Exception as e:
+            results.append({
+                'lead_map_id': lead_map_id,
+                'status': 'error',
+                'error': str(e)
+            })
+    
+    return results
+
+# Assign 10 leads to Jane
+new_leads = [2433664091, 2433664092, 2433664093, ...]
+bulk_assign_leads(new_leads, 456)
+```
+
+## Reassignment Workflows
+
+### Manager Reassignment
+```python
+def reassign_from_to(from_member_id, to_member_id, filters=None):
+    """Reassign all leads from one member to another"""
+    # Get all leads assigned to from_member
+    payload = {
+        "filters": {
+            "campaignTeamMemberId": from_member_id
+        },
+        "limit": 20
+    }
+    if filters:
+        payload["filters"].update(filters)
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/assigned-me",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    leads = response.json().get('messages', [])
+    
+    # Reassign each lead
+    for lead in leads:
+        assign_lead_to_member(
+            lead['campaign_lead_map_id'],
+            to_member_id
+        )
+    
+    return len(leads)
+
+# Transfer all of John's hot leads to Jane
+count = reassign_from_to(
+    from_member_id=123,
+    to_member_id=456,
+    filters={"leadCategories": {"categoryIdsIn": [1]}}  # Interested only
+)
+print(f"Reassigned {count} leads")
+```
+
+### Vacation Coverage
+```python
+def setup_vacation_coverage(away_member_id, covering_member_id, start_date, end_date):
+    """Temporarily reassign leads during vacation"""
+    # Get active leads
+    payload = {
+        "filters": {
+            "campaignTeamMemberId": away_member_id,
+            "emailStatus": "Replied"  # Only active conversations
+        }
+    }
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/assigned-me",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    active_leads = response.json().get('messages', [])
+    
+    # Reassign to covering member
+    for lead in active_leads:
+        assign_lead_to_member(
+            lead['campaign_lead_map_id'],
+            covering_member_id
+        )
+        
+        # Add note about temporary reassignment
+        create_note(
+            lead['campaign_lead_map_id'],
+            f"Temporarily assigned to covering member during vacation from {start_date} to {end_date}"
+        )
+```
+
+## Getting email_lead_map_id
+
+The `email_lead_map_id` is returned as `campaign_lead_map_id` from inbox endpoints:
+
+```json From inbox response
+{
+  "messages": [{
+    "campaign_lead_map_id": "2433664091",  // Use this value
+    "lead": {...},
+    "assigned_to": {
+      "id": 123,
+      "name": "John Doe"
+    }
+  }]
+}
+```
+
+## Team Member Notifications
+
+After assignment, the team member typically receives:
+- Email notification of new assignment
+- In-app notification
+- Addition to their "Assigned to Me" inbox view
+
+Configure notification preferences in team settings.
+
+## Best Practices
+
+1. **Document assignment logic**: Keep records of why leads were assigned
+2. **Add notes on assignment**: Use create-note endpoint to explain context
+3. **Monitor workload distribution**: Regularly check assignment balance
+4. **Set up SLAs**: Define expected response times for assigned leads
+5. **Review periodically**: Reassess assignments based on performance
+6. **Handle edge cases**: Plan for invalid IDs, missing members, etc.
+
+## Performance Tracking
+
+```python
+def get_member_performance(member_id, start_date, end_date):
+    """Get performance metrics for assigned leads"""
+    payload = {
+        "filters": {
+            "campaignTeamMemberId": member_id,
+            "replyTimeBetween": [start_date, end_date]
+        }
+    }
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/assigned-me",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    messages = response.json().get('messages', [])
+    
+    # Calculate metrics
+    total = len(messages)
+    replied = len([m for m in messages if m['email_status'] == 'Replied'])
+    interested = len([m for m in messages 
+                      if m.get('category', {}).get('id') == 1])
+    
+    return {
+        'member_id': member_id,
+        'total_assigned': total,
+        'reply_rate': (replied / total * 100) if total > 0 else 0,
+        'interest_rate': (interested / total * 100) if total > 0 else 0
+    }
+```
+
+## Related Endpoints
+
+- [Get Assigned to Me](/api-reference/inbox/get-assigned) - View assigned leads
+- [Get Inbox Messages](/api-reference/inbox/get-messages) - All inbox replies
+- [Create Note](/api-reference/inbox/create-note) - Add assignment context
+- [Update Lead Category](/api-reference/inbox/update-category) - Categorize assigned leads
+

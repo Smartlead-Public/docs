@@ -1,8 +1,28 @@
 ---
-title: "Push to Subsequence"
+title: "Push Lead to Subsequence"
 api: "POST https://server.smartlead.ai/api/v1/master-inbox/push-to-subsequence"
-description: "Move a lead to different email sequence based on behavior or category"
+description: "Move a lead to a subsequence (child campaign) for targeted follow-up"
 ---
+
+<Note>
+Branch lead into targeted follow-up sequences based on behavior or interest. Essential for sophisticated campaign logic and personalized nurturing.
+</Note>
+
+## Overview
+
+Moves a lead from a parent campaign to a subsequence (child campaign) for specialized follow-up. Enables branching campaign logic based on lead behavior and interests.
+
+**Subsequence Concept:**
+- Parent campaign identifies lead interest/behavior
+- Lead pushed to specialized subsequence
+- Subsequence delivers targeted messaging
+- Optional: Stop subsequence if lead replies to parent
+
+**Use Cases:**
+1. **Interest-based routing**: Clicked pricing link → Push to "Pricing Discussion" subsequence
+2. **Re-engagement**: No reply after 30 days → Push to "Re-engagement" subsequence
+3. **Product-specific**: Asked about Feature X → Push to "Feature X Demo" subsequence
+4. **Qualification**: High engagement → Push to "Enterprise Sales" subsequence
 
 ## Query Parameters
 
@@ -10,14 +30,36 @@ description: "Move a lead to different email sequence based on behavior or categ
   Your SmartLead API key
 </ParamField>
 
+## Request Body
 
+<ParamField body="email_lead_map_id" type="number" required>
+  Lead-campaign mapping ID from parent campaign
+</ParamField>
+
+<ParamField body="sub_sequence_id" type="number" required>
+  Target subsequence (child campaign) ID
+</ParamField>
+
+<ParamField body="sub_sequence_delay_time" type="number" default="0">
+  Delay in seconds before starting subsequence (min 0, default: immediate)
+</ParamField>
+
+<ParamField body="stop_lead_on_parent_campaign_reply" type="boolean" default="false">
+  If `true`, stop subsequence if lead replies to parent campaign
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
+# Push to subsequence with 2-day delay
 curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/push-to-subsequence?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "email_lead_map_id": 2433664091,
+    "sub_sequence_id": 789,
+    "sub_sequence_delay_time": 172800,
+    "stop_lead_on_parent_campaign_reply": true
+  }'
 ```
 
 ```python Python
@@ -25,95 +67,119 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
-response = requests.post(
-    "https://server.smartlead.ai/api/v1/master-inbox/push-to-subsequence",
-    params={"api_key": API_KEY},
-    json={"key": "value"}
-)
+def push_to_subsequence(lead_map_id, subseq_id, delay_days=0, stop_on_parent_reply=False):
+    """Push lead to subsequence with optional delay"""
+    delay_seconds = delay_days * 24 * 60 * 60
+    
+    payload = {
+        "email_lead_map_id": lead_map_id,
+        "sub_sequence_id": subseq_id,
+        "sub_sequence_delay_time": delay_seconds,
+        "stop_lead_on_parent_campaign_reply": stop_on_parent_reply
+    }
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/push-to-subsequence",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Lead pushed to subsequence {subseq_id}")
+        if delay_days > 0:
+            print(f"   Will start in {delay_days} days")
+    
+    return response.json()
 
-result = response.json()
-print(result)
+# Example: Push to pricing discussion after 2 days
+push_to_subsequence(
+    lead_map_id=2433664091,
+    subseq_id=789,  # Pricing discussion subsequence
+    delay_days=2,
+    stop_on_parent_reply=True  # Stop if they reply to main campaign
+)
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
-const response = await fetch(
-  `https://server.smartlead.ai/api/v1/master-inbox/push-to-subsequence?api_key=${API_KEY}`,
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
-  }
-);
+async function pushToSubsequence(leadMapId, subseqId, options = {}) {
+  const delayDays = options.delayDays || 0;
+  const delaySeconds = delayDays * 24 * 60 * 60;
+  
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/master-inbox/push-to-subsequence?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email_lead_map_id: leadMapId,
+        sub_sequence_id: subseqId,
+        sub_sequence_delay_time: delaySeconds,
+        stop_lead_on_parent_campaign_reply: options.stopOnParentReply || false
+      })
+    }
+  );
+  
+  return response.json();
+}
 
-const result = await response.json();
-console.log(result);
+// Push to demo request subsequence
+await pushToSubsequence(2433664091, 789, {
+  delayDays: 3,
+  stopOnParentReply: true
+});
 ```
 
 </RequestExample>
 
-
-
-## Response Codes
-
-<ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
-</ResponseField>
-
-<ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
-</ResponseField>
+## Response Example
 
 <ResponseExample>
 
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
-}
-```
-
-```json 401 - Unauthorized
-{
-  "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "message": "Lead pushed to subsequence successfully",
+  "data": {
+    "email_lead_map_id": 2433664091,
+    "parent_campaign_id": 12345,
+    "sub_sequence_id": 789,
+    "will_start_at": "2025-01-22T00:00:00Z",
+    "stop_on_parent_reply": true
+  }
 }
 ```
 
 </ResponseExample>
+
+## Subsequence Workflows
+
+### Interest-Based Routing
+```python
+# Lead clicked pricing link
+if lead_clicked_pricing:
+    push_to_subsequence(
+        lead_map_id,
+        pricing_discussion_subseq_id,
+        delay_days=1,
+        stop_on_parent_reply=True
+    )
+```
+
+### Re-engagement Campaign
+```python
+# No reply after 30 days
+if days_since_last_send > 30 and not replied:
+    push_to_subsequence(
+        lead_map_id,
+        reengagement_subseq_id,
+        delay_days=0,
+        stop_on_parent_reply=True
+    )
+```
+
+## Related Endpoints
+
+- [Get Custom Views](/api-reference/inbox/get-views) - Filter by subsequence
+- [Resume Lead](/api-reference/inbox/resume-lead)

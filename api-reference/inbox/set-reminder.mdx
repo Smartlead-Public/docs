@@ -1,8 +1,22 @@
 ---
-title: "Set Reminder"
+title: "Set Lead Reminder"
 api: "POST https://server.smartlead.ai/api/v1/master-inbox/set-reminder"
-description: "Set a reminder notification for a specific lead/message at specified time"
+description: "Set a reminder for a specific lead conversation"
 ---
+
+<Note>
+Schedule reminders for lead follow-ups. Ensures timely responses and prevents leads from going cold.
+</Note>
+
+## Overview
+
+Sets a reminder for a specific lead conversation. Reminders trigger email/push notifications at the specified time.
+
+**Features:**
+- Email/push notifications at reminder time
+- Appears in reminders inbox view
+- Multiple reminders per lead supported
+- Edit or cancel before trigger
 
 ## Query Parameters
 
@@ -10,110 +24,120 @@ description: "Set a reminder notification for a specific lead/message at specifi
   Your SmartLead API key
 </ParamField>
 
+## Request Body
 
+<ParamField body="email_lead_map_id" type="number" required>
+  Lead-campaign mapping ID
+</ParamField>
+
+<ParamField body="email_stats_id" type="string" required>
+  Specific email/message ID to set reminder for
+</ParamField>
+
+<ParamField body="message" type="string" required>
+  Reminder note/description
+</ParamField>
+
+<ParamField body="reminder_time" type="string" required>
+  Reminder timestamp in ISO 8601 format
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/set-reminder?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "email_lead_map_id": 2433664091,
+    "email_stats_id": "abc-def-123",
+    "message": "Follow up on pricing question",
+    "reminder_time": "2025-01-27T14:00:00Z"
+  }'
 ```
 
 ```python Python
 import requests
+from datetime import datetime, timedelta
 
 API_KEY = "YOUR_API_KEY"
 
-response = requests.post(
-    "https://server.smartlead.ai/api/v1/master-inbox/set-reminder",
-    params={"api_key": API_KEY},
-    json={"key": "value"}
-)
+def set_reminder(lead_map_id, email_stats_id, message, days_from_now):
+    """Set reminder X days from now"""
+    reminder_time = (datetime.now() + timedelta(days=days_from_now)).isoformat() + 'Z'
+    
+    payload = {
+        "email_lead_map_id": lead_map_id,
+        "email_stats_id": email_stats_id,
+        "message": message,
+        "reminder_time": reminder_time
+    }
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/set-reminder",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    return response.json()
 
-result = response.json()
-print(result)
+# Remind me in 3 days
+set_reminder(
+    2433664091,
+    "abc-def-123",
+    "Follow up on demo feedback",
+    days_from_now=3
+)
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
-const response = await fetch(
-  `https://server.smartlead.ai/api/v1/master-inbox/set-reminder?api_key=${API_KEY}`,
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
-  }
-);
+async function setReminder(leadMapId, emailStatsId, message, daysFromNow) {
+  const reminderDate = new Date();
+  reminderDate.setDate(reminderDate.getDate() + daysFromNow);
+  
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/master-inbox/set-reminder?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email_lead_map_id: leadMapId,
+        email_stats_id: emailStatsId,
+        message: message,
+        reminder_time: reminderDate.toISOString()
+      })
+    }
+  );
+  
+  return response.json();
+}
 
-const result = await response.json();
-console.log(result);
+await setReminder(2433664091, 'abc-def-123', 'Check if interested', 7);
 ```
 
 </RequestExample>
 
-
-
-## Response Codes
-
-<ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
-</ResponseField>
-
-<ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
-</ResponseField>
+## Response Example
 
 <ResponseExample>
 
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
-}
-```
-
-```json 401 - Unauthorized
-{
-  "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "message": "Reminder set successfully",
+  "data": {
+    "reminder_id": 789,
+    "email_lead_map_id": 2433664091,
+    "reminder_time": "2025-01-27T14:00:00Z",
+    "message": "Follow up on pricing question"
+  }
 }
 ```
 
 </ResponseExample>
+
+## Related Endpoints
+
+- [Get Reminder Emails](/api-reference/inbox/get-reminders)
+- [Create Task](/api-reference/inbox/create-task)

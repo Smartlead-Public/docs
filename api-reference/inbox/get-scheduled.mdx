@@ -1,8 +1,20 @@
 ---
-title: "Get Scheduled Messages"
+title: "Get Scheduled Emails"
 api: "POST https://server.smartlead.ai/api/v1/master-inbox/scheduled"
-description: "Get all scheduled email replies that are queued for future sending"
+description: "Retrieve emails queued for future sending with schedule time sorting"
 ---
+
+<Note>
+View and manage your scheduled email queue. Essential for reviewing upcoming sends and optimizing send times.
+</Note>
+
+## Overview
+
+Retrieves scheduled emails queued to be sent at a future time. Unique sorting by scheduled time helps manage your outreach pipeline.
+
+**Scheduled Sorting (Unique to this endpoint):**
+- `SCHEDULED_TIME_ASC`: Earliest scheduled sends first (next to send)
+- `SCHEDULED_TIME_DESC`: Latest scheduled sends first
 
 ## Query Parameters
 
@@ -10,14 +22,34 @@ description: "Get all scheduled email replies that are queued for future sending
   Your SmartLead API key
 </ParamField>
 
+<ParamField query="fetch_message_history" type="boolean" default="false">
+  Include full thread history
+</ParamField>
 
+## Request Body
+
+<ParamField body="offset" type="number" default="0">
+  Pagination offset
+</ParamField>
+
+<ParamField body="limit" type="number" default="20">
+  Records per page (1-20)
+</ParamField>
+
+<ParamField body="filters" type="object">
+  Standard inbox filters - campaignId max 5, emailAccountId max 10
+</ParamField>
+
+<ParamField body="sortBy" type="string">
+  **Unique Options**: `SCHEDULED_TIME_ASC` or `SCHEDULED_TIME_DESC`
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/scheduled?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{"sortBy": "SCHEDULED_TIME_ASC", "limit": 20}'
 ```
 
 ```python Python
@@ -25,95 +57,48 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
+# Get next scheduled emails
 response = requests.post(
     "https://server.smartlead.ai/api/v1/master-inbox/scheduled",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json={"sortBy": "SCHEDULED_TIME_ASC", "limit": 20}
 )
 
-result = response.json()
-print(result)
+scheduled = response.json()
+print(f"Next {len(scheduled.get('messages', []))} scheduled emails")
 ```
 
 ```javascript JavaScript
-const API_KEY = 'YOUR_API_KEY';
-
 const response = await fetch(
   `https://server.smartlead.ai/api/v1/master-inbox/scheduled?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify({sortBy: 'SCHEDULED_TIME_ASC', limit: 20})
   }
 );
-
-const result = await response.json();
-console.log(result);
 ```
 
 </RequestExample>
 
-
-
-## Response Codes
-
-<ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
-</ResponseField>
-
-<ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
-</ResponseField>
+## Response Example
 
 <ResponseExample>
 
-```json 200 - Success
+```json 200
 {
-  "success": true,
-  "data": {}
-}
-```
-
-```json 401 - Unauthorized
-{
-  "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "messages": [{
+    "campaign_lead_map_id": "2433664091",
+    "scheduled_time": "2025-01-21T09:00:00Z",
+    "email_status": "Scheduled"
+  }],
+  "total_count": 1
 }
 ```
 
 </ResponseExample>
+
+## Related Endpoints
+
+- [Get Sent Emails](/api-reference/inbox/get-sent)
+- [Get Inbox Messages](/api-reference/inbox/get-messages)

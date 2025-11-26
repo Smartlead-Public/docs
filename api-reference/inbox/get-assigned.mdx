@@ -1,0 +1,332 @@
+---
+title: "Get Assigned to Me"
+api: "POST https://server.smartlead.ai/api/v1/master-inbox/assigned-me"
+description: "Retrieve all emails and conversations assigned to the authenticated user"
+---
+
+<Note>
+View your personalized inbox showing only leads and conversations assigned to you. Essential for team collaboration and individual accountability.
+</Note>
+
+## Overview
+
+Retrieves all emails assigned to the authenticated user across all campaigns. This endpoint provides a personalized view for team members to focus on their assigned leads.
+
+**Key Features**:
+- Personalized inbox view for individual team members
+- Same comprehensive filtering as other inbox endpoints
+- Track assigned lead performance and engagement
+- Enable accountability in team-based campaigns
+
+**Use Cases**:
+- **Individual dashboards**: Show team members only their assigned work
+- **Performance tracking**: Monitor individual team member metrics
+- **Load balancing**: View current assignment distribution
+- **Task management**: Track follow-ups on assigned leads
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="fetch_message_history" type="boolean" default="false">
+  Include full email thread history. Set to `true` to get complete conversation context.
+</ParamField>
+
+## Request Body
+
+<ParamField body="offset" type="number" default="0">
+  Number of records to skip for pagination. Must be non-negative.
+</ParamField>
+
+<ParamField body="limit" type="number" default="20">
+  Number of records to return per page. Must be between 1 and 20.
+</ParamField>
+
+<ParamField body="filters" type="object">
+  Advanced filtering options
+  
+  <Expandable title="filters properties">
+    <ParamField body="filters.search" type="string">
+      Search term to filter emails by lead email, name, or content. Max 30 characters.
+    </ParamField>
+    
+    <ParamField body="filters.leadCategories" type="object">
+      Filter by lead category assignment
+      
+      <Expandable title="leadCategories properties">
+        <ParamField body="leadCategories.unassigned" type="boolean">
+          Include leads without category assignment
+        </ParamField>
+        
+        <ParamField body="leadCategories.isAssigned" type="boolean">
+          Include leads with category assignment
+        </ParamField>
+        
+        <ParamField body="leadCategories.categoryIdsNotIn" type="array">
+          Exclude specific category IDs (max 10 items)
+        </ParamField>
+        
+        <ParamField body="leadCategories.categoryIdsIn" type="array">
+          Include only specific category IDs (max 10 items)
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    
+    <ParamField body="filters.emailStatus" type="string">
+      Filter by email engagement status. Valid values: `Opened`, `Clicked`, `Replied`, `Unsubscribed`, `Bounced`, `Accepted`, `Not Replied`
+    </ParamField>
+    
+    <ParamField body="filters.campaignId" type="number">
+      Filter by specific campaign ID (single value only for this endpoint)
+    </ParamField>
+    
+    <ParamField body="filters.emailAccountId" type="number">
+      Filter by specific email account ID (single value only)
+    </ParamField>
+    
+    <ParamField body="filters.campaignTeamMemberId" type="number">
+      Filter by specific team member ID (single value only)
+    </ParamField>
+    
+    <ParamField body="filters.campaignTagId" type="number">
+      Filter by campaign tag ID (single value only)
+    </ParamField>
+    
+    <ParamField body="filters.campaignClientId" type="number">
+      Filter by client ID (single value only)
+    </ParamField>
+    
+    <ParamField body="filters.replyTimeBetween" type="array">
+      Date range filter for reply times. Array of 2 ISO 8601 datetime strings: `["2025-01-01T00:00:00Z", "2025-01-31T23:59:59Z"]`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="sortBy" type="string" default="REPLY_TIME_DESC">
+  Sort order for results
+  - `REPLY_TIME_DESC`: Most recent replies first (default)
+  - `SENT_TIME_DESC`: Most recently sent emails first
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/assigned-me?api_key=YOUR_KEY&fetch_message_history=false" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "offset": 0,
+    "limit": 20,
+    "filters": {
+      "emailStatus": "Replied",
+      "leadCategories": {
+        "isAssigned": true,
+        "categoryIdsIn": [1]
+      },
+      "replyTimeBetween": ["2025-01-01T00:00:00Z", "2025-01-31T23:59:59Z"]
+    },
+    "sortBy": "REPLY_TIME_DESC"
+  }'
+```
+
+```python Python
+import requests
+from datetime import datetime
+
+API_KEY = "YOUR_API_KEY"
+
+# Get my assigned leads that replied this month
+payload = {
+    "offset": 0,
+    "limit": 20,
+    "filters": {
+        "emailStatus": "Replied",
+        "leadCategories": {
+            "isAssigned": True,
+            "categoryIdsIn": [1]  # Interested category
+        },
+        "replyTimeBetween": [
+            "2025-01-01T00:00:00Z",
+            "2025-01-31T23:59:59Z"
+        ]
+    },
+    "sortBy": "REPLY_TIME_DESC"
+}
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/master-inbox/assigned-me",
+    params={
+        "api_key": API_KEY,
+        "fetch_message_history": False
+    },
+    json=payload
+)
+
+result = response.json()
+print(f"Found {result.get('total_count', 0)} assigned leads")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+// Get my assigned leads that replied this month
+const payload = {
+  offset: 0,
+  limit: 20,
+  filters: {
+    emailStatus: 'Replied',
+    leadCategories: {
+      isAssigned: true,
+      categoryIdsIn: [1]  // Interested category
+    },
+    replyTimeBetween: [
+      '2025-01-01T00:00:00Z',
+      '2025-01-31T23:59:59Z'
+    ]
+  },
+  sortBy: 'REPLY_TIME_DESC'
+};
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/master-inbox/assigned-me?api_key=${API_KEY}&fetch_message_history=false`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }
+);
+
+const result = await response.json();
+console.log(`Found ${result.total_count} assigned leads`);
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful - assigned emails retrieved
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Invalid request parameters (e.g., limit > 20, invalid date format)
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "messages": [
+    {
+      "id": "msg_123",
+      "campaign_lead_map_id": "2433664091",
+      "lead": {
+        "email": "john@company.com",
+        "first_name": "John",
+        "last_name": "Doe"
+      },
+      "campaign": {
+        "id": 12345,
+        "name": "Q1 2025 Outreach"
+      },
+      "last_message": {
+        "subject": "Re: Partnership Opportunity",
+        "body": "I'm interested in learning more...",
+        "received_at": "2025-01-15T14:30:00Z"
+      },
+      "email_status": "Replied",
+      "category": {
+        "id": 1,
+        "name": "Interested"
+      },
+      "assigned_to": {
+        "id": 456,
+        "name": "Jane Smith"
+      },
+      "is_read": false
+    }
+  ],
+  "total_count": 1,
+  "offset": 0,
+  "limit": 20
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "limit must be between 1 and 20"
+}
+```
+
+</ResponseExample>
+
+## Common Workflows
+
+### Daily Task Check
+```python
+# Get all my unread assigned leads
+payload = {
+    "filters": {
+        "emailStatus": "Replied",
+        "leadCategories": {"isAssigned": True}
+    },
+    "limit": 20
+}
+response = get_assigned_me(payload)
+```
+
+### Hot Leads Follow-up
+```python
+# Get interested leads assigned to me
+payload = {
+    "filters": {
+        "leadCategories": {
+            "isAssigned": True,
+            "categoryIdsIn": [1]  # Interested
+        }
+    },
+    "sortBy": "REPLY_TIME_DESC"
+}
+response = get_assigned_me(payload)
+```
+
+### Campaign-Specific View
+```python
+# See my assigned leads in specific campaign
+payload = {
+    "filters": {
+        "campaignId": 12345
+    },
+    "limit": 20
+}
+response = get_assigned_me(payload)
+```
+
+## Performance Tips
+
+1. **Use pagination**: Default limit of 20 is optimal for response time
+2. **Disable message history**: Set `fetch_message_history=false` for list views
+3. **Filter smartly**: Combine filters to reduce result set
+4. **Sort appropriately**: Use `REPLY_TIME_DESC` for action-oriented views
+
+## Related Endpoints
+
+- [Update Team Member](/api-reference/inbox/update-team-member) - Reassign leads
+- [Get Inbox Messages](/api-reference/inbox/get-messages) - All inbox replies
+- [Update Lead Category](/api-reference/inbox/update-category) - Categorize leads
+

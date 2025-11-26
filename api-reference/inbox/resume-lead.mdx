@@ -1,8 +1,22 @@
 ---
-title: "Resume Lead"
+title: "Resume Paused Lead"
 api: "PATCH https://server.smartlead.ai/api/v1/master-inbox/resume-lead"
-description: "Resume email sending for a paused lead with optional delay"
+description: "Resume a paused lead in a campaign with optional delay"
 ---
+
+<Note>
+Re-engage paused or stopped leads in your campaigns. Optionally add a delay before resuming the email sequence.
+</Note>
+
+## Overview
+
+Resumes a paused lead in a campaign sequence, optionally adding a delay before restarting.
+
+**Use Cases:**
+- Lead requested follow-up later
+- Re-engage cold leads
+- Resume after temporary pause
+- Add to nurture sequence after delay
 
 ## Query Parameters
 
@@ -10,14 +24,40 @@ description: "Resume email sending for a paused lead with optional delay"
   Your SmartLead API key
 </ParamField>
 
+## Request Body
 
+<ParamField body="campaign_id" type="number" required>
+  Campaign ID to resume lead in
+</ParamField>
+
+<ParamField body="email_lead_map_id" type="number" required>
+  Lead-campaign mapping ID
+</ParamField>
+
+<ParamField body="resume_delay_days" type="number">
+  Optional delay in days before resuming (min 0, default immediate)
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
+# Resume immediately
 curl -X PATCH "https://server.smartlead.ai/api/v1/master-inbox/resume-lead?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "campaign_id": 12345,
+    "email_lead_map_id": 2433664091,
+    "resume_delay_days": 0
+  }'
+
+# Resume after 7 days
+curl -X PATCH "https://server.smartlead.ai/api/v1/master-inbox/resume-lead?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "campaign_id": 12345,
+    "email_lead_map_id": 2433664091,
+    "resume_delay_days": 7
+  }'
 ```
 
 ```python Python
@@ -25,95 +65,81 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
-response = requests.patch(
-    "https://server.smartlead.ai/api/v1/master-inbox/resume-lead",
-    params={"api_key": API_KEY},
-    json={"key": "value"}
-)
+def resume_lead(campaign_id, lead_map_id, delay_days=0):
+    """Resume paused lead with optional delay"""
+    payload = {
+        "campaign_id": campaign_id,
+        "email_lead_map_id": lead_map_id,
+        "resume_delay_days": delay_days
+    }
+    
+    response = requests.patch(
+        "https://server.smartlead.ai/api/v1/master-inbox/resume-lead",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        if delay_days > 0:
+            print(f"✅ Lead will resume in {delay_days} days")
+        else:
+            print("✅ Lead resumed immediately")
+    
+    return response.json()
 
-result = response.json()
-print(result)
+# Resume immediately
+resume_lead(12345, 2433664091, delay_days=0)
+
+# Resume after 30-day pause
+resume_lead(12345, 2433664092, delay_days=30)
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
-const response = await fetch(
-  `https://server.smartlead.ai/api/v1/master-inbox/resume-lead?api_key=${API_KEY}`,
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
-  }
-);
+async function resumeLead(campaignId, leadMapId, delayDays = 0) {
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/master-inbox/resume-lead?api_key=${API_KEY}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        campaign_id: campaignId,
+        email_lead_map_id: leadMapId,
+        resume_delay_days: delayDays
+      })
+    }
+  );
+  
+  return response.json();
+}
 
-const result = await response.json();
-console.log(result);
+// Resume after 7 days
+await resumeLead(12345, 2433664091, 7);
 ```
 
 </RequestExample>
 
-
-
-## Response Codes
-
-<ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
-</ResponseField>
-
-<ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
-</ResponseField>
+## Response Example
 
 <ResponseExample>
 
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
-}
-```
-
-```json 401 - Unauthorized
-{
-  "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "message": "Lead resumed successfully",
+  "data": {
+    "campaign_id": 12345,
+    "email_lead_map_id": 2433664091,
+    "resume_delay_days": 7,
+    "will_resume_at": "2025-01-27T00:00:00Z"
+  }
 }
 ```
 
 </ResponseExample>
+
+## Related Endpoints
+
+- [Pause Lead](/api-reference/leads/pause)
+- [Push to Subsequence](/api-reference/inbox/push-to-subsequence)

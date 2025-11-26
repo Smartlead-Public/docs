@@ -1,8 +1,16 @@
 ---
 title: "Create Lead Task"
 api: "POST https://server.smartlead.ai/api/v1/master-inbox/create-task"
-description: "Create an action item for a lead with priority and optional due date"
+description: "Create a task associated with a lead for follow-up management"
 ---
+
+<Note>
+Create actionable tasks linked to leads. Essential for managing follow-ups, tracking action items, and team collaboration.
+</Note>
+
+## Overview
+
+Creates a task associated with a specific lead to track follow-up actions and ensure nothing falls through the cracks.
 
 ## Query Parameters
 
@@ -10,110 +18,133 @@ description: "Create an action item for a lead with priority and optional due da
   Your SmartLead API key
 </ParamField>
 
+## Request Body
 
+<ParamField body="email_lead_map_id" type="number" required>
+  Lead-campaign mapping ID
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Task title/name
+</ParamField>
+
+<ParamField body="description" type="string">
+  Detailed task notes (optional)
+</ParamField>
+
+<ParamField body="priority" type="string" default="MEDIUM">
+  Task priority: `LOW`, `MEDIUM`, or `HIGH`
+</ParamField>
+
+<ParamField body="due_date" type="string">
+  Due date in ISO 8601 format (optional)
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/create-task?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "email_lead_map_id": 2433664091,
+    "name": "Schedule demo call",
+    "description": "Lead interested in enterprise plan",
+    "priority": "HIGH",
+    "due_date": "2025-01-25T14:00:00Z"
+  }'
 ```
 
 ```python Python
 import requests
+from datetime import datetime, timedelta
 
 API_KEY = "YOUR_API_KEY"
 
-response = requests.post(
-    "https://server.smartlead.ai/api/v1/master-inbox/create-task",
-    params={"api_key": API_KEY},
-    json={"key": "value"}
-)
+def create_task(lead_map_id, name, description="", priority="MEDIUM", due_date=None):
+    """Create a task for lead follow-up"""
+    payload = {
+        "email_lead_map_id": lead_map_id,
+        "name": name,
+        "description": description,
+        "priority": priority,
+        "due_date": due_date
+    }
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/master-inbox/create-task",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    return response.json()
 
-result = response.json()
-print(result)
+# Create high-priority task due tomorrow
+tomorrow = (datetime.now() + timedelta(days=1)).replace(hour=14, minute=0).isoformat() + 'Z'
+
+create_task(
+    lead_map_id=2433664091,
+    name="Schedule demo call",
+    description="Lead expressed interest in enterprise features",
+    priority="HIGH",
+    due_date=tomorrow
+)
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
-const response = await fetch(
-  `https://server.smartlead.ai/api/v1/master-inbox/create-task?api_key=${API_KEY}`,
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
-  }
-);
+async function createTask(leadMapId, name, options = {}) {
+  const payload = {
+    email_lead_map_id: leadMapId,
+    name: name,
+    description: options.description || '',
+    priority: options.priority || 'MEDIUM',
+    due_date: options.dueDate || null
+  };
+  
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/master-inbox/create-task?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
+  
+  return response.json();
+}
 
-const result = await response.json();
-console.log(result);
+// Create task
+await createTask(2433664091, 'Follow up on pricing', {
+  description: 'Lead requested custom pricing',
+  priority: 'HIGH',
+  dueDate: '2025-01-25T14:00:00Z'
+});
 ```
 
 </RequestExample>
 
-
-
-## Response Codes
-
-<ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
-</ResponseField>
-
-<ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
-</ResponseField>
+## Response Example
 
 <ResponseExample>
 
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
-}
-```
-
-```json 401 - Unauthorized
-{
-  "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "message": "Task created successfully",
+  "data": {
+    "task_id": 789,
+    "email_lead_map_id": 2433664091,
+    "name": "Schedule demo call",
+    "priority": "HIGH",
+    "due_date": "2025-01-25T14:00:00Z"
+  }
 }
 ```
 
 </ResponseExample>
+
+## Related Endpoints
+
+- [Create Note](/api-reference/inbox/create-note)
+- [Set Reminder](/api-reference/inbox/set-reminder)

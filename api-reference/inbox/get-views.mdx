@@ -1,0 +1,389 @@
+---
+title: "Get Custom View Emails"
+api: "POST https://server.smartlead.ai/api/v1/master-inbox/views"
+description: "Retrieve emails based on saved custom filter views"
+---
+
+<Note>
+Access emails using your custom saved views/filters. Create complex filter combinations and save them for quick access to specific inbox segments.
+</Note>
+
+## Overview
+
+Retrieves emails based on custom saved views. This endpoint allows you to create and access sophisticated filter combinations for segmenting your inbox.
+
+**Key Features**:
+- Save complex filter combinations as reusable views
+- Quick access to frequently used inbox segments
+- Additional subsequence filtering capability
+- All standard inbox filtering options available
+
+**Common Custom Views**:
+- **"Hot Leads"**: Replied + High Priority + Assigned to Me
+- **"Follow-up Needed"**: Not Replied + Sent > 3 days ago
+- **"Campaign X VIPs"**: Specific campaign + Important flag
+- **"Subsequence Tracking"**: Leads in specific subsequence
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="fetch_message_history" type="boolean" default="false">
+  Include full email thread history
+</ParamField>
+
+## Request Body
+
+<ParamField body="offset" type="number" default="0">
+  Number of records to skip for pagination
+</ParamField>
+
+<ParamField body="limit" type="number" default="20">
+  Number of records per page (1-20)
+</ParamField>
+
+<ParamField body="filters" type="object">
+  Custom view filter configuration
+  
+  <Expandable title="filters properties">
+    <ParamField body="filters.search" type="string">
+      Search term (max 30 characters)
+    </ParamField>
+    
+    <ParamField body="filters.leadCategories" type="object">
+      Lead category filters
+      
+      <Expandable title="leadCategories properties">
+        <ParamField body="leadCategories.unassigned" type="boolean">
+          Include uncategorized leads
+        </ParamField>
+        
+        <ParamField body="leadCategories.isAssigned" type="boolean">
+          Include categorized leads
+        </ParamField>
+        
+        <ParamField body="leadCategories.categoryIdsNotIn" type="array">
+          Exclude specific category IDs (max 10)
+        </ParamField>
+        
+        <ParamField body="leadCategories.categoryIdsIn" type="array">
+          Include only specific category IDs (max 10)
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    
+    <ParamField body="filters.emailStatus" type="string">
+      Email engagement status: `Opened`, `Clicked`, `Replied`, `Unsubscribed`, `Bounced`, `Accepted`, `Not Replied`
+    </ParamField>
+    
+    <ParamField body="filters.campaignId" type="number">
+      Filter by campaign ID (single value only for views)
+    </ParamField>
+    
+    <ParamField body="filters.emailAccountId" type="number">
+      Filter by email account ID (single value)
+    </ParamField>
+    
+    <ParamField body="filters.campaignTeamMemberId" type="number">
+      Filter by team member assignment (single value)
+    </ParamField>
+    
+    <ParamField body="filters.campaignTagId" type="number">
+      Filter by campaign tag (single value)
+    </ParamField>
+    
+    <ParamField body="filters.campaignClientId" type="number">
+      Filter by client ID (single value)
+    </ParamField>
+    
+    <ParamField body="filters.subSequenceId" type="number">
+      **Unique to views**: Filter by subsequence ID to track leads in specific child campaigns
+    </ParamField>
+    
+    <ParamField body="filters.replyTimeBetween" type="array">
+      Date range for reply times: `["start_date", "end_date"]` in ISO 8601 format
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="sortBy" type="string" default="REPLY_TIME_DESC">
+  Sort order: `REPLY_TIME_DESC` or `SENT_TIME_DESC`
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/views?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "offset": 0,
+    "limit": 20,
+    "filters": {
+      "emailStatus": "Replied",
+      "campaignId": 12345,
+      "leadCategories": {
+        "categoryIdsIn": [1]
+      },
+      "subSequenceId": 789
+    },
+    "sortBy": "REPLY_TIME_DESC"
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+# Example: "Hot Leads in Subsequence" view
+hot_leads_view = {
+    "filters": {
+        "emailStatus": "Replied",
+        "campaignId": 12345,
+        "leadCategories": {
+            "categoryIdsIn": [1]  # Interested
+        },
+        "subSequenceId": 789  # Pricing discussion subsequence
+    },
+    "sortBy": "REPLY_TIME_DESC",
+    "limit": 20
+}
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/master-inbox/views",
+    params={"api_key": API_KEY},
+    json=hot_leads_view
+)
+
+leads = response.json()
+print(f"Hot leads in subsequence: {leads.get('total_count', 0)}")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+// Example: "Needs Follow-up" view
+const needsFollowupView = {
+  filters: {
+    emailStatus: 'Not Replied',
+    replyTimeBetween: [
+      new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      new Date().toISOString()
+    ]
+  },
+  sortBy: 'SENT_TIME_DESC',
+  limit: 20
+};
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/master-inbox/views?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(needsFollowupView)
+  }
+);
+
+const result = await response.json();
+console.log(`Leads needing follow-up: ${result.total_count}`);
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Custom view emails retrieved successfully
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Invalid filter parameters
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "messages": [
+    {
+      "id": "msg_456",
+      "campaign_lead_map_id": "9876543210",
+      "lead": {
+        "email": "sarah@startup.io",
+        "first_name": "Sarah",
+        "last_name": "Johnson"
+      },
+      "campaign": {
+        "id": 12345,
+        "name": "SaaS Outreach"
+      },
+      "subsequence": {
+        "id": 789,
+        "name": "Pricing Discussion"
+      },
+      "last_message": {
+        "subject": "Re: Pricing Question",
+        "body": "Thanks for the detailed pricing...",
+        "received_at": "2025-01-20T10:15:00Z"
+      },
+      "email_status": "Replied",
+      "category": {
+        "id": 1,
+        "name": "Interested"
+      }
+    }
+  ],
+  "total_count": 1,
+  "offset": 0,
+  "limit": 20
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "Invalid subSequenceId"
+}
+```
+
+</ResponseExample>
+
+## Predefined View Examples
+
+### Hot Leads View
+```python
+{
+  "filters": {
+    "emailStatus": "Replied",
+    "leadCategories": {
+      "categoryIdsIn": [1]  # Interested
+    },
+    "campaignTeamMemberId": current_user_id
+  },
+  "sortBy": "REPLY_TIME_DESC"
+}
+```
+
+### Needs Follow-up View
+```python
+{
+  "filters": {
+    "emailStatus": "Not Replied",
+    "replyTimeBetween": [
+      three_days_ago,
+      now
+    ]
+  },
+  "sortBy": "SENT_TIME_DESC"
+}
+```
+
+### Subsequence Performance View
+```python
+{
+  "filters": {
+    "subSequenceId": 789,
+    "emailStatus": "Replied"
+  },
+  "sortBy": "REPLY_TIME_DESC"
+}
+```
+
+### VIP Campaign View
+```python
+{
+  "filters": {
+    "campaignId": 12345,
+    "campaignTagId": 5,  # VIP tag
+    "leadCategories": {
+      "isAssigned": True
+    }
+  }
+}
+```
+
+## Subsequence Filtering
+
+The `subSequenceId` filter is unique to this endpoint and allows tracking leads that have been pushed to child campaigns:
+
+```python
+# Track leads in demo request subsequence
+demo_requests = {
+  "filters": {
+    "campaignId": main_campaign_id,
+    "subSequenceId": demo_subsequence_id,
+    "emailStatus": "Replied"
+  }
+}
+
+# Compare parent vs subsequence performance
+parent_responses = get_views({"filters": {"campaignId": main_campaign_id}})
+subseq_responses = get_views({"filters": {"subSequenceId": demo_subsequence_id}})
+```
+
+## Building Effective Views
+
+### 1. Start Specific, Then Broaden
+```python
+# Start narrow
+specific_view = {
+  "filters": {
+    "campaignId": 123,
+    "emailStatus": "Replied",
+    "leadCategories": {"categoryIdsIn": [1]}
+  }
+}
+
+# If no results, remove constraints
+broader_view = {
+  "filters": {
+    "campaignId": 123,
+    "emailStatus": "Replied"
+  }
+}
+```
+
+### 2. Combine Time and Status
+```python
+recent_inactive = {
+  "filters": {
+    "emailStatus": "Opened",  # Opened but not replied
+    "replyTimeBetween": [last_week, today]
+  }
+}
+```
+
+### 3. Multi-Dimension Filtering
+```python
+high_value_prospects = {
+  "filters": {
+    "leadCategories": {"categoryIdsIn": [1]},  # Interested
+    "campaignTagId": vip_tag_id,
+    "campaignTeamMemberId": senior_rep_id,
+    "subSequenceId": pricing_discussion_id
+  }
+}
+```
+
+## Performance Optimization
+
+1. **Single values preferred**: Use single IDs instead of arrays when possible
+2. **Limit subsequence queries**: Subsequence filtering is more intensive
+3. **Paginate properly**: Use offset/limit for large result sets
+4. **Cache views**: Save frequently used filter combinations client-side
+
+## Related Endpoints
+
+- [Get Inbox Messages](/api-reference/inbox/get-messages) - All replies
+- [Push to Subsequence](/api-reference/inbox/push-to-subsequence) - Add leads to subsequence
+- [Get By Campaign](/api-reference/leads/get-by-campaign) - Campaign-specific leads
+

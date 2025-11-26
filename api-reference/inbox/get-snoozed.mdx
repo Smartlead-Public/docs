@@ -1,8 +1,28 @@
 ---
-title: "Get Snoozed Messages"
+title: "Get Snoozed Emails"
 api: "POST https://server.smartlead.ai/api/v1/master-inbox/snoozed"
-description: "Retrieve temporarily snoozed conversations with filtering and sorting options"
+description: "Retrieve emails temporarily snoozed for later follow-up"
 ---
+
+<Note>
+Manage inbox overflow by retrieving emails snoozed until a specific time. Helps prioritize immediate tasks while ensuring important conversations resurface automatically.
+</Note>
+
+## Overview
+
+Retrieves snoozed emails that are scheduled to reappear at a later time. Snoozing helps manage inbox load by temporarily hiding emails that don't require immediate attention.
+
+**Key Features:**
+- View all snoozed conversations
+- Same filtering as other inbox endpoints (max 5 campaigns, max 10 accounts)
+- Automatically reappear when snooze expires
+- Bulk snooze management
+
+**Use Cases:**
+- Waiting for information before responding
+- Follow-up after specific event/date
+- Reduce immediate inbox clutter
+- Schedule review of low-priority leads
 
 ## Query Parameters
 
@@ -10,14 +30,46 @@ description: "Retrieve temporarily snoozed conversations with filtering and sort
   Your SmartLead API key
 </ParamField>
 
+<ParamField query="fetch_message_history" type="boolean" default="false">
+  Include full email thread history
+</ParamField>
 
+## Request Body
+
+<ParamField body="offset" type="number" default="0">
+  Pagination offset
+</ParamField>
+
+<ParamField body="limit" type="number" default="20">
+  Records per page (1-20)
+</ParamField>
+
+<ParamField body="filters" type="object">
+  See [Complete Schema Template](./COMPREHENSIVE_SCHEMA_TEMPLATE.md) for all filter options.
+  
+  **Array Limits for this endpoint:**
+  - campaignId: max 5
+  - emailAccountId: max 10
+  - Other arrays: max 10
+</ParamField>
+
+<ParamField body="sortBy" type="string">
+  `REPLY_TIME_DESC` or `SENT_TIME_DESC`
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/snoozed?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "offset": 0,
+    "limit": 20,
+    "filters": {
+      "campaignId": 12345,
+      "leadCategories": {"categoryIdsIn": [1]}
+    }
+  }'
 ```
 
 ```python Python
@@ -25,14 +77,15 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
+# Get all snoozed emails
 response = requests.post(
     "https://server.smartlead.ai/api/v1/master-inbox/snoozed",
-    params={"api_key": API_KEY},
-    json={"key": "value"}
+    params={"api_key": API_KEY, "fetch_message_history": False},
+    json={"offset": 0, "limit": 20, "filters": {}}
 )
 
 result = response.json()
-print(result)
+print(f"Snoozed emails: {result.get('total_count', 0)}")
 ```
 
 ```javascript JavaScript
@@ -43,77 +96,35 @@ const response = await fetch(
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify({limit: 20, filters: {}})
   }
 );
 
 const result = await response.json();
-console.log(result);
+console.log(`Snoozed: ${result.total_count}`);
 ```
 
 </RequestExample>
 
-
-
-## Response Codes
-
-<ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
-</ResponseField>
-
-<ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
-</ResponseField>
+## Response Example
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
-}
-```
-
-```json 401 - Unauthorized
-{
-  "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "messages": [{
+    "campaign_lead_map_id": "2433664091",
+    "lead": {"email": "john@company.com"},
+    "snoozed_until": "2025-01-25T09:00:00Z",
+    "email_status": "Replied"
+  }],
+  "total_count": 1
 }
 ```
 
 </ResponseExample>
+
+## Related Endpoints
+
+- [Get Inbox Messages](/api-reference/inbox/get-messages)
+- [Get Reminders](/api-reference/inbox/get-reminders)
