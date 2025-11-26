@@ -1,16 +1,18 @@
 ---
-title: "Unsubscribe Lead"
+title: "Unsubscribe Lead Globally"
 api: "POST https://server.smartlead.ai/api/v1/leads/{lead_id}/unsubscribe"
 description: "Globally unsubscribe a lead from all current and future campaigns"
 ---
 
+<Warning>
+This action unsubscribes the lead globally across all campaigns in your account. The lead will not receive any future emails from any campaign. This action cannot be undone via API.
+</Warning>
+
 ## Path Parameters
 
 <ParamField path="lead_id" type="number" required>
-  The lead id
+  The lead ID to unsubscribe globally
 </ParamField>
-
-
 
 ## Query Parameters
 
@@ -18,49 +20,41 @@ description: "Globally unsubscribe a lead from all current and future campaigns"
   Your SmartLead API key
 </ParamField>
 
-
-
-## Request Body
-
-<Note>No request body required</Note>
-
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/leads/{lead_id}/unsubscribe?api_key=YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+curl -X POST "https://server.smartlead.ai/api/v1/leads/456/unsubscribe?api_key=YOUR_KEY"
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+lead_id = 456
 
 response = requests.post(
-    "https://server.smartlead.ai/api/v1/leads/{lead_id}/unsubscribe",
-    params={"api_key": API_KEY},
-    json={"key": "value"}
+    f"https://server.smartlead.ai/api/v1/leads/{lead_id}/unsubscribe",
+    params={"api_key": API_KEY}
 )
 
 result = response.json()
-print(result)
+if result.get('ok'):
+    print(f"Lead {lead_id} unsubscribed globally")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const leadId = 456;
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/leads/${lead_id}/unsubscribe?api_key=${API_KEY}`,
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
-  }
+  `https://server.smartlead.ai/api/v1/leads/${leadId}/unsubscribe?api_key=${API_KEY}`,
+  { method: 'POST' }
 );
 
 const result = await response.json();
-console.log(result);
+if (result.ok) {
+  console.log(`Lead ${leadId} unsubscribed globally`);
+}
 ```
 
 </RequestExample>
@@ -70,43 +64,32 @@ console.log(result);
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Lead unsubscribed successfully
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Lead not found or you don't have access to it
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true
+}
+```
+
+```json 200 - No Update
+{
+  "ok": false
 }
 ```
 
@@ -118,18 +101,28 @@ console.log(result);
 
 ```json 404 - Not Found
 {
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
+  "error": "Lead not found - Invalid lead_id."
 }
 ```
 
 </ResponseExample>
 
+## Behavior Notes
+
+<Info>
+When a lead is globally unsubscribed:
+- The `is_unsubscribed` flag is set to `true` on the lead record
+- The lead will not receive emails from any campaign
+- The lead remains in all campaigns but will not be contacted
+- This action affects all current and future campaigns
+</Info>
+
+<Tip>
+To unsubscribe a lead from a specific campaign only (not globally), use the campaign-specific unsubscribe endpoint: `POST /api/v1/campaigns/{campaign_id}/leads/{lead_id}/unsubscribe`
+</Tip>
+
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Get Lead by Email](/api-reference/leads/get-by-email)
+- [Get Campaign Leads](/api-reference/leads/get-by-campaign)
+- [Delete Lead](/api-reference/leads/delete)

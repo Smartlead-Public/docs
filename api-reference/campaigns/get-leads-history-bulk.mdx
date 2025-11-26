@@ -1,0 +1,82 @@
+---
+title: "Get Bulk Lead Message History"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/message-history-for-leads/bbfbdsFGHlBr76ruhjvh6fhHL"
+description: "Retrieve message history for multiple leads at once"
+---
+
+<Note>
+Get email conversation history for multiple leads in a single API call. Efficient for bulk operations and reporting.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="event_time_gt" type="string">
+  Filter messages after this timestamp
+</ParamField>
+
+## Request Body
+
+<ParamField body="lead_ids" type="array">
+  Array of lead IDs (nullable - if null, returns for all leads)
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/message-history-for-leads/bbfbdsFGHlBr76ruhjvh6fhHL?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"lead_ids": [789, 790, 791]}'
+```
+
+```python Python
+import requests
+
+def get_bulk_lead_history(campaign_id, lead_ids=None):
+    payload = {"lead_ids": lead_ids}
+    
+    response = requests.post(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/message-history-for-leads/bbfbdsFGHlBr76ruhjvh6fhHL",
+        params={"api_key": "YOUR_API_KEY"},
+        json=payload
+    )
+    
+    return response.json()
+
+# Get history for specific leads
+history = get_bulk_lead_history(123, [789, 790, 791])
+
+# Get history for all leads (pass null)
+all_history = get_bulk_lead_history(123, None)
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "data": {
+    "789": [
+      {"subject": "Email 1", "sent_at": "2025-01-15T10:00:00Z"}
+    ],
+    "790": [
+      {"subject": "Email 1", "sent_at": "2025-01-15T10:05:00Z"}
+    ]
+  }
+}
+```
+
+</ResponseExample>
+

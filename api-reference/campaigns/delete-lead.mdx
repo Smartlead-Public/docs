@@ -1,0 +1,86 @@
+---
+title: "Delete Lead from Campaign"
+api: "DELETE https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}"
+description: "Remove a lead from a campaign"
+---
+
+<Note>
+Permanently remove a lead from a campaign. This does not delete the lead from your account, only removes them from this specific campaign.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField path="lead_id" type="number" required>
+  Lead ID to delete
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://server.smartlead.ai/api/v1/campaigns/123/leads/789?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+def delete_lead_from_campaign(campaign_id, lead_id):
+    response = requests.delete(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}",
+        params={"api_key": API_KEY}
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Lead {lead_id} removed from campaign")
+    
+    return response.json()
+
+delete_lead_from_campaign(123, 789)
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+async function deleteLead(campaignId, leadId) {
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads/${leadId}?api_key=${API_KEY}`,
+    { method: 'DELETE' }
+  );
+  
+  return response.json();
+}
+
+await deleteLead(123, 789);
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "message": "Lead deleted from campaign successfully"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Add Leads to Campaign](/api-reference/campaigns/add-leads)
+- [Get Campaign Leads](/api-reference/campaigns/get-leads)
+

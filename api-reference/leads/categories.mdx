@@ -1,24 +1,18 @@
 ---
 title: "Get Lead Categories"
 api: "GET https://server.smartlead.ai/api/v1/leads/fetch-categories"
-description: "Get all lead categories with IDs, names, and sentiment types for your account"
+description: "Retrieve all available lead categories including global and user-specific categories"
 ---
 
-## Path Parameters
-
-<Note>No path parameters</Note>
+<Note>
+Returns both global categories (available to all users) and categories you've created. Categories are used to organize and filter leads based on their engagement or status.
+</Note>
 
 ## Query Parameters
 
 <ParamField query="api_key" type="string" required>
   Your SmartLead API key
 </ParamField>
-
-
-
-## Request Body
-
-<Note>No request body required</Note>
 
 <RequestExample>
 
@@ -36,8 +30,12 @@ response = requests.get(
     params={"api_key": API_KEY}
 )
 
-result = response.json()
-print(result)
+categories = response.json()
+print(f"Total categories: {len(categories)}")
+
+# Filter by sentiment
+positive_categories = [c for c in categories if c['sentiment_type'] == 'positive']
+print(f"Positive sentiment categories: {len(positive_categories)}")
 ```
 
 ```javascript JavaScript
@@ -47,55 +45,79 @@ const response = await fetch(
   `https://server.smartlead.ai/api/v1/leads/fetch-categories?api_key=${API_KEY}`
 );
 
-const result = await response.json();
-console.log(result);
+const categories = await response.json();
+console.log(`Total categories: ${categories.length}`);
+
+// Filter by sentiment
+const positiveCategories = categories.filter(c => c.sentiment_type === 'positive');
+console.log(`Positive sentiment categories: ${positiveCategories.length}`);
 ```
 
 </RequestExample>
 
+## Response Fields
 
+The response is an array of category objects, each containing:
+
+<ResponseField name="id" type="number">
+  Unique category identifier
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Category name (e.g., "Interested", "Not Interested", "Meeting Booked")
+</ResponseField>
+
+<ResponseField name="sentiment_type" type="string">
+  Sentiment classification of the category. Values: `positive`, `negative`, `neutral`
+</ResponseField>
+
+<ResponseField name="created_at" type="timestamp">
+  ISO 8601 timestamp of when the category was created
+</ResponseField>
 
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Categories retrieved successfully
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
-</ResponseField>
-
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {}
-}
+[
+  {
+    "id": 1,
+    "name": "Interested",
+    "sentiment_type": "positive",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Not Interested",
+    "sentiment_type": "negative",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Meeting Booked",
+    "sentiment_type": "positive",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "id": 789,
+    "name": "Follow Up Later",
+    "sentiment_type": "neutral",
+    "created_at": "2025-11-20T14:22:00.000Z"
+  }
+]
 ```
 
 ```json 401 - Unauthorized
@@ -104,20 +126,19 @@ console.log(result);
 }
 ```
 
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
-}
-```
-
 </ResponseExample>
+
+## Usage Notes
+
+<Info>
+Categories are sorted by ID in ascending order. Global categories (available to all users) have lower IDs, while user-created categories have higher IDs.
+</Info>
+
+<Tip>
+Use the category ID when updating a lead's category via the Update Lead Category endpoint. The sentiment type helps you filter leads for reporting and analytics.
+</Tip>
 
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Get Campaign Leads](/api-reference/leads/get-by-campaign) - Filter leads by category
+- [Get Lead by Email](/api-reference/leads/get-by-email) - View lead's assigned category

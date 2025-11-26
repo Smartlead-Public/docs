@@ -1,17 +1,17 @@
 ---
 title: "Get Campaign Leads"
 api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads"
-description: "Retrieve paginated list of leads in a campaign with advanced filtering"
+description: "Retrieve paginated list of leads in a campaign with advanced filtering options"
 ---
 
 <Note>
-Supports filtering by status, category, email engagement, and date. Returns lead details with custom fields. Max 100 per page.
+Supports filtering by status, category, email engagement, and date ranges. Returns lead details with custom fields. Maximum 100 leads per page.
 </Note>
 
 ## Path Parameters
 
 <ParamField path="campaign_id" type="number" required>
-  The campaign ID
+  The campaign ID to retrieve leads from
 </ParamField>
 
 ## Query Parameters
@@ -21,29 +21,41 @@ Supports filtering by status, category, email engagement, and date. Returns lead
 </ParamField>
 
 <ParamField query="offset" type="number" default="0">
-  Pagination offset
+  Pagination offset (minimum: 0)
 </ParamField>
 
-<ParamField query="limit" type="number" default="100" max="100">
-  Number of leads to return
+<ParamField query="limit" type="number" default="100">
+  Number of leads to return per page (minimum: 1, maximum: 100)
 </ParamField>
 
 <ParamField query="status" type="string">
-  Filter by status: STARTED, INPROGRESS, COMPLETED, PAUSED, STOPPED
+  Filter by lead status. Valid values: `STARTED`, `INPROGRESS`, `COMPLETED`, `PAUSED`, `STOPPED`
 </ParamField>
 
 <ParamField query="lead_category_id" type="number">
-  Filter by category ID
+  Filter by category ID (must be a positive integer)
 </ParamField>
 
 <ParamField query="emailStatus" type="string">
-  Filter by email status: is_opened, is_clicked, is_replied, is_bounced, is_unsubscribed
+  Filter by email engagement status. Valid values: `is_opened`, `is_clicked`, `is_replied`, `is_bounced`, `is_unsubscribed`, `is_spam`, `is_accepted`, `not_replied`, `is_sender_bounced`
+</ParamField>
+
+<ParamField query="created_at_gt" type="string">
+  Filter leads created after this ISO 8601 date (e.g., `2025-11-25T00:00:00.000Z`)
+</ParamField>
+
+<ParamField query="last_sent_time_gt" type="string">
+  Filter leads with last email sent after this ISO 8601 date
+</ParamField>
+
+<ParamField query="event_time_gt" type="string">
+  Filter leads with any activity (sent or reply) after this ISO 8601 date
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/campaigns/123/leads?api_key=YOUR_KEY&limit=50&status=INPROGRESS"
+curl "https://server.smartlead.ai/api/v1/campaigns/123/leads?api_key=YOUR_KEY&limit=50&status=INPROGRESS&emailStatus=is_opened"
 ```
 
 ```python Python
@@ -57,27 +69,133 @@ response = requests.get(
     params={
         "api_key": API_KEY,
         "limit": 50,
-        "status": "INPROGRESS"
+        "offset": 0,
+        "status": "INPROGRESS",
+        "emailStatus": "is_opened"
     }
 )
 
 result = response.json()
-print(f"Total leads: {result.get('total_leads', 0)}")
+print(f"Total leads: {result['total_leads']}")
+print(f"Returned: {len(result['data'])} leads")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 const campaignId = 123;
 
+const params = new URLSearchParams({
+  api_key: API_KEY,
+  limit: 50,
+  offset: 0,
+  status: 'INPROGRESS',
+  emailStatus: 'is_opened'
+});
+
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads?api_key=${API_KEY}&limit=50&status=INPROGRESS`
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads?${params}`
 );
 
 const result = await response.json();
 console.log(`Total leads: ${result.total_leads}`);
+console.log(`Returned: ${result.data.length} leads`);
 ```
 
 </RequestExample>
+
+## Response Fields
+
+<ResponseField name="total_leads" type="string">
+  Total count of leads matching the filter criteria
+</ResponseField>
+
+<ResponseField name="offset" type="number">
+  The offset used in the request
+</ResponseField>
+
+<ResponseField name="limit" type="number">
+  The limit used in the request
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of lead objects
+
+<Expandable title="Lead object properties">
+  <ResponseField name="campaign_lead_map_id" type="number">
+    Unique identifier for the lead-campaign mapping
+  </ResponseField>
+
+  <ResponseField name="lead_category_id" type="number | null">
+    Category ID assigned to this lead, or null if uncategorized
+  </ResponseField>
+
+  <ResponseField name="status" type="string">
+    Current status of the lead in this campaign. Values: `STARTED`, `INPROGRESS`, `COMPLETED`, `PAUSED`, `STOPPED`
+  </ResponseField>
+
+  <ResponseField name="created_at" type="timestamp">
+    ISO 8601 timestamp when the lead was added to the campaign
+  </ResponseField>
+
+  <ResponseField name="lead" type="object">
+    Lead contact information
+
+  <Expandable title="Lead details">
+    <ResponseField name="id" type="number">
+      Unique lead identifier
+    </ResponseField>
+
+    <ResponseField name="email" type="string">
+      Lead's email address
+    </ResponseField>
+
+    <ResponseField name="first_name" type="string">
+      Lead's first name
+    </ResponseField>
+
+    <ResponseField name="last_name" type="string">
+      Lead's last name
+    </ResponseField>
+
+    <ResponseField name="phone_number" type="string">
+      Lead's phone number
+    </ResponseField>
+
+    <ResponseField name="company_name" type="string">
+      Company name
+    </ResponseField>
+
+    <ResponseField name="website" type="string">
+      Company website
+    </ResponseField>
+
+    <ResponseField name="location" type="string">
+      Lead's location
+    </ResponseField>
+
+    <ResponseField name="linkedin_profile" type="string">
+      LinkedIn profile URL
+    </ResponseField>
+
+    <ResponseField name="company_url" type="string">
+      Company URL
+    </ResponseField>
+
+    <ResponseField name="custom_fields" type="object">
+      Custom fields object containing personalization data
+    </ResponseField>
+
+    <ResponseField name="is_unsubscribed" type="boolean">
+      Whether the lead is globally unsubscribed
+    </ResponseField>
+
+    <ResponseField name="unsubscribed_client_id_map" type="object">
+      Map of client IDs where lead is unsubscribed
+    </ResponseField>
+  </Expandable>
+  </ResponseField>
+</Expandable>
+</ResponseField>
 
 ## Response Codes
 
@@ -90,11 +208,15 @@ console.log(`Total leads: ${result.total_leads}`);
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  Campaign not found
+  Campaign not found or you don't have access to it
 </ResponseField>
 
 <ResponseField name="422" type="Validation Error">
-  Invalid query parameters
+  Invalid query parameters (check offset, limit ranges and status values)
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
@@ -102,21 +224,31 @@ console.log(`Total leads: ${result.total_leads}`);
 ```json 200 - Success
 {
   "total_leads": "42",
+  "offset": 0,
+  "limit": 50,
   "data": [
     {
-      "campaign_lead_map_id": "2433664091",
+      "campaign_lead_map_id": 2433664091,
       "lead_category_id": null,
-      "status": "STARTED",
+      "status": "INPROGRESS",
       "created_at": "2025-11-25T12:54:54.000Z",
       "lead": {
         "id": 2995276770,
         "first_name": "John",
         "last_name": "Doe",
         "email": "john@example.com",
+        "phone_number": "+1234567890",
         "company_name": "Acme Corp",
+        "website": "https://acme.com",
+        "location": "San Francisco, CA",
+        "linkedin_profile": "https://linkedin.com/in/johndoe",
+        "company_url": "https://acme.com",
         "custom_fields": {
-          "job_title": "CEO"
-        }
+          "job_title": "CEO",
+          "industry": "Technology"
+        },
+        "is_unsubscribed": false,
+        "unsubscribed_client_id_map": null
       }
     }
   ]
@@ -129,6 +261,12 @@ console.log(`Total leads: ${result.total_leads}`);
 }
 ```
 
+```json 404 - Not Found
+{
+  "error": "Campaign not found - Invalid campaign_id."
+}
+```
+
 </ResponseExample>
 
 ## Related Endpoints
@@ -136,3 +274,4 @@ console.log(`Total leads: ${result.total_leads}`);
 - [Add Leads to Campaign](/api-reference/leads/add-to-campaign)
 - [Update Lead](/api-reference/leads/update)
 - [Delete Lead](/api-reference/leads/delete)
+- [Get Lead by Email](/api-reference/leads/get-by-email)

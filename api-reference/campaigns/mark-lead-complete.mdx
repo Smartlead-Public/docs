@@ -1,0 +1,64 @@
+---
+title: "Mark Lead as Complete"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_map_id}/manual-complete"
+description: "Manually mark a lead as completed in the campaign sequence"
+---
+
+<Note>
+Manually complete a lead to stop further emails without categorizing as unsubscribed or stopped. Useful for deals closed or leads no longer relevant.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField path="lead_map_id" type="number" required>
+  Lead map ID (campaign_lead_map_id from other endpoints)
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/leads/2433664091/manual-complete?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+def mark_lead_complete(campaign_id, lead_map_id):
+    response = requests.post(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_map_id}/manual-complete",
+        params={"api_key": "YOUR_API_KEY"}
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Lead marked as complete")
+    
+    return response.json()
+
+mark_lead_complete(123, 2433664091)
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "message": "Lead marked as complete"
+}
+```
+
+</ResponseExample>
+

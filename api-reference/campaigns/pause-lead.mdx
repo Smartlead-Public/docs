@@ -1,0 +1,86 @@
+---
+title: "Pause Campaign Lead"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/pause"
+description: "Temporarily pause a specific lead in a campaign"
+---
+
+<Note>
+Pause outreach to a specific lead without removing them from the campaign. Can be resumed later.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField path="lead_id" type="number" required>
+  Lead ID to pause
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/leads/789/pause?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+def pause_lead(campaign_id, lead_id):
+    response = requests.post(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/pause",
+        params={"api_key": API_KEY}
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Lead {lead_id} paused")
+    
+    return response.json()
+
+pause_lead(123, 789)
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+async function pauseLead(campaignId, leadId) {
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads/${leadId}/pause?api_key=${API_KEY}`,
+    { method: 'POST' }
+  );
+  
+  return response.json();
+}
+
+await pauseLead(123, 789);
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "message": "Lead paused successfully"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Resume Lead](/api-reference/campaigns/resume-lead)
+- [Get Campaign Leads](/api-reference/campaigns/get-leads)
+

@@ -1,20 +1,22 @@
 ---
 title: "Resume Lead"
 api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/resume"
-description: "Resume email sending for a paused lead with optional delay before next email"
+description: "Resume email sending for a paused lead with optional custom delay"
 ---
+
+<Note>
+Resuming a lead changes its status to `INPROGRESS` and schedules the next email based on the delay specified. If no delay is provided, the sequence's default delay is used.
+</Note>
 
 ## Path Parameters
 
 <ParamField path="campaign_id" type="number" required>
-  The campaign id
+  The campaign ID containing the lead
 </ParamField>
 
 <ParamField path="lead_id" type="number" required>
-  The lead id
+  The lead ID to resume
 </ParamField>
-
-
 
 ## Query Parameters
 
@@ -22,98 +24,102 @@ description: "Resume email sending for a paused lead with optional delay before 
   Your SmartLead API key
 </ParamField>
 
-
-
 ## Request Body
 
-<ParamField body="resume_lead_with_delay_days" type="string">
-  Resume Lead With Delay Days
+<ParamField body="resume_lead_with_delay_days" type="number">
+  Number of days to wait before sending the next email. If not provided, uses the default delay from the sequence configuration. The next email timestamp is calculated as `last_sent_time + delay_days`.
 </ParamField>
 
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/resume?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/leads/456/resume?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{"resume_lead_with_delay_days": 3}'
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+lead_id = 456
+
+# Resume with custom delay
+payload = {
+    "resume_lead_with_delay_days": 3
+}
 
 response = requests.post(
-    "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/resume",
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/resume",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
-print(result)
+if result.get('ok'):
+    print(f"Lead {lead_id} resumed with {payload['resume_lead_with_delay_days']} day delay")
+
+# Or resume with default delay
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/resume",
+    params={"api_key": API_KEY},
+    json={}
+)
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+const leadId = 456;
+
+// Resume with custom delay
+const payload = {
+  resume_lead_with_delay_days: 3
+};
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/leads/${lead_id}/resume?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads/${leadId}/resume?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 
 const result = await response.json();
-console.log(result);
+if (result.ok) {
+  console.log(`Lead ${leadId} resumed with ${payload.resume_lead_with_delay_days} day delay`);
+}
 ```
 
 </RequestExample>
 
-
-
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Lead resumed successfully
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Campaign not found or you don't have access to it
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred (e.g., lead is at the last sequence and cannot be resumed)
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "data": "success"
 }
 ```
 
@@ -125,18 +131,43 @@ console.log(result);
 
 ```json 404 - Not Found
 {
-  "error": "Resource not found"
+  "error": "Campaign not found - Invalid campaign_id."
 }
 ```
 
-```json 422 - Validation Error
+```json 500 - Last Sequence Error
 {
-  "error": "Invalid parameters provided"
+  "error": "This is the last sequence. You cannot resume this lead."
+}
+```
+
+```json 500 - Invalid Lead
+{
+  "error": "Invalid lead id"
 }
 ```
 
 </ResponseExample>
 
+## Behavior Notes
+
+<Info>
+When a lead is resumed:
+- Lead status changes from `PAUSED` to `INPROGRESS`
+- The next sequence is determined automatically
+- The `next_timestamp_to_reach` is calculated based on:
+  - If `resume_lead_with_delay_days` is provided: `last_sent_time + specified_days`
+  - If not provided: Uses the default delay from the sequence configuration
+  - If no `last_sent_time` exists: Scheduled immediately (NOW)
+- Drafted emails are marked as `DRAFTED` and ready to send
+</Info>
+
+<Warning>
+You cannot resume a lead that is already on the last sequence of the campaign. Attempting to do so will return an error.
+</Warning>
+
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Pause Lead](/api-reference/leads/pause)
+- [Get Campaign Leads](/api-reference/leads/get-by-campaign)
+- [Delete Lead](/api-reference/leads/delete)

@@ -1,0 +1,65 @@
+---
+title: "Get Top Level Analytics by Date"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/top-level-analytics-by-date"
+description: "Retrieve high-level campaign metrics for a date range"
+---
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="start_date" type="string" required>
+  Start date (ISO 8601)
+</ParamField>
+
+<ParamField query="end_date" type="string" required>
+  End date (ISO 8601)
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/campaigns/123/top-level-analytics-by-date?api_key=YOUR_KEY&start_date=2025-01-01T00:00:00Z&end_date=2025-01-31T23:59:59Z"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    f"https://server.smartlead.ai/api/v1/campaigns/123/top-level-analytics-by-date",
+    params={
+        "api_key": "YOUR_API_KEY",
+        "start_date": "2025-01-01T00:00:00Z",
+        "end_date": "2025-01-31T23:59:59Z"
+    }
+)
+
+analytics = response.json()
+print(f"Period metrics: {analytics}")
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "total_sent": 500,
+  "total_delivered": 490,
+  "open_rate": 45.0,
+  "reply_rate": 8.5
+}
+```
+
+</ResponseExample>
+

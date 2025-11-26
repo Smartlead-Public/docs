@@ -1,0 +1,54 @@
+---
+title: "Get Webhook Summary"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhook-summary"
+description: "Get webhook execution summary and statistics"
+---
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/campaigns/123/webhook-summary?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    f"https://server.smartlead.ai/api/v1/campaigns/123/webhook-summary",
+    params={"api_key": "YOUR_API_KEY"}
+)
+
+summary = response.json()
+print(f"Total webhook calls: {summary.get('total_calls', 0)}")
+print(f"Success rate: {summary.get('success_rate', 0)}%")
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "total_calls": 150,
+  "successful_calls": 145,
+  "failed_calls": 5,
+  "success_rate": 96.7
+}
+```
+
+</ResponseExample>
+

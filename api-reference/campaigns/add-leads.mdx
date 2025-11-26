@@ -1,0 +1,314 @@
+---
+title: "Add Leads to Campaign"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads"
+description: "Add new leads to a campaign with custom fields and validation settings"
+---
+
+<Note>
+Import leads into your campaign. Supports bulk upload (max 400 leads per request) with custom fields and duplicate/validation controls.
+</Note>
+
+## Overview
+
+Adds leads to a campaign with comprehensive validation and duplicate handling options.
+
+**Key Features:**
+- Bulk import: Up to 400 leads per request
+- Custom fields support (max 200 fields)
+- Duplicate detection controls
+- Global block list checking
+- Community bounce list validation
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="lead_list" type="array" required>
+  Array of lead objects (max 400 leads)
+  
+  <Expandable title="Lead Object Properties">
+    <ParamField body="email" type="string" required>
+      Lead email address (required)
+    </ParamField>
+    
+    <ParamField body="first_name" type="string">
+      First name (optional)
+    </ParamField>
+    
+    <ParamField body="last_name" type="string">
+      Last name (optional)
+    </ParamField>
+    
+    <ParamField body="company_name" type="string">
+      Company name (optional)
+    </ParamField>
+    
+    <ParamField body="phone_number" type="string">
+      Phone number (optional)
+    </ParamField>
+    
+    <ParamField body="website" type="string">
+      Website URL (optional)
+    </ParamField>
+    
+    <ParamField body="location" type="string">
+      Geographic location (optional)
+    </ParamField>
+    
+    <ParamField body="linkedin_profile" type="string">
+      LinkedIn profile URL (optional)
+    </ParamField>
+    
+    <ParamField body="company_url" type="string">
+      Company website (optional)
+    </ParamField>
+    
+    <ParamField body="custom_fields" type="object">
+      Custom field key-value pairs (max 200 fields)
+      
+      Example: `{"job_title": "CEO", "industry": "SaaS", "company_size": "50-200"}`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="lead_list_ids" type="array">
+  Array of lead list IDs (if importing from existing lists)
+</ParamField>
+
+<ParamField body="type" type="string">
+  Import type (optional)
+</ParamField>
+
+<ParamField body="settings" type="object">
+  Validation and duplicate handling settings
+  
+  <Expandable title="Settings Properties">
+    <ParamField body="settings.ignore_global_block_list" type="boolean">
+      Skip global block list validation (default: false)
+    </ParamField>
+    
+    <ParamField body="settings.ignore_unsubscribe_list" type="boolean">
+      Skip unsubscribe list check (default: false)
+    </ParamField>
+    
+    <ParamField body="settings.ignore_duplicate_leads_in_other_campaign" type="boolean">
+      Allow leads that exist in other campaigns (default: false)
+    </ParamField>
+    
+    <ParamField body="settings.ignore_community_bounce_list" type="boolean">
+      Skip community bounce list validation (default: false)
+    </ParamField>
+    
+    <ParamField body="settings.return_lead_ids" type="boolean" default="false">
+      Return array of created lead IDs in response
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/leads?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lead_list": [
+      {
+        "email": "john@company.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "company_name": "ACME Corp",
+        "custom_fields": {
+          "job_title": "CEO",
+          "industry": "SaaS"
+        }
+      },
+      {
+        "email": "jane@startup.io",
+        "first_name": "Jane",
+        "last_name": "Smith",
+        "company_name": "Startup Inc"
+      }
+    ],
+    "settings": {
+      "ignore_duplicate_leads_in_other_campaign": false,
+      "return_lead_ids": true
+    }
+  }'
+```
+
+```python Python
+import requests
+import csv
+
+API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+
+# Example 1: Add leads with custom fields
+leads = [
+    {
+        "email": "john@company.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "company_name": "ACME Corp",
+        "custom_fields": {
+            "job_title": "CEO",
+            "industry": "SaaS",
+            "company_size": "50-200"
+        }
+    },
+    {
+        "email": "jane@startup.io",
+        "first_name": "Jane",
+        "last_name": "Smith",
+        "company_name": "Startup Inc",
+        "linkedin_profile": "https://linkedin.com/in/janesmith"
+    }
+]
+
+payload = {
+    "lead_list": leads,
+    "settings": {
+        "ignore_duplicate_leads_in_other_campaign": False,
+        "ignore_global_block_list": False,
+        "return_lead_ids": True
+    }
+}
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads",
+    params={"api_key": API_KEY},
+    json=payload
+)
+
+if response.status_code == 200:
+    result = response.json()
+    print(f"✅ Added {result.get('added_count', 0)} leads")
+    if result.get('lead_ids'):
+        print(f"Lead IDs: {result['lead_ids']}")
+
+# Example 2: Import from CSV
+def import_csv_to_campaign(csv_path, campaign_id):
+    leads = []
+    
+    with open(csv_path, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            lead = {
+                "email": row['email'],
+                "first_name": row.get('first_name', ''),
+                "last_name": row.get('last_name', ''),
+                "company_name": row.get('company', ''),
+                "custom_fields": {
+                    k: v for k, v in row.items() 
+                    if k not in ['email', 'first_name', 'last_name', 'company']
+                }
+            }
+            leads.append(lead)
+            
+            # Batch every 400 leads (max per request)
+            if len(leads) >= 400:
+                add_leads_batch(campaign_id, leads)
+                leads = []
+    
+    # Add remaining leads
+    if leads:
+        add_leads_batch(campaign_id, leads)
+
+def add_leads_batch(campaign_id, leads):
+    payload = {"lead_list": leads}
+    response = requests.post(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    print(f"Batch added: {len(leads)} leads")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+
+// Add leads to campaign
+async function addLeads(campaignId, leads, settings = {}) {
+  const payload = {
+    lead_list: leads,
+    settings: {
+      ignore_duplicate_leads_in_other_campaign: false,
+      return_lead_ids: true,
+      ...settings
+    }
+  };
+  
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
+  
+  const result = await response.json();
+  console.log(`Added ${result.added_count} leads`);
+  return result;
+}
+
+// Example usage
+const newLeads = [
+  {
+    email: 'john@company.com',
+    first_name: 'John',
+    last_name: 'Doe',
+    company_name: 'ACME Corp',
+    custom_fields: {
+      job_title: 'CEO',
+      industry: 'SaaS'
+    }
+  }
+];
+
+await addLeads(123, newLeads);
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "success": true,
+  "added_count": 2,
+  "skipped_count": 0,
+  "lead_ids": [789, 790],
+  "message": "Leads added successfully"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "lead_list cannot exceed 400 leads per request",
+  "provided_count": 500,
+  "max_allowed": 400
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Get Campaign Leads](/api-reference/campaigns/get-leads)
+- [Update Lead](/api-reference/campaigns/update-lead)
+- [Delete Lead](/api-reference/campaigns/delete-lead)
+

@@ -1,0 +1,64 @@
+---
+title: "Unsubscribe Lead from Campaign"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/unsubscribe"
+description: "Unsubscribe a lead from a campaign to stop all future emails"
+---
+
+<Note>
+Permanently unsubscribe a lead from receiving emails. Lead will be marked as unsubscribed and excluded from future campaigns.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField path="lead_id" type="number" required>
+  Lead ID to unsubscribe
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/leads/789/unsubscribe?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+def unsubscribe_lead(campaign_id, lead_id):
+    response = requests.post(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/unsubscribe",
+        params={"api_key": "YOUR_API_KEY"}
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Lead {lead_id} unsubscribed")
+    
+    return response.json()
+
+unsubscribe_lead(123, 789)
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "message": "Lead unsubscribed successfully"
+}
+```
+
+</ResponseExample>
+

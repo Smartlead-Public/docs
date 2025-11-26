@@ -1,0 +1,79 @@
+---
+title: "Create Subsequence Campaign"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/create-subsequence"
+description: "Create a child campaign (subsequence) with conditional logic"
+---
+
+<Note>
+Create branching campaign logic by defining subsequences that triggers based on lead behavior. Essential for sophisticated nurture workflows.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Parent campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<Warning>
+Complex schema - implementation details need verification from `/server/controller/v1/campaigns/createSubsequence.js` for complete documentation.
+</Warning>
+
+<ParamField body="subsequence_name" type="string">
+  Name for the subsequence campaign
+</ParamField>
+
+<ParamField body="condition_events" type="array">
+  Events that trigger moving lead to subsequence
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/create-subsequence?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+```python Python
+import requests
+
+# Schema needs verification
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/123/create-subsequence",
+    params={"api_key": "YOUR_API_KEY"},
+    json={}
+)
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "subsequence_id": 456
+}
+```
+
+</ResponseExample>
+
+<Warning>
+Complete schema documentation requires verification from controller implementation at `/server/controller/v1/campaigns/createSubsequence.js`
+</Warning>
+
+## Related Endpoints
+
+- [Push to Subsequence](/api-reference/inbox/push-to-subsequence)
+- [Update Subsequence Conditions](/api-reference/campaigns/update-subsequence-conditions)
+

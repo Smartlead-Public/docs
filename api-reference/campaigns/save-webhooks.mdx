@@ -1,0 +1,147 @@
+---
+title: "Create/Update Campaign Webhook"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks"
+description: "Create a new webhook or update existing webhook for campaign events"
+---
+
+<Note>
+Configure webhooks to receive real-time notifications when campaign events occur. Integrate with CRM, Slack, or custom systems.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="id" type="number">
+  Webhook ID (null for new webhook, number to update existing)
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Webhook name for identification
+</ParamField>
+
+<ParamField body="webhook_url" type="string" required>
+  URL to receive webhook POST requests
+</ParamField>
+
+<ParamField body="event_types" type="array" required>
+  Array of event types to trigger webhook
+  
+  Common events:
+  - `LEAD_REPLIED`
+  - `LEAD_OPENED`
+  - `LEAD_CLICKED`
+  - `LEAD_BOUNCED`
+  - `LEAD_UNSUBSCRIBED`
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/webhooks?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": null,
+    "name": "CRM Integration",
+    "webhook_url": "https://crm.example.com/smartlead-webhook",
+    "event_types": ["LEAD_REPLIED", "LEAD_OPENED"]
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+def create_webhook(campaign_id, name, url, events):
+    payload = {
+        "id": None,  # null for new
+        "name": name,
+        "webhook_url": url,
+        "event_types": events
+    }
+    
+    response = requests.post(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks",
+        params={"api_key": API_KEY},
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        webhook_id = response.json()['data']['id']
+        print(f"✅ Webhook created (ID: {webhook_id})")
+    
+    return response.json()
+
+# Create CRM webhook for replies
+create_webhook(
+    campaign_id=123,
+    name="CRM Reply Integration",
+    url="https://crm.example.com/webhook",
+    events=["LEAD_REPLIED", "LEAD_CLICKED"]
+)
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+async function createWebhook(campaignId, name, url, events) {
+  const payload = {
+    id: null,
+    name,
+    webhook_url: url,
+    event_types: events
+  };
+  
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/webhooks?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
+  
+  return response.json();
+}
+
+await createWebhook(123, 'Slack Notifications', 
+  'https://hooks.slack.com/...', ['LEAD_REPLIED']);
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "data": {
+    "id": 456,
+    "name": "CRM Integration",
+    "webhook_url": "https://crm.example.com/webhook",
+    "event_types": ["LEAD_REPLIED", "LEAD_OPENED"]
+  }
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Get Campaign Webhooks](/api-reference/campaigns/get-webhooks)
+- [Delete Webhook](/api-reference/campaigns/delete-webhook)
+- [Webhook Events Reference](/api-reference/webhooks/events)
+

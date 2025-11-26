@@ -1,0 +1,87 @@
+---
+title: "Update Lead Email Account"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/update-lead-email-account"
+description: "Change which email account is used to send to a specific lead"
+---
+
+<Note>
+Override the email account used for a specific lead. Useful for deliverability optimization or when specific senders perform better with certain leads.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="email_account_id" type="number" required>
+  New email account ID to use
+</ParamField>
+
+<ParamField body="email_campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField body="email_lead_id" type="number" required>
+  Lead ID
+</ParamField>
+
+<ParamField body="override_lead_email_account" type="boolean">
+  Force override even if lead has specific account assigned
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/update-lead-email-account?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email_account_id": 999,
+    "email_campaign_id": 123,
+    "email_lead_id": 789,
+    "override_lead_email_account": true
+  }'
+```
+
+```python Python
+import requests
+
+def update_lead_sending_account(campaign_id, lead_id, new_account_id):
+    payload = {
+        "email_account_id": new_account_id,
+        "email_campaign_id": campaign_id,
+        "email_lead_id": lead_id,
+        "override_lead_email_account": True
+    }
+    
+    response = requests.post(
+        "https://server.smartlead.ai/api/v1/campaigns/update-lead-email-account",
+        params={"api_key": "YOUR_API_KEY"},
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Lead {lead_id} now uses account {new_account_id}")
+    
+    return response.json()
+
+update_lead_sending_account(123, 789, 999)
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "message": "Lead email account updated"
+}
+```
+
+</ResponseExample>
+

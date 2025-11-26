@@ -1,0 +1,50 @@
+---
+title: "Retrigger Campaign Webhooks"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/retrigger-webhooks"
+description: "Manually retry failed webhook deliveries"
+---
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/retrigger-webhooks?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/123/retrigger-webhooks",
+    params={"api_key": "YOUR_API_KEY"}
+)
+
+print("✅ Webhooks retriggered")
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "retriggered_count": 5
+}
+```
+
+</ResponseExample>
+

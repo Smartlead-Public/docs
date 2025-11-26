@@ -1,0 +1,71 @@
+---
+title: "Update Campaign Team Member"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/team-member"
+description: "Assign or change the team member responsible for a campaign"
+---
+
+<Note>
+Assign campaign ownership to specific team members for accountability and workload distribution.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="teamMemberId" type="number">
+  Team member ID to assign (use `null` to unassign)
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/team-member?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"teamMemberId": 456}'
+```
+
+```python Python
+import requests
+
+def assign_campaign_to_member(campaign_id, member_id):
+    payload = {"teamMemberId": member_id}
+    
+    response = requests.post(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/team-member",
+        params={"api_key": "YOUR_API_KEY"},
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Campaign assigned to member {member_id}")
+    
+    return response.json()
+
+assign_campaign_to_member(123, 456)
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "message": "Team member updated"
+}
+```
+
+</ResponseExample>
+

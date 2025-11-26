@@ -1,0 +1,75 @@
+---
+title: "Get Campaign Webhooks"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks"
+description: "Retrieve all webhooks configured for a campaign"
+---
+
+<Note>
+View all webhook integrations set up for campaign events. Essential for managing integrations with external systems.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/campaigns/123/webhooks?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+response = requests.get(
+    f"https://server.smartlead.ai/api/v1/campaigns/123/webhooks",
+    params={"api_key": API_KEY}
+)
+
+webhooks = response.json()
+print(f"Configured webhooks: {len(webhooks['data'])}")
+
+for webhook in webhooks['data']:
+    print(f"  - {webhook['name']}: {webhook['webhook_url']}")
+    print(f"    Events: {', '.join(webhook['event_types'])}")
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "data": [
+    {
+      "id": 456,
+      "name": "CRM Integration",
+      "webhook_url": "https://crm.example.com/webhook",
+      "event_types": ["LEAD_REPLIED", "LEAD_OPENED"],
+      "is_active": true
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Save Webhooks](/api-reference/campaigns/save-webhooks)
+- [Delete Webhook](/api-reference/campaigns/delete-webhook)
+- [Webhooks Overview](/api-reference/webhooks/events)
+

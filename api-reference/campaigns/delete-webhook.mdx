@@ -1,0 +1,60 @@
+---
+title: "Delete Campaign Webhook"
+api: "DELETE https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks/{webhook_id}"
+description: "Remove a webhook from a campaign"
+---
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField path="webhook_id" type="number" required>
+  Webhook ID to delete
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://server.smartlead.ai/api/v1/campaigns/123/webhooks/456?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+def delete_webhook(campaign_id, webhook_id):
+    response = requests.delete(
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks/{webhook_id}",
+        params={"api_key": "YOUR_API_KEY"}
+    )
+    
+    if response.status_code == 200:
+        print(f"✅ Webhook {webhook_id} deleted")
+    
+    return response.json()
+
+delete_webhook(123, 456)
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "message": "Webhook deleted successfully"
+}
+```
+
+</ResponseExample>
+

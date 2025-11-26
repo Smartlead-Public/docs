@@ -1,20 +1,22 @@
 ---
 title: "Update Lead"
 api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}/"
-description: "Update lead contact information and custom fields within a campaign"
+description: "Update lead contact information and custom fields. Changes apply globally across all campaigns."
 ---
+
+<Warning>
+Updating a lead modifies the lead record globally across all campaigns. The `email` field is required even if not being changed.
+</Warning>
 
 ## Path Parameters
 
 <ParamField path="campaign_id" type="number" required>
-  The campaign id
+  The campaign ID (used for validation and audit logging)
 </ParamField>
 
 <ParamField path="lead_id" type="number" required>
-  The lead id
+  The lead ID to update
 </ParamField>
-
-
 
 ## Query Parameters
 
@@ -22,106 +24,155 @@ description: "Update lead contact information and custom fields within a campaig
   Your SmartLead API key
 </ParamField>
 
-
-
 ## Request Body
 
+<ParamField body="email" type="string" required>
+  Lead's email address (required field, even if not being changed)
+</ParamField>
+
 <ParamField body="first_name" type="string">
-  First Name
+  Lead's first name
 </ParamField>
 
 <ParamField body="last_name" type="string">
-  Last Name
+  Lead's last name
 </ParamField>
 
-<ParamField body="custom_fields" type="string">
-  Custom Fields
+<ParamField body="phone_number" type="string">
+  Lead's phone number
+</ParamField>
+
+<ParamField body="company_name" type="string">
+  Company name
+</ParamField>
+
+<ParamField body="website" type="string">
+  Company website
+</ParamField>
+
+<ParamField body="location" type="string">
+  Lead's location
+</ParamField>
+
+<ParamField body="linkedin_profile" type="string">
+  LinkedIn profile URL
+</ParamField>
+
+<ParamField body="company_url" type="string">
+  Company URL
+</ParamField>
+
+<ParamField body="custom_fields" type="object">
+  Custom fields object (maximum 200 key-value pairs). Custom fields are merged with existing fields, not replaced.
 </ParamField>
 
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/leads/456?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "company_name": "Acme Corp",
+    "custom_fields": {
+      "job_title": "CTO",
+      "department": "Engineering"
+    }
+  }'
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+lead_id = 456
+
+payload = {
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "company_name": "Acme Corp",
+    "custom_fields": {
+        "job_title": "CTO",
+        "department": "Engineering"
+    }
+}
 
 response = requests.post(
-    "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}",
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
-print(result)
+if result.get('ok'):
+    print("Lead updated successfully")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+const leadId = 456;
+
+const payload = {
+  email: 'john@example.com',
+  first_name: 'John',
+  last_name: 'Doe',
+  company_name: 'Acme Corp',
+  custom_fields: {
+    job_title: 'CTO',
+    department: 'Engineering'
+  }
+};
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/leads/${lead_id}?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads/${leadId}?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 
 const result = await response.json();
-console.log(result);
+if (result.ok) {
+  console.log('Lead updated successfully');
+}
 ```
 
 </RequestExample>
 
-
-
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
-</ResponseField>
-
-<ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Lead updated successfully
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
+  Campaign or lead not found, or you don't have access
 </ResponseField>
 
 <ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  Missing required email field or invalid custom_fields object size
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Server error occurred
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true
 }
 ```
 
@@ -133,13 +184,20 @@ console.log(result);
 
 ```json 404 - Not Found
 {
-  "error": "Resource not found"
+  "ok": false,
+  "error": "Invalid request!"
+}
+```
+
+```json 404 - Campaign Not Found
+{
+  "error": "Campaign not found - Invalid campaign_id."
 }
 ```
 
 ```json 422 - Validation Error
 {
-  "error": "Invalid parameters provided"
+  "error": "email is required"
 }
 ```
 
@@ -147,4 +205,6 @@ console.log(result);
 
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Get Campaign Leads](/api-reference/leads/get-by-campaign)
+- [Add Leads to Campaign](/api-reference/leads/add-to-campaign)
+- [Delete Lead](/api-reference/leads/delete)

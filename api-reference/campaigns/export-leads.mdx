@@ -1,0 +1,85 @@
+---
+title: "Export Campaign Leads"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads-export"
+description: "Export all campaign leads as CSV file"
+---
+
+<Note>
+Download all leads from a campaign in CSV format. Essential for reporting, backup, and external analysis.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/campaigns/123/leads-export?api_key=YOUR_KEY" \
+  --output campaign_leads.csv
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+
+response = requests.get(
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads-export",
+    params={"api_key": API_KEY}
+)
+
+# Save to file
+with open(f'campaign_{campaign_id}_leads.csv', 'w') as f:
+    f.write(response.text)
+
+print(f"✅ Leads exported to campaign_{campaign_id}_leads.csv")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/leads-export?api_key=${API_KEY}`
+);
+
+const csvData = await response.text();
+
+// In browser: trigger download
+const blob = new Blob([csvData], { type: 'text/csv' });
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `campaign_${campaignId}_leads.csv`;
+a.click();
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```csv CSV Format
+email,first_name,last_name,company_name,phone_number,status,category,created_at
+john@company.com,John,Doe,ACME Corp,+1-555-0100,INPROGRESS,Interested,2025-01-15T10:00:00Z
+jane@startup.io,Jane,Smith,Startup Inc,,COMPLETED,Meeting Request,2025-01-10T09:00:00Z
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Get Campaign Leads](/api-reference/campaigns/get-leads)
+- [Add Leads](/api-reference/campaigns/add-leads)
+
