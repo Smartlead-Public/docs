@@ -7,9 +7,9 @@
   },
   "favicon": "smartleadHighResLogoSL.png",
   "colors": {
-    "primary": "#0D9373",
-    "light": "#07C983",
-    "dark": "#0D9373",
+    "primary": "#000566",
+    "light": "#757AE9",
+    "dark": "#000566",
     "anchors": {
       "from": "#0D9373",
       "to": "#07C983"
