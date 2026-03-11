@@ -1,54 +1,405 @@
 ---
 title: "Campaign Setup Guide"
-description: "Comprehensive guide for campaign setup guide"
+description: "Learn how to create, configure, and optimize email campaigns — from sequences and A/B testing to scheduling, email account rotation, and advanced settings"
 ---
 
 ## Overview
 
-This guide will help you understand and implement campaign setup guide.
+A SmartLead campaign is the core unit of outbound email. It ties together your email accounts, sequences, leads, and sending schedule into a single automated workflow. This guide covers everything you need to configure a campaign programmatically.
 
-## Prerequisites
+## Campaign Architecture
 
-- SmartLead account
-- API key
-- Basic understanding of REST APIs
+Every campaign has four building blocks:
 
-## Step-by-Step Guide
+1. **Email Accounts** — The sending addresses that rotate automatically
+2. **Sequences** — The emails and follow-ups your leads receive
+3. **Leads** — The prospects imported into the campaign
+4. **Schedule** — When and how fast emails are sent
 
-<Steps>
-  <Step title="Step 1">
-    First step description
-  </Step>
-  
-  <Step title="Step 2">
-    Second step description
-  </Step>
-</Steps>
+```
+Campaign
+├── Email Accounts (1+)
+├── Sequences
+│   ├── Step 1 (Initial email)
+│   │   ├── Variant A
+│   │   └── Variant B (optional A/B test)
+│   ├── Step 2 (Follow-up, +3 days)
+│   └── Step 3 (Break-up, +5 days)
+├── Leads (up to 400 per import)
+└── Schedule (timezone, days, hours)
+```
 
-## Code Example
+## Creating a Campaign
+
+<CodeGroup>
 
 ```python Python
 import requests
+import os
 
-API_KEY = "YOUR_API_KEY"
-# Your code here
+API_KEY = os.getenv("SMARTLEAD_API_KEY")
+BASE_URL = "https://server.smartlead.ai/api/v1"
+
+campaign_payload = {
+    "name": "Q1 SaaS Outreach — VP Sales",
+    "track_settings": {
+        "track_open": True,
+        "track_click": True
+    }
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/create",
+    params={"api_key": API_KEY},
+    json=campaign_payload
+)
+
+campaign = response.json()
+campaign_id = campaign["campaign"]["id"]
+print(f"Campaign created: ID {campaign_id}")
 ```
 
-## Best Practices
+```javascript JavaScript
+const API_KEY = process.env.SMARTLEAD_API_KEY;
+const BASE_URL = 'https://server.smartlead.ai/api/v1';
+
+const response = await fetch(`${BASE_URL}/campaigns/create?api_key=${API_KEY}`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'Q1 SaaS Outreach — VP Sales',
+    track_settings: {
+      track_open: true,
+      track_click: true
+    }
+  })
+});
+
+const campaign = await response.json();
+const campaignId = campaign.campaign.id;
+console.log(`Campaign created: ID ${campaignId}`);
+```
+
+</CodeGroup>
 
 <Tip>
-  Best practice tip here
+  Use descriptive campaign names that include the quarter, ICP, and persona. This makes it easier to filter and compare performance later. Example: `Q1 SaaS Outreach — VP Sales — US`.
 </Tip>
 
-## Common Issues
+## Building Sequences
+
+Sequences define the emails your leads receive and the timing between them. Each step can optionally include A/B test variants.
+
+### Basic Sequence
+
+```python Python
+sequences_payload = {
+    "sequences": [
+        {
+            "seq_number": 1,
+            "subject": "Quick question about {{company_name}}",
+            "email_body": """Hi {{first_name}},
+
+I noticed {{company_name}} is scaling its outbound — are you exploring ways to improve reply rates?
+
+We help {{industry}} companies like yours book 3x more meetings through automated cold email.
+
+Worth a 15-minute call this week?
+
+Best,
+Sarah""",
+            "seq_delay_details": {"delay_in_days": 0}
+        },
+        {
+            "seq_number": 2,
+            "subject": "Re: Quick question about {{company_name}}",
+            "email_body": """Hi {{first_name}},
+
+Following up — I wanted to share a case study from a {{industry}} company that went from 2% to 14% reply rates in 30 days.
+
+Happy to walk through what they did if you have 10 minutes.
+
+Sarah""",
+            "seq_delay_details": {"delay_in_days": 3}
+        },
+        {
+            "seq_number": 3,
+            "subject": "Re: Quick question about {{company_name}}",
+            "email_body": """Hi {{first_name}},
+
+Don't want to be a pest — just checking if improving outbound pipeline is a priority for {{company_name}} right now.
+
+If the timing isn't right, no worries. Happy to reconnect next quarter.
+
+Best,
+Sarah""",
+            "seq_delay_details": {"delay_in_days": 5}
+        }
+    ]
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/sequences",
+    params={"api_key": API_KEY},
+    json=sequences_payload
+)
+
+print("Sequences created!")
+```
+
+### Personalization Variables
+
+Use double curly braces to insert lead-specific data into your emails:
+
+| Variable | Description | Source |
+|---|---|---|
+| `{{first_name}}` | Lead's first name | Lead import |
+| `{{last_name}}` | Lead's last name | Lead import |
+| `{{email}}` | Lead's email address | Lead import |
+| `{{company_name}}` | Company name | Lead import |
+| `{{location}}` | Lead's location | Lead import |
+| `{{custom_field_name}}` | Any custom field | `custom_fields` on import |
+
+<Note>
+  If a personalization variable is missing for a lead, SmartLead will leave the placeholder blank. Use fallback values in your copy to handle this gracefully — for example, write "your team" as a fallback for `{{company_name}}`.
+</Note>
+
+### A/B Testing Variants
+
+Test different subject lines or email bodies to optimize performance:
+
+```python Python
+sequences_with_variants = {
+    "sequences": [
+        {
+            "seq_number": 1,
+            "subject": "Quick question about {{company_name}}",
+            "email_body": "Hi {{first_name}},\n\nI noticed {{company_name}} is scaling...",
+            "seq_delay_details": {"delay_in_days": 0},
+            "variants": [
+                {
+                    "subject": "{{first_name}}, quick thought on {{company_name}}",
+                    "email_body": "Hey {{first_name}},\n\nSaw that {{company_name}} is growing fast...",
+                    "variant_distribution": 50
+                }
+            ]
+        }
+    ]
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/sequences",
+    params={"api_key": API_KEY},
+    json=sequences_with_variants
+)
+```
+
+SmartLead automatically splits traffic between variants and tracks open/reply rates for each.
+
+<Tip>
+  Test one variable at a time (subject line OR body, not both) so you can isolate what drives performance. Run tests for at least 200 sends before drawing conclusions.
+</Tip>
+
+## Linking Email Accounts
+
+Connect one or more email accounts to your campaign. SmartLead rotates between them automatically to maximize deliverability.
+
+```python Python
+# Link existing email accounts by their IDs
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/email-accounts",
+    params={"api_key": API_KEY},
+    json={"email_account_ids": [101, 102, 103]}
+)
+
+print("Email accounts linked!")
+```
+
+### Fetching Available Accounts
+
+```python Python
+# List all email accounts
+response = requests.get(
+    f"{BASE_URL}/email-accounts",
+    params={"api_key": API_KEY}
+)
+
+accounts = response.json()
+for account in accounts:
+    print(f"ID: {account['id']} | {account['from_email']} | Warmup: {account['warmup_enabled']}")
+```
+
+<Warning>
+  Only link accounts that have been warmed up for at least 14 days. Sending cold emails from a fresh account will hurt your deliverability and sender reputation. See the [Email Warmup Guide](/guides/email-warmup) for details.
+</Warning>
+
+## Configuring the Schedule
+
+Control when emails are sent and how many go out per day:
+
+```python Python
+schedule_payload = {
+    "timezone": "America/New_York",
+    "days_of_the_week": [1, 2, 3, 4, 5],  # Monday-Friday
+    "start_hour": "09:00",
+    "end_hour": "17:00",
+    "min_time_btw_emails": 8,              # Minutes between emails
+    "max_new_leads_per_day": 30            # New leads contacted per day
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/schedule",
+    params={"api_key": API_KEY},
+    json=schedule_payload
+)
+
+print("Schedule configured!")
+```
+
+| Parameter | Description | Recommended |
+|---|---|---|
+| `timezone` | IANA timezone for send window | Match your leads' timezone |
+| `days_of_the_week` | 1=Mon through 7=Sun | `[1,2,3,4,5]` (weekdays) |
+| `start_hour` | Earliest send time | `"08:00"` - `"10:00"` |
+| `end_hour` | Latest send time | `"16:00"` - `"18:00"` |
+| `min_time_btw_emails` | Gap between sends (minutes) | `5` - `12` |
+| `max_new_leads_per_day` | Daily new lead cap | `20` - `50` per account |
+
+## Campaign Settings
+
+### Track Settings
+
+```python Python
+# Update tracking settings
+response = requests.patch(
+    f"{BASE_URL}/campaigns/{campaign_id}/settings",
+    params={"api_key": API_KEY},
+    json={
+        "track_settings": {
+            "track_open": True,
+            "track_click": True
+        }
+    }
+)
+```
+
+### Stop Conditions
+
+Automatically stop emailing a lead when certain events occur:
+
+```python Python
+settings_payload = {
+    "stop_lead_settings": {
+        "stop_on_reply": True,
+        "stop_on_auto_reply": False,
+        "stop_on_click": False
+    }
+}
+
+response = requests.patch(
+    f"{BASE_URL}/campaigns/{campaign_id}/settings",
+    params={"api_key": API_KEY},
+    json=settings_payload
+)
+```
+
+<Tip>
+  Always enable `stop_on_reply`. Continuing to send follow-ups after someone replies creates a poor experience and can increase spam complaints.
+</Tip>
+
+## Activating the Campaign
+
+Once everything is configured, set the campaign status to `ACTIVE`:
+
+```python Python
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/status",
+    params={"api_key": API_KEY},
+    json={"status": "ACTIVE"}
+)
+
+print("Campaign is now ACTIVE!")
+```
+
+### Campaign Statuses
+
+| Status | Description |
+|---|---|
+| `DRAFTED` | Campaign created but not yet active |
+| `ACTIVE` | Currently sending emails on schedule |
+| `PAUSED` | Temporarily stopped; can be resumed |
+| `COMPLETED` | All leads have received all sequences |
+| `STOPPED` | Manually stopped; leads won't receive more emails |
+
+```python Python
+# Pause a campaign
+requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/status",
+    params={"api_key": API_KEY},
+    json={"status": "PAUSED"}
+)
+```
+
+## Monitoring Campaign Performance
+
+Track your campaign's performance with the analytics endpoints:
+
+```python Python
+# Get campaign analytics
+response = requests.get(
+    f"{BASE_URL}/campaigns/{campaign_id}/analytics",
+    params={"api_key": API_KEY}
+)
+
+analytics = response.json()
+print(f"Sent: {analytics.get('total_sent', 0)}")
+print(f"Opened: {analytics.get('total_opened', 0)}")
+print(f"Replied: {analytics.get('total_replied', 0)}")
+print(f"Bounced: {analytics.get('total_bounced', 0)}")
+```
+
+### Key Metrics to Watch
+
+| Metric | Good | Warning | Action Needed |
+|---|---|---|---|
+| Open Rate | > 50% | 30–50% | < 30% — fix subject lines or deliverability |
+| Reply Rate | > 5% | 2–5% | < 2% — improve copy or targeting |
+| Bounce Rate | < 3% | 3–5% | > 5% — verify email list quality |
+| Unsubscribe Rate | < 0.5% | 0.5–1% | > 1% — review targeting and frequency |
+
+## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title="Issue 1">
-    Solution here
+  <Accordion title="Campaign is ACTIVE but no emails are being sent">
+    Check these in order: (1) Email accounts are linked and warmed up, (2) the schedule window includes the current day and time, (3) leads have been imported and are in "Not Contacted" status, (4) email accounts haven't hit their daily sending limit.
+  </Accordion>
+
+  <Accordion title="High bounce rates">
+    Verify your lead list quality. Use an email verification service before importing leads. Check that your email accounts' DNS records (SPF, DKIM, DMARC) are properly configured. Consider reducing your daily sending volume.
+  </Accordion>
+
+  <Accordion title="Low open rates">
+    Test different subject lines with A/B testing. Check your sender reputation using tools like mail-tester.com. Ensure your email accounts are properly warmed up. Avoid spam trigger words in subject lines.
+  </Accordion>
+
+  <Accordion title="Sequences not advancing to the next step">
+    Verify that the delay days are set correctly between steps. Check if `stop_on_reply` or other stop conditions are triggering. Ensure the campaign status is still ACTIVE.
   </Accordion>
 </AccordionGroup>
 
-## Related Resources
+## What's Next?
 
-- [API Reference](#)
-- [Other Guides](#)
+<CardGroup cols={2}>
+  <Card title="Email Warmup Guide" icon="fire" href="/guides/email-warmup">
+    Warm up accounts before adding them to campaigns
+  </Card>
+  <Card title="Lead Management Guide" icon="users" href="/guides/lead-management">
+    Import, segment, and manage leads at scale
+  </Card>
+  <Card title="Best Practices" icon="star" href="/guides/best-practices">
+    Optimize deliverability, copy, and campaign structure
+  </Card>
+  <Card title="Webhook Integration" icon="webhook" href="/guides/webhook-integration">
+    Get real-time notifications for campaign events
+  </Card>
+</CardGroup>

@@ -1,54 +1,225 @@
 ---
 title: "Email Warmup Guide"
-description: "Comprehensive guide for email warmup guide"
+description: "Understand and configure email warmup to build sender reputation, improve deliverability, and avoid the spam folder before launching campaigns"
 ---
 
 ## Overview
 
-This guide will help you understand and implement email warmup guide.
+Email warmup is the process of gradually building a sending reputation for a new email account. SmartLead automates this by exchanging emails between accounts in its warmup pool — opening, replying, and marking messages as important to signal to email providers that your account is legitimate.
 
-## Prerequisites
+Skipping warmup is the number one reason cold emails land in spam. This guide covers how to configure warmup via the API and when your accounts are ready for live campaigns.
 
-- SmartLead account
-- API key
-- Basic understanding of REST APIs
+## How Warmup Works
 
-## Step-by-Step Guide
+SmartLead's warmup pool consists of thousands of email accounts. When you enable warmup on an account:
 
-<Steps>
-  <Step title="Step 1">
-    First step description
-  </Step>
-  
-  <Step title="Step 2">
-    Second step description
-  </Step>
-</Steps>
+1. **SmartLead sends emails** from your account to other pool members
+2. **Pool members open and reply** to your emails automatically
+3. **Positive engagement signals** (opens, replies, moving from spam to inbox) train email providers to trust your account
+4. **Volume increases gradually** based on your `daily_rampup` setting
 
-## Code Example
+```
+Day 1:  ████░░░░░░░░░░  (5 warmup emails)
+Day 7:  ████████░░░░░░  (19 warmup emails)
+Day 14: ██████████████  (33+ warmup emails)
+         └── Ready for campaigns
+```
+
+## Configuring Warmup on a New Account
+
+When creating an email account, include warmup settings in the payload:
 
 ```python Python
 import requests
+import os
 
-API_KEY = "YOUR_API_KEY"
-# Your code here
+API_KEY = os.getenv("SMARTLEAD_API_KEY")
+BASE_URL = "https://server.smartlead.ai/api/v1"
+
+email_account_payload = {
+    "from_name": "Sarah Johnson",
+    "from_email": "sarah@yourcompany.com",
+    "user_name": "sarah@yourcompany.com",
+    "password": "your_app_password",
+    "smtp_host": "smtp.yourprovider.com",
+    "smtp_port": 587,
+    "imap_host": "imap.yourprovider.com",
+    "imap_port": 993,
+    "max_email_per_day": 40,
+    "warmup_enabled": True,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 2,
+    "reply_rate_percentage": 30
+}
+
+response = requests.post(
+    f"{BASE_URL}/email-accounts/save",
+    params={"api_key": API_KEY},
+    json=email_account_payload
+)
+
+account = response.json()
+print(f"Account created with warmup enabled: {account['email_account']['id']}")
 ```
 
-## Best Practices
+### Warmup Parameters Explained
+
+| Parameter | Description | Recommended |
+|---|---|---|
+| `warmup_enabled` | Turn warmup on/off | `True` for all new accounts |
+| `total_warmup_per_day` | Max warmup emails per day | `20` – `40` |
+| `daily_rampup` | Additional warmup emails added per day | `2` – `3` |
+| `reply_rate_percentage` | Percentage of warmup emails that get a reply | `30` – `40` |
+
+<Warning>
+  Do not set `total_warmup_per_day` above 40 for new accounts. Sending too many warmup emails too fast can trigger spam filters — the opposite of what you want.
+</Warning>
+
+## Enabling Warmup on Existing Accounts
+
+```python Python
+# Enable warmup on an existing account
+email_account_id = 12345
+
+response = requests.patch(
+    f"{BASE_URL}/email-accounts/{email_account_id}",
+    params={"api_key": API_KEY},
+    json={
+        "warmup_enabled": True,
+        "total_warmup_per_day": 25,
+        "daily_rampup": 2,
+        "reply_rate_percentage": 30
+    }
+)
+
+print("Warmup enabled!")
+```
+
+## Warmup Timeline
+
+Here's what a typical warmup schedule looks like:
+
+| Phase | Days | Daily Volume | What's Happening |
+|---|---|---|---|
+| **Ramp-up** | 1–7 | 5 → 19 | Building initial reputation |
+| **Growth** | 8–14 | 20 → 33 | Establishing consistent engagement |
+| **Stable** | 14+ | 33–40 | Reputation established, ready for campaigns |
+| **Maintenance** | Ongoing | 15–25 | Keep warmup running alongside campaigns |
 
 <Tip>
-  Best practice tip here
+  Keep warmup enabled even after you start sending campaigns. SmartLead automatically coordinates warmup and campaign sends to stay within your daily limits. Warmup volume will decrease as campaign sends increase.
 </Tip>
 
-## Common Issues
+## Checking Warmup Status
+
+Monitor your account's warmup progress:
+
+```python Python
+# Get email account details including warmup stats
+response = requests.get(
+    f"{BASE_URL}/email-accounts/{email_account_id}",
+    params={"api_key": API_KEY}
+)
+
+account = response.json()
+print(f"Warmup enabled: {account.get('warmup_enabled')}")
+print(f"Daily warmup limit: {account.get('total_warmup_per_day')}")
+print(f"Current rampup: {account.get('daily_rampup')}")
+```
+
+## When to Start Campaigns
+
+Your account is ready for live campaigns when:
+
+- **Warmup has been running for 14+ days** without interruption
+- **Inbox placement is above 90%** (check your email deliverability score)
+- **No spam folder issues** have been flagged
+- **Daily warmup volume** has reached a stable level
+
+<Steps>
+  <Step title="Verify warmup duration">
+    Confirm the account has been warming up for at least 14 days. Newer domains may need 21–30 days.
+  </Step>
+
+  <Step title="Check deliverability">
+    Send a test email to a personal account and verify it lands in the primary inbox, not spam or promotions.
+  </Step>
+
+  <Step title="Start with low volume">
+    Begin your campaign with `max_new_leads_per_day` set to 10–15. Monitor bounce rates and spam complaints for the first few days.
+  </Step>
+
+  <Step title="Scale gradually">
+    Increase sending volume by 5–10 leads per day every few days, as long as deliverability metrics remain healthy.
+  </Step>
+</Steps>
+
+## Managing Daily Limits
+
+SmartLead coordinates warmup and campaign sends within your `max_email_per_day` limit:
+
+```
+max_email_per_day = 40
+├── Warmup emails:  15 (auto-adjusted)
+└── Campaign emails: 25 (remaining capacity)
+```
+
+As campaign volume increases, warmup volume automatically decreases. If campaign volume drops, warmup ramps back up.
+
+```python Python
+# Update daily email limit
+response = requests.patch(
+    f"{BASE_URL}/email-accounts/{email_account_id}",
+    params={"api_key": API_KEY},
+    json={
+        "max_email_per_day": 50,
+        "total_warmup_per_day": 20
+    }
+)
+```
+
+## DNS Requirements
+
+Proper DNS configuration is critical for deliverability. Ensure these records are set up for your sending domain:
+
+| Record | Purpose | Priority |
+|---|---|---|
+| **SPF** | Authorizes your mail servers to send on behalf of your domain | Required |
+| **DKIM** | Cryptographically signs emails to verify authenticity | Required |
+| **DMARC** | Tells receiving servers how to handle SPF/DKIM failures | Required |
+| **Custom Tracking Domain** | Branded tracking links instead of generic ones | Recommended |
+
+<Warning>
+  Missing or misconfigured DNS records will tank your deliverability regardless of how well your account is warmed up. Set up SPF, DKIM, and DMARC before enabling warmup.
+</Warning>
+
+## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title="Issue 1">
-    Solution here
+  <Accordion title="Warmup emails are landing in spam">
+    Check your DNS records (SPF, DKIM, DMARC). Reduce `total_warmup_per_day` to 10 and rebuild gradually. Ensure your sending domain isn't on any blacklists — check with tools like MXToolbox.
+  </Accordion>
+
+  <Accordion title="Warmup volume isn't increasing">
+    Verify `daily_rampup` is set to 2 or higher. Check that the email account credentials (SMTP/IMAP) are still valid and the account isn't locked. Ensure `max_email_per_day` is high enough to allow warmup growth.
+  </Accordion>
+
+  <Accordion title="Deliverability dropped after starting campaigns">
+    Reduce campaign volume immediately. Check bounce rates — if above 5%, your lead list needs better verification. Ensure warmup is still enabled alongside campaigns. Consider pausing campaigns for 3–5 days while warmup rebuilds reputation.
+  </Accordion>
+
+  <Accordion title="IMAP connection errors">
+    Verify your IMAP credentials and host/port settings. For Gmail, ensure "Less secure app access" is enabled or use an App Password. For Outlook, check that IMAP is enabled in account settings. Ensure 2FA app passwords are being used where required.
   </Accordion>
 </AccordionGroup>
 
-## Related Resources
+## What's Next?
 
-- [API Reference](#)
-- [Other Guides](#)
+<CardGroup cols={2}>
+  <Card title="Campaign Setup Guide" icon="paper-plane" href="/guides/campaign-setup">
+    Configure campaigns once your accounts are warmed up
+  </Card>
+  <Card title="Best Practices" icon="star" href="/guides/best-practices">
+    Deliverability tips and sending strategies
+  </Card>
+</CardGroup>

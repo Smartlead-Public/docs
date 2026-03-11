@@ -256,5 +256,18 @@
   "footerSocials": {
     "twitter": "https://twitter.com/smartlead_ai",
     "linkedin": "https://www.linkedin.com/company/smartlead-ai"
+  },
+  "seo": {
+    "indexHiddenPages": false
+  },
+  "metadata": {
+    "og:site_name": "SmartLead API Documentation",
+    "og:description": "Automate cold email outreach with the SmartLead API — manage campaigns, leads, email accounts, sequences, and analytics programmatically",
+    "og:image": "https://api.smartlead.ai/smartleadHighResLogoSL.png",
+    "twitter:site": "@smartlead_ai"
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true
   }
 }

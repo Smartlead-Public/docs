@@ -1,54 +1,332 @@
 ---
 title: "Lead Management Guide"
-description: "Comprehensive guide for lead management guide"
+description: "Import, segment, and manage leads at scale — including custom fields, bulk operations, deduplication, and lead lifecycle management"
 ---
 
 ## Overview
 
-This guide will help you understand and implement lead management guide.
+Leads are the contacts who receive your campaign emails. SmartLead provides APIs for importing leads in bulk, enriching them with custom fields, tracking their status through the outreach lifecycle, and managing them across campaigns. This guide covers the full lead management workflow.
 
-## Prerequisites
+## Importing Leads
 
-- SmartLead account
-- API key
-- Basic understanding of REST APIs
+Add leads to a campaign using the lead import endpoint. You can send up to **400 leads per request**.
 
-## Step-by-Step Guide
-
-<Steps>
-  <Step title="Step 1">
-    First step description
-  </Step>
-  
-  <Step title="Step 2">
-    Second step description
-  </Step>
-</Steps>
-
-## Code Example
+<CodeGroup>
 
 ```python Python
 import requests
+import os
 
-API_KEY = "YOUR_API_KEY"
-# Your code here
+API_KEY = os.getenv("SMARTLEAD_API_KEY")
+BASE_URL = "https://server.smartlead.ai/api/v1"
+
+campaign_id = 12345
+
+leads_payload = {
+    "lead_list": [
+        {
+            "email": "alex@acmecorp.com",
+            "first_name": "Alex",
+            "last_name": "Chen",
+            "company_name": "Acme Corp",
+            "location": "San Francisco, CA",
+            "custom_fields": {
+                "job_title": "VP of Sales",
+                "industry": "B2B SaaS",
+                "company_size": "50-200",
+                "linkedin_url": "https://linkedin.com/in/alexchen"
+            }
+        },
+        {
+            "email": "maria@techstartup.io",
+            "first_name": "Maria",
+            "last_name": "Garcia",
+            "company_name": "TechStartup",
+            "location": "Austin, TX",
+            "custom_fields": {
+                "job_title": "Head of Growth",
+                "industry": "Fintech",
+                "company_size": "20-50"
+            }
+        }
+    ],
+    "settings": {
+        "ignore_global_block_list": False,
+        "ignore_unsubscribe_list": False,
+        "ignore_duplicate_leads_in_other_campaign": False
+    }
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/leads",
+    params={"api_key": API_KEY},
+    json=leads_payload
+)
+
+result = response.json()
+print(f"Added: {result['added_count']}")
+print(f"Skipped: {result['skipped_count']}")
 ```
 
-## Best Practices
+```javascript JavaScript
+const API_KEY = process.env.SMARTLEAD_API_KEY;
+const BASE_URL = 'https://server.smartlead.ai/api/v1';
+
+const campaignId = 12345;
+
+const response = await fetch(
+  `${BASE_URL}/campaigns/${campaignId}/leads?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lead_list: [
+        {
+          email: 'alex@acmecorp.com',
+          first_name: 'Alex',
+          last_name: 'Chen',
+          company_name: 'Acme Corp',
+          custom_fields: {
+            job_title: 'VP of Sales',
+            industry: 'B2B SaaS'
+          }
+        }
+      ],
+      settings: {
+        ignore_global_block_list: false,
+        ignore_unsubscribe_list: false,
+        ignore_duplicate_leads_in_other_campaign: false
+      }
+    })
+  }
+);
+
+const result = await response.json();
+console.log(`Added: ${result.added_count}, Skipped: ${result.skipped_count}`);
+```
+
+</CodeGroup>
+
+### Import Settings
+
+| Setting | Default | Description |
+|---|---|---|
+| `ignore_global_block_list` | `false` | Skip checking against your global block list |
+| `ignore_unsubscribe_list` | `false` | Skip checking against unsubscribed leads |
+| `ignore_duplicate_leads_in_other_campaign` | `false` | Allow leads already in other campaigns |
+
+<Warning>
+  Keep all three settings as `false` unless you have a specific reason to override them. Block lists and unsubscribe lists exist to protect your sender reputation and ensure compliance with email regulations.
+</Warning>
+
+### Bulk Import (Large Lists)
+
+For lists larger than 400 leads, batch your imports:
+
+```python Python
+import time
+
+all_leads = [...]  # Your full lead list
+
+batch_size = 400
+for i in range(0, len(all_leads), batch_size):
+    batch = all_leads[i:i + batch_size]
+
+    response = requests.post(
+        f"{BASE_URL}/campaigns/{campaign_id}/leads",
+        params={"api_key": API_KEY},
+        json={
+            "lead_list": batch,
+            "settings": {
+                "ignore_global_block_list": False,
+                "ignore_unsubscribe_list": False,
+                "ignore_duplicate_leads_in_other_campaign": False
+            }
+        }
+    )
+
+    result = response.json()
+    print(f"Batch {i // batch_size + 1}: Added {result['added_count']}, Skipped {result['skipped_count']}")
+
+    # Small delay between batches
+    time.sleep(1)
+```
+
+## Custom Fields
+
+Custom fields let you store any additional data on a lead and use it for personalization in your email sequences.
+
+### Adding Custom Fields on Import
+
+Include custom fields in the `custom_fields` object when importing leads:
+
+```python Python
+lead = {
+    "email": "prospect@company.com",
+    "first_name": "Jordan",
+    "company_name": "TechCo",
+    "custom_fields": {
+        "job_title": "CTO",
+        "industry": "Healthcare",
+        "pain_point": "manual outreach processes",
+        "mutual_connection": "Sarah from YC",
+        "funding_round": "Series B"
+    }
+}
+```
+
+### Using Custom Fields in Sequences
+
+Reference any custom field in your email templates using `{{field_name}}`:
+
+```
+Hi {{first_name}},
+
+I heard {{company_name}} just closed its {{funding_round}} — congrats!
+
+Given your role as {{job_title}}, I imagine {{pain_point}} is top of mind.
+{{mutual_connection}} suggested I reach out...
+```
 
 <Tip>
-  Best practice tip here
+  Use custom fields for personalization that goes beyond first name and company. Mentioning a recent funding round, a shared connection, or a specific pain point dramatically increases reply rates.
 </Tip>
 
-## Common Issues
+## Lead Statuses
+
+Every lead in a campaign has a status that reflects where they are in the outreach lifecycle:
+
+| Status | Description |
+|---|---|
+| `NOT_CONTACTED` | Lead imported but no email sent yet |
+| `IN_PROGRESS` | Currently receiving sequence emails |
+| `COMPLETED` | All sequence steps have been sent |
+| `INTERESTED` | Lead replied with positive intent |
+| `NOT_INTERESTED` | Lead replied with negative intent |
+| `DO_NOT_CONTACT` | Lead requested removal |
+| `BOUNCED` | Email address bounced |
+| `UNSUBSCRIBED` | Lead clicked unsubscribe link |
+
+### Fetching Leads by Status
+
+```python Python
+# Get all leads in a campaign with a specific status
+response = requests.get(
+    f"{BASE_URL}/campaigns/{campaign_id}/leads",
+    params={
+        "api_key": API_KEY,
+        "status": "INTERESTED"
+    }
+)
+
+interested_leads = response.json()
+for lead in interested_leads.get("leads", []):
+    print(f"{lead['first_name']} {lead['last_name']} ({lead['email']})")
+```
+
+### Updating Lead Status
+
+```python Python
+lead_id = 67890
+
+response = requests.patch(
+    f"{BASE_URL}/campaigns/{campaign_id}/leads/{lead_id}/status",
+    params={"api_key": API_KEY},
+    json={"status": "INTERESTED"}
+)
+
+print("Lead status updated!")
+```
+
+## Managing Leads Across Campaigns
+
+### Getting Lead Activity
+
+Track what emails a lead has received and how they engaged:
+
+```python Python
+response = requests.get(
+    f"{BASE_URL}/campaigns/{campaign_id}/leads/{lead_id}/activity",
+    params={"api_key": API_KEY}
+)
+
+activity = response.json()
+for event in activity.get("events", []):
+    print(f"{event['type']} — {event['timestamp']}")
+```
+
+### Block List Management
+
+Add leads to your global block list to prevent contacting them across all campaigns:
+
+```python Python
+# Add to global block list
+response = requests.post(
+    f"{BASE_URL}/leads/block-list",
+    params={"api_key": API_KEY},
+    json={
+        "emails": ["donotcontact@company.com", "optedout@example.com"]
+    }
+)
+
+print("Leads added to block list")
+```
+
+<Note>
+  Blocked leads are automatically skipped during import. This applies across all campaigns in your account, not just the campaign where the lead was blocked.
+</Note>
+
+## Deduplication
+
+SmartLead handles deduplication automatically during import:
+
+1. **Within the same campaign** — Duplicate emails are always skipped
+2. **Across campaigns** — Controlled by `ignore_duplicate_leads_in_other_campaign` setting
+3. **Against block lists** — Leads on the global block list are skipped
+4. **Against unsubscribes** — Previously unsubscribed leads are skipped
+
+The import response tells you exactly what was skipped and why:
+
+```json
+{
+  "added_count": 45,
+  "skipped_count": 5,
+  "skipped_leads": [
+    {
+      "email": "duplicate@company.com",
+      "reason": "Already exists in this campaign"
+    },
+    {
+      "email": "blocked@company.com",
+      "reason": "On global block list"
+    }
+  ]
+}
+```
+
+## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title="Issue 1">
-    Solution here
+  <Accordion title="Leads are being skipped during import">
+    Check the `skipped_leads` array in the response for reasons. Common causes: duplicate email in the same campaign, lead on the global block list, lead previously unsubscribed, or lead exists in another campaign (when `ignore_duplicate_leads_in_other_campaign` is false).
+  </Accordion>
+
+  <Accordion title="Custom field variables showing as blank in emails">
+    Ensure the custom field name in your email template matches the key name in the `custom_fields` object exactly (case-sensitive). Check that the lead was imported with that custom field populated.
+  </Accordion>
+
+  <Accordion title="Import request fails with 400 error">
+    Check that your batch size doesn't exceed 400 leads. Verify all required fields (`email` at minimum) are present. Ensure email addresses are valid format.
   </Accordion>
 </AccordionGroup>
 
-## Related Resources
+## What's Next?
 
-- [API Reference](#)
-- [Other Guides](#)
+<CardGroup cols={2}>
+  <Card title="Campaign Setup Guide" icon="paper-plane" href="/guides/campaign-setup">
+    Configure campaigns and sequences for your leads
+  </Card>
+  <Card title="Webhook Integration" icon="webhook" href="/guides/webhook-integration">
+    Get real-time notifications when leads reply or bounce
+  </Card>
+</CardGroup>

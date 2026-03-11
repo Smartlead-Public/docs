@@ -1,54 +1,452 @@
 ---
 title: "Getting Started Guide"
-description: "Comprehensive guide for getting started guide"
+description: "Set up your SmartLead API integration from scratch — generate keys, make your first calls, and launch a campaign programmatically"
 ---
 
 ## Overview
 
-This guide will help you understand and implement getting started guide.
+This guide walks you through everything you need to go from zero to a live email campaign using the SmartLead API. By the end, you'll have created a campaign, added email accounts, imported leads, configured sequences, and started sending — all through code.
 
 ## Prerequisites
 
-- SmartLead account
-- API key
-- Basic understanding of REST APIs
+Before you begin, make sure you have:
 
-## Step-by-Step Guide
+- A SmartLead account ([sign up here](https://app.smartlead.ai/signup))
+- At least one email account ready (Gmail, Outlook, or SMTP credentials)
+- Basic familiarity with REST APIs and HTTP requests
+- A tool for making API calls (cURL, Postman, or any HTTP client library)
+
+## Step 1: Get Your API Key
 
 <Steps>
-  <Step title="Step 1">
-    First step description
+  <Step title="Log in to SmartLead">
+    Go to [app.smartlead.ai](https://app.smartlead.ai) and sign in with your credentials.
   </Step>
-  
-  <Step title="Step 2">
-    Second step description
+
+  <Step title="Open API Settings">
+    Navigate to **Settings** → **API Keys** from the left sidebar.
+  </Step>
+
+  <Step title="Generate a Key">
+    Click **Generate New API Key**, give it a descriptive name (e.g., "Production API" or "Dev Testing"), and copy the key immediately.
   </Step>
 </Steps>
 
-## Code Example
+<Warning>
+  Your API key is shown only once. Store it in a secure location like an environment variable or secrets manager. Never hardcode it in source files or commit it to version control.
+</Warning>
+
+### Store Your Key Securely
+
+```bash .env
+SMARTLEAD_API_KEY=your_api_key_here
+```
+
+```python Python
+import os
+API_KEY = os.getenv("SMARTLEAD_API_KEY")
+BASE_URL = "https://server.smartlead.ai/api/v1"
+```
+
+```javascript JavaScript
+const API_KEY = process.env.SMARTLEAD_API_KEY;
+const BASE_URL = 'https://server.smartlead.ai/api/v1';
+```
+
+## Step 2: Verify Your Connection
+
+Test that your API key works by fetching your campaigns:
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://server.smartlead.ai/api/v1/campaigns/?api_key=$SMARTLEAD_API_KEY"
+```
 
 ```python Python
 import requests
+import os
 
-API_KEY = "YOUR_API_KEY"
-# Your code here
+API_KEY = os.getenv("SMARTLEAD_API_KEY")
+BASE_URL = "https://server.smartlead.ai/api/v1"
+
+response = requests.get(f"{BASE_URL}/campaigns/", params={"api_key": API_KEY})
+
+if response.status_code == 200:
+    data = response.json()
+    print(f"Connected! Found {len(data.get('campaigns', []))} campaigns.")
+else:
+    print(f"Error {response.status_code}: {response.text}")
 ```
 
-## Best Practices
+```javascript JavaScript
+const API_KEY = process.env.SMARTLEAD_API_KEY;
+const BASE_URL = 'https://server.smartlead.ai/api/v1';
+
+const response = await fetch(`${BASE_URL}/campaigns/?api_key=${API_KEY}`);
+const data = await response.json();
+
+if (response.ok) {
+  console.log(`Connected! Found ${data.campaigns.length} campaigns.`);
+} else {
+  console.error(`Error ${response.status}: ${JSON.stringify(data)}`);
+}
+```
+
+</CodeGroup>
+
+A successful response looks like:
+
+```json
+{
+  "campaigns": [],
+  "total_count": 0
+}
+```
+
+## Step 3: Create a Campaign
+
+Now create your first campaign:
+
+<CodeGroup>
+
+```python Python
+campaign_payload = {
+    "name": "Q1 2025 SaaS Outreach",
+    "track_settings": {
+        "track_open": True,
+        "track_click": True
+    }
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/create",
+    params={"api_key": API_KEY},
+    json=campaign_payload
+)
+
+campaign = response.json()
+campaign_id = campaign["campaign"]["id"]
+print(f"Campaign created: ID {campaign_id}")
+```
+
+```javascript JavaScript
+const campaignPayload = {
+  name: 'Q1 2025 SaaS Outreach',
+  track_settings: {
+    track_open: true,
+    track_click: true
+  }
+};
+
+const response = await fetch(`${BASE_URL}/campaigns/create?api_key=${API_KEY}`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(campaignPayload)
+});
+
+const campaign = await response.json();
+const campaignId = campaign.campaign.id;
+console.log(`Campaign created: ID ${campaignId}`);
+```
+
+</CodeGroup>
+
+## Step 4: Add an Email Account
+
+You need at least one sending account. Here's how to add an SMTP account:
+
+```python Python
+email_account_payload = {
+    "from_name": "Sarah Johnson",
+    "from_email": "sarah@yourcompany.com",
+    "user_name": "sarah@yourcompany.com",
+    "password": "your_app_password",
+    "smtp_host": "smtp.yourprovider.com",
+    "smtp_port": 587,
+    "imap_host": "imap.yourprovider.com",
+    "imap_port": 993,
+    "max_email_per_day": 40,
+    "warmup_enabled": True,
+    "total_warmup_per_day": 20,
+    "daily_rampup": 2,
+    "reply_rate_percentage": 30
+}
+
+response = requests.post(
+    f"{BASE_URL}/email-accounts/save",
+    params={"api_key": API_KEY},
+    json=email_account_payload
+)
+
+account = response.json()
+email_account_id = account["email_account"]["id"]
+print(f"Email account added: ID {email_account_id}")
+```
+
+Then connect it to your campaign:
+
+```python Python
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/email-accounts",
+    params={"api_key": API_KEY},
+    json={"email_account_ids": [email_account_id]}
+)
+
+print("Email account linked to campaign!")
+```
 
 <Tip>
-  Best practice tip here
+  For best deliverability, warm up new email accounts for at least 14 days before adding them to active campaigns. See the [Email Warmup Guide](/guides/email-warmup) for details.
 </Tip>
 
-## Common Issues
+## Step 5: Create Email Sequences
 
-<AccordionGroup>
-  <Accordion title="Issue 1">
-    Solution here
-  </Accordion>
-</AccordionGroup>
+Add your outreach emails and follow-ups:
 
-## Related Resources
+```python Python
+sequences_payload = {
+    "sequences": [
+        {
+            "seq_number": 1,
+            "subject": "Quick question about {{company_name}}",
+            "email_body": """Hi {{first_name}},
 
-- [API Reference](#)
-- [Other Guides](#)
+I came across {{company_name}} and noticed you're in the {{industry}} space.
+
+We help companies like yours increase outbound pipeline by 3x through automated cold email. Companies like [relevant reference] saw results within the first month.
+
+Would it make sense to chat for 15 minutes this week?
+
+Best,
+Sarah""",
+            "seq_delay_details": {"delay_in_days": 0}
+        },
+        {
+            "seq_number": 2,
+            "subject": "Re: Quick question about {{company_name}}",
+            "email_body": """Hi {{first_name}},
+
+Following up on my note — I wanted to share a quick case study that might be relevant.
+
+[Case study company] in {{industry}} increased their reply rates from 2% to 12% after switching to our approach.
+
+Worth a quick call?
+
+Sarah""",
+            "seq_delay_details": {"delay_in_days": 3}
+        },
+        {
+            "seq_number": 3,
+            "subject": "Re: Quick question about {{company_name}}",
+            "email_body": """Hi {{first_name}},
+
+I don't want to be a pest — just wanted to check if this is something {{company_name}} is thinking about right now.
+
+If the timing isn't right, no worries at all. Happy to reconnect later.
+
+Best,
+Sarah""",
+            "seq_delay_details": {"delay_in_days": 5}
+        }
+    ]
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/sequences",
+    params={"api_key": API_KEY},
+    json=sequences_payload
+)
+
+print("Sequences created!")
+```
+
+## Step 6: Import Leads
+
+Add prospects to your campaign (max 400 per request):
+
+```python Python
+leads_payload = {
+    "lead_list": [
+        {
+            "email": "alex@acmecorp.com",
+            "first_name": "Alex",
+            "last_name": "Chen",
+            "company_name": "Acme Corp",
+            "custom_fields": {
+                "job_title": "VP of Sales",
+                "industry": "B2B SaaS",
+                "company_size": "50-200"
+            }
+        },
+        {
+            "email": "maria@techstartup.io",
+            "first_name": "Maria",
+            "last_name": "Garcia",
+            "company_name": "TechStartup",
+            "custom_fields": {
+                "job_title": "Head of Growth",
+                "industry": "Fintech",
+                "company_size": "20-50"
+            }
+        }
+    ],
+    "settings": {
+        "ignore_global_block_list": False,
+        "ignore_unsubscribe_list": False,
+        "ignore_duplicate_leads_in_other_campaign": False
+    }
+}
+
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/leads",
+    params={"api_key": API_KEY},
+    json=leads_payload
+)
+
+result = response.json()
+print(f"Added: {result['added_count']}, Skipped: {result['skipped_count']}")
+```
+
+<Note>
+  SmartLead automatically validates emails against block lists and checks for duplicates. Skipped leads will include a reason in the response.
+</Note>
+
+## Step 7: Configure Schedule & Start
+
+Set your sending schedule, then activate:
+
+```python Python
+# Set schedule (Monday-Friday, 9am-5pm EST)
+schedule_payload = {
+    "timezone": "America/New_York",
+    "days_of_the_week": [1, 2, 3, 4, 5],
+    "start_hour": "09:00",
+    "end_hour": "17:00",
+    "min_time_btw_emails": 8,
+    "max_new_leads_per_day": 30
+}
+
+requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/schedule",
+    params={"api_key": API_KEY},
+    json=schedule_payload
+)
+
+# Activate the campaign
+requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/status",
+    params={"api_key": API_KEY},
+    json={"status": "ACTIVE"}
+)
+
+print("Campaign is now ACTIVE and sending!")
+```
+
+<Check>
+  Your first campaign is live! SmartLead will now send emails according to your schedule, rotating between connected email accounts.
+</Check>
+
+## Complete Working Example
+
+Here's the full script combining all steps:
+
+```python Python
+import requests
+import os
+
+API_KEY = os.getenv("SMARTLEAD_API_KEY")
+BASE_URL = "https://server.smartlead.ai/api/v1"
+
+def make_request(method, endpoint, payload=None):
+    """Helper to make API requests with error handling."""
+    url = f"{BASE_URL}/{endpoint}"
+    params = {"api_key": API_KEY}
+
+    if method == "GET":
+        response = requests.get(url, params=params)
+    elif method == "POST":
+        response = requests.post(url, params=params, json=payload)
+    elif method == "PATCH":
+        response = requests.patch(url, params=params, json=payload)
+
+    if response.status_code not in [200, 201]:
+        raise Exception(f"API error {response.status_code}: {response.text}")
+
+    return response.json()
+
+# 1. Create campaign
+campaign = make_request("POST", "campaigns/create", {
+    "name": "Q1 2025 SaaS Outreach"
+})
+campaign_id = campaign["campaign"]["id"]
+print(f"✓ Campaign created: {campaign_id}")
+
+# 2. Add sequences
+make_request("POST", f"campaigns/{campaign_id}/sequences", {
+    "sequences": [
+        {
+            "seq_number": 1,
+            "subject": "Quick question about {{company_name}}",
+            "email_body": "Hi {{first_name}},\n\nI came across {{company_name}}...",
+            "seq_delay_details": {"delay_in_days": 0}
+        },
+        {
+            "seq_number": 2,
+            "subject": "Re: Quick question about {{company_name}}",
+            "email_body": "Hi {{first_name}},\n\nFollowing up...",
+            "seq_delay_details": {"delay_in_days": 3}
+        }
+    ]
+})
+print("✓ Sequences added")
+
+# 3. Link email accounts (use your existing account IDs)
+make_request("POST", f"campaigns/{campaign_id}/email-accounts", {
+    "email_account_ids": [YOUR_EMAIL_ACCOUNT_ID]
+})
+print("✓ Email accounts linked")
+
+# 4. Import leads
+result = make_request("POST", f"campaigns/{campaign_id}/leads", {
+    "lead_list": [
+        {
+            "email": "prospect@example.com",
+            "first_name": "Alex",
+            "company_name": "Acme Corp",
+            "custom_fields": {"job_title": "VP Sales"}
+        }
+    ]
+})
+print(f"✓ Leads added: {result['added_count']}")
+
+# 5. Set schedule and activate
+make_request("POST", f"campaigns/{campaign_id}/schedule", {
+    "timezone": "America/New_York",
+    "days_of_the_week": [1, 2, 3, 4, 5],
+    "start_hour": "09:00",
+    "end_hour": "17:00"
+})
+
+make_request("POST", f"campaigns/{campaign_id}/status", {
+    "status": "ACTIVE"
+})
+print("✓ Campaign is ACTIVE!")
+```
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Campaign Setup Guide" icon="paper-plane" href="/guides/campaign-setup">
+    Advanced campaign configuration and optimization
+  </Card>
+  <Card title="Email Warmup Guide" icon="fire" href="/guides/email-warmup">
+    Warm up accounts for maximum deliverability
+  </Card>
+  <Card title="Lead Management Guide" icon="users" href="/guides/lead-management">
+    Import, segment, and manage leads at scale
+  </Card>
+  <Card title="Webhook Integration" icon="webhook" href="/guides/webhook-integration">
+    Connect SmartLead to your CRM and tools
+  </Card>
+</CardGroup>

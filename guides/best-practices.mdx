@@ -1,54 +1,364 @@
 ---
 title: "Best Practices Guide"
-description: "Comprehensive guide for best practices guide"
+description: "Production-ready patterns for SmartLead API integrations — covering deliverability, personalization, campaign architecture, scaling, and security"
 ---
 
 ## Overview
 
-This guide will help you understand and implement best practices guide.
+This guide covers the patterns and strategies that high-performing SmartLead integrations use in production. Whether you're building a custom outreach tool, syncing with your CRM, or automating campaign management, these best practices will help you get better results and avoid common pitfalls.
 
-## Prerequisites
+## Deliverability Best Practices
 
-- SmartLead account
-- API key
-- Basic understanding of REST APIs
+Deliverability is the foundation of cold email. If your emails land in spam, nothing else matters.
 
-## Step-by-Step Guide
+### Warm Up Every Account
+
+Never send campaign emails from an account that hasn't been warmed up for at least 14 days. For new domains, allow 21–30 days.
+
+```python Python
+# When creating an account, always enable warmup
+account_payload = {
+    "from_name": "Sarah Johnson",
+    "from_email": "sarah@yourcompany.com",
+    "smtp_host": "smtp.yourprovider.com",
+    "smtp_port": 587,
+    "imap_host": "imap.yourprovider.com",
+    "imap_port": 993,
+    "max_email_per_day": 40,
+    "warmup_enabled": True,
+    "total_warmup_per_day": 25,
+    "daily_rampup": 2,
+    "reply_rate_percentage": 30
+}
+```
+
+### Configure DNS Records
+
+Before sending any emails, ensure these DNS records are properly set up for every sending domain:
+
+| Record | What It Does | Priority |
+|---|---|---|
+| **SPF** | Authorizes which servers can send email from your domain | Required |
+| **DKIM** | Adds a cryptographic signature to verify email authenticity | Required |
+| **DMARC** | Defines how receivers handle SPF/DKIM failures | Required |
+| **Custom Tracking Domain** | Uses your domain for open/click tracking links | Recommended |
+
+<Warning>
+  Missing DNS records is the most common cause of deliverability issues. Set these up before enabling warmup — warming up an account with bad DNS records can actively harm your domain reputation.
+</Warning>
+
+### Rotate Multiple Accounts
+
+Use 3–5 email accounts per campaign to distribute sending volume and reduce the risk of any single account being flagged:
+
+```python Python
+# Link multiple accounts to a campaign
+response = requests.post(
+    f"{BASE_URL}/campaigns/{campaign_id}/email-accounts",
+    params={"api_key": API_KEY},
+    json={"email_account_ids": [101, 102, 103, 104, 105]}
+)
+```
+
+### Monitor Bounce Rates
+
+Set up automated monitoring and pause campaigns if bounce rates spike:
+
+```python Python
+def check_campaign_health(campaign_id):
+    """Monitor campaign health and alert on issues."""
+    response = requests.get(
+        f"{BASE_URL}/campaigns/{campaign_id}/analytics",
+        params={"api_key": API_KEY}
+    )
+    analytics = response.json()
+
+    total_sent = analytics.get("total_sent", 0)
+    total_bounced = analytics.get("total_bounced", 0)
+
+    if total_sent > 0:
+        bounce_rate = total_bounced / total_sent
+        if bounce_rate > 0.05:  # 5% threshold
+            print(f"WARNING: Bounce rate {bounce_rate:.1%} — consider pausing campaign")
+            # Optionally auto-pause
+            requests.post(
+                f"{BASE_URL}/campaigns/{campaign_id}/status",
+                params={"api_key": API_KEY},
+                json={"status": "PAUSED"}
+            )
+```
+
+## Personalization Best Practices
+
+### Use Custom Fields Extensively
+
+Generic cold emails get ignored. Use custom fields to make every email feel hand-written:
+
+```python Python
+lead = {
+    "email": "alex@company.com",
+    "first_name": "Alex",
+    "company_name": "Acme Corp",
+    "custom_fields": {
+        "job_title": "VP of Sales",
+        "industry": "B2B SaaS",
+        "pain_point": "low reply rates on outbound",
+        "mutual_connection": "Jordan at YC",
+        "recent_news": "Series B announcement",
+        "team_size": "50"
+    }
+}
+```
+
+Then reference them in your sequences:
+
+```
+Hi {{first_name}},
+
+Congrats on {{recent_news}} — exciting times at {{company_name}}.
+
+Given your role as {{job_title}}, I imagine {{pain_point}} is something you're thinking about.
+
+{{mutual_connection}} mentioned you might be open to exploring new approaches...
+```
+
+### Validate Personalization Data
+
+Always validate custom fields before import to prevent sending emails with empty placeholders:
+
+```python Python
+def validate_lead_personalization(lead, required_fields):
+    """Ensure all required personalization fields are present."""
+    missing = []
+    for field in required_fields:
+        if field in ["first_name", "last_name", "email", "company_name"]:
+            if not lead.get(field):
+                missing.append(field)
+        else:
+            if not lead.get("custom_fields", {}).get(field):
+                missing.append(field)
+    return missing
+
+# Check before import
+required = ["first_name", "company_name", "job_title", "industry"]
+for lead in lead_list:
+    missing = validate_lead_personalization(lead, required)
+    if missing:
+        print(f"Lead {lead['email']} missing: {', '.join(missing)}")
+```
+
+<Tip>
+  If a custom field might be empty for some leads, write your email copy to handle it gracefully. Instead of "I noticed {{company_name}} is hiring," use "I noticed your team is growing" as a fallback.
+</Tip>
+
+## Campaign Architecture
+
+### Structure Campaigns by Segment
+
+Create separate campaigns for each ICP segment rather than one massive campaign:
+
+```
+Campaign: Q1 SaaS — VP Sales — US (50-200 employees)
+Campaign: Q1 SaaS — VP Sales — US (200-500 employees)
+Campaign: Q1 SaaS — Head of Growth — US
+Campaign: Q1 Fintech — VP Sales — US
+```
+
+This lets you tailor sequences, measure performance by segment, and adjust strategy independently.
+
+### Sequence Design
+
+Follow these guidelines for high-performing sequences:
+
+| Step | Timing | Purpose | Length |
+|---|---|---|---|
+| Email 1 | Day 0 | Hook — introduce your value prop | 50-80 words |
+| Email 2 | Day 3 | Social proof — share a case study | 40-70 words |
+| Email 3 | Day 7 | New angle — different pain point | 40-60 words |
+| Email 4 | Day 14 | Break-up — final follow-up | 30-50 words |
+
+```python Python
+sequences = {
+    "sequences": [
+        {"seq_number": 1, "seq_delay_details": {"delay_in_days": 0}, ...},
+        {"seq_number": 2, "seq_delay_details": {"delay_in_days": 3}, ...},
+        {"seq_number": 3, "seq_delay_details": {"delay_in_days": 4}, ...},
+        {"seq_number": 4, "seq_delay_details": {"delay_in_days": 7}, ...}
+    ]
+}
+```
+
+### A/B Test Systematically
+
+Test one variable at a time and run tests until you have statistical significance:
+
+```python Python
+# Test subject lines on step 1
+sequence_step = {
+    "seq_number": 1,
+    "subject": "Quick question about {{company_name}}",
+    "email_body": "...",
+    "variants": [
+        {
+            "subject": "{{first_name}}, thought on {{company_name}}'s outbound",
+            "email_body": "...",  # Same body to isolate subject impact
+            "variant_distribution": 50
+        }
+    ]
+}
+```
+
+<Note>
+  Wait for at least 200 sends per variant before drawing conclusions. Small sample sizes produce unreliable results.
+</Note>
+
+## Scaling Best Practices
+
+### Batch All Operations
+
+Always use batch endpoints when working with multiple items:
+
+```python Python
+# Import leads in batches of 400
+batch_size = 400
+for i in range(0, len(all_leads), batch_size):
+    batch = all_leads[i:i + batch_size]
+    result = make_request("POST", f"campaigns/{campaign_id}/leads", {
+        "lead_list": batch,
+        "settings": {
+            "ignore_global_block_list": False,
+            "ignore_unsubscribe_list": False,
+            "ignore_duplicate_leads_in_other_campaign": False
+        }
+    })
+    time.sleep(1)  # Brief pause between batches
+```
+
+### Use Webhooks for Real-Time Data
+
+Don't poll the API for updates. Set up webhooks and react to events:
+
+```python Python
+# Register webhook once
+make_request("POST", "webhooks", {
+    "webhook_url": "https://yourapp.com/hooks/smartlead",
+    "event_types": ["EMAIL_REPLIED", "EMAIL_BOUNCED", "LEAD_UNSUBSCRIBED"],
+    "is_active": True
+})
+```
+
+### Cache Static Data
+
+Cache data that rarely changes to minimize API calls:
+
+```python Python
+# Cache campaign list (changes infrequently)
+campaigns = cached_request("campaigns/", ttl_seconds=300)
+
+# Cache email accounts (changes infrequently)
+accounts = cached_request("email-accounts", ttl_seconds=600)
+
+# Don't cache analytics (changes with every send)
+analytics = make_request("GET", f"campaigns/{cid}/analytics")
+```
+
+## Security Best Practices
+
+### Protect Your API Key
+
+```python Python
+# Good: Environment variable
+API_KEY = os.getenv("SMARTLEAD_API_KEY")
+
+# Bad: Hardcoded in source
+API_KEY = "sl_abc123..."  # Never do this
+```
+
+<Warning>
+  Never commit API keys to version control, include them in client-side code, or share them in Slack messages. Use environment variables or a secrets manager like AWS Secrets Manager, HashiCorp Vault, or Doppler.
+</Warning>
+
+### Validate Webhook Sources
+
+Verify that incoming webhooks actually come from SmartLead:
+
+```python Python
+import hmac
+import hashlib
+
+def verify_webhook(payload, signature, secret):
+    """Verify webhook signature to prevent spoofing."""
+    expected = hmac.new(
+        secret.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature)
+
+@app.route('/webhooks/smartlead', methods=['POST'])
+def handle_webhook():
+    signature = request.headers.get('X-Smartlead-Signature', '')
+    if not verify_webhook(request.data.decode(), signature, WEBHOOK_SECRET):
+        return jsonify({'error': 'Invalid signature'}), 401
+
+    # Process webhook...
+```
+
+### Use Least-Privilege Access
+
+If you have multiple integrations, create separate API keys for each with appropriate access scopes. Rotate keys periodically and revoke unused keys.
+
+## Production Checklist
+
+Before going live, verify:
 
 <Steps>
-  <Step title="Step 1">
-    First step description
+  <Step title="DNS records configured">
+    SPF, DKIM, and DMARC are set up for all sending domains.
   </Step>
-  
-  <Step title="Step 2">
-    Second step description
+
+  <Step title="Accounts warmed up">
+    All email accounts have been warming for 14+ days with good inbox placement.
+  </Step>
+
+  <Step title="Error handling in place">
+    Your integration handles 400, 401, 404, 429, and 500 errors gracefully with retries.
+  </Step>
+
+  <Step title="Rate limiting implemented">
+    Client-side rate limiting prevents 429 errors. Webhooks replace polling where possible.
+  </Step>
+
+  <Step title="Monitoring active">
+    Bounce rates, reply rates, and campaign health are monitored with alerts.
+  </Step>
+
+  <Step title="API key secured">
+    Keys stored in environment variables or secrets manager. Never in source code.
+  </Step>
+
+  <Step title="Webhook endpoint tested">
+    Webhook handler processes all event types, returns 200, and handles duplicates.
+  </Step>
+
+  <Step title="Lead data validated">
+    All leads are email-verified and personalization fields are validated before import.
   </Step>
 </Steps>
 
-## Code Example
+## What's Next?
 
-```python Python
-import requests
-
-API_KEY = "YOUR_API_KEY"
-# Your code here
-```
-
-## Best Practices
-
-<Tip>
-  Best practice tip here
-</Tip>
-
-## Common Issues
-
-<AccordionGroup>
-  <Accordion title="Issue 1">
-    Solution here
-  </Accordion>
-</AccordionGroup>
-
-## Related Resources
-
-- [API Reference](#)
-- [Other Guides](#)
+<CardGroup cols={2}>
+  <Card title="Getting Started Guide" icon="rocket" href="/guides/getting-started">
+    Build your first campaign from scratch
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference">
+    Explore all available endpoints
+  </Card>
+  <Card title="Error Handling" icon="shield" href="/guides/error-handling">
+    Comprehensive error handling patterns
+  </Card>
+  <Card title="Rate Limits" icon="gauge" href="/guides/rate-limits">
+    Optimize your request patterns
+  </Card>
+</CardGroup>
