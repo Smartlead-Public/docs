@@ -1,8 +1,12 @@
 ---
-title: "Push to List"
-api: "POST https://server.smartlead.ai/api/v1/smart-prospect/push-to-list"
-description: "Push prospect search results to a lead list"
+title: "Push Prospects to List"
+api: "POST https://server.smartlead.ai/api/v1/search-email-leads/push-to-list"
+description: "Push enriched Smart Prospect leads to a lead list"
 ---
+
+<Note>
+After enriching leads through Smart Prospect, push them to a lead list for campaign use. Provide either a filter ID (from a saved search) or specific lead IDs.
+</Note>
 
 ## Query Parameters
 
@@ -10,29 +14,58 @@ description: "Push prospect search results to a lead list"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="search_id" type="number" required>
-  ID of the saved search
+<ParamField body="listId" type="number" required>
+  Target lead list ID to push prospects into
 </ParamField>
 
-<ParamField body="list_id" type="number" required>
-  Target lead list ID
+<ParamField body="filterId" type="number">
+  ID of a saved search filter. Provide either `filterId` or `leadIds`, not both.
 </ParamField>
 
-<ParamField body="lead_ids" type="array">
-  Optional array of specific lead IDs to push. If omitted, pushes all results
+<ParamField body="leadIds" type="array">
+  Array of prospect lead ID strings. 1-10,000 items. Provide either `filterId` or `leadIds`, not both.
+</ParamField>
+
+<ParamField body="verification_status" type="string">
+  Filter by email verification status before pushing
+</ParamField>
+
+<ParamField body="catch_all_status" type="string">
+  Filter by catch-all status before pushing
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/smart-prospect/push-to-list?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/search-email-leads/push-to-list?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"search_id": 100, "list_id": 201}'
+  -d '{
+    "listId": 500,
+    "leadIds": ["prospect_abc123", "prospect_def456"]
+  }'
 ```
 
 </RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
+</ResponseField>
 
 <ResponseExample>
 
@@ -40,9 +73,15 @@ curl -X POST "https://server.smartlead.ai/api/v1/smart-prospect/push-to-list?api
 {
   "ok": true,
   "data": {
-    "pushed": 50,
-    "credits_used": 50
+    "total_pushed": 2,
+    "duplicates": 0
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

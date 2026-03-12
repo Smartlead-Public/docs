@@ -1,18 +1,12 @@
 ---
-title: "Assign Tag to Email Account"
-api: "POST https://server.smartlead.ai/api/v1/email-accounts/{account_id}/tags/{tag_id}"
-description: "Assign an existing tag to an email account"
+title: "Assign Tags to Email Accounts"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/tag-mapping"
+description: "Add tags to one or more email accounts"
 ---
 
-## Path Parameters
-
-<ParamField path="account_id" type="number" required>
-  The email account ID
-</ParamField>
-
-<ParamField path="tag_id" type="number" required>
-  The tag ID to assign
-</ParamField>
+<Note>
+Assign existing tags to email accounts for better organization. You can tag up to 25 email accounts at once.
+</Note>
 
 ## Query Parameters
 
@@ -20,25 +14,56 @@ description: "Assign an existing tag to an email account"
   Your SmartLead API key
 </ParamField>
 
+## Request Body
+
+<ParamField body="email_account_ids" type="array" required>
+  Array of email account IDs to tag. Minimum 1, maximum 25 accounts.
+</ParamField>
+
+<ParamField body="tag_ids" type="array" required>
+  Array of tag IDs to assign. Minimum 1 tag required.
+</ParamField>
+
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/100/tags/501?api_key=YOUR_KEY"
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/tag-mapping?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"email_account_ids": [101, 102, 103], "tag_ids": [1, 2]}'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "ok": true
+  "ok": true,
+  "message": "Tags assigned successfully"
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

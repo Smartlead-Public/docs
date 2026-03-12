@@ -1,14 +1,12 @@
 ---
 title: "Update Client"
-api: "PATCH https://server.smartlead.ai/api/v1/clients/{client_id}"
-description: "Update client details"
+api: "POST https://server.smartlead.ai/api/v1/client/save"
+description: "Update an existing client sub-account by providing the client ID"
 ---
 
-## Path Parameters
-
-<ParamField path="client_id" type="number" required>
-  The unique identifier of the client
-</ParamField>
+<Note>
+To update a client, include the `id` field in the request body along with the fields you want to change. The same endpoint is used for both creating and updating clients.
+</Note>
 
 ## Query Parameters
 
@@ -16,34 +14,83 @@ description: "Update client details"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="name" type="string">
-  Updated client name
+<ParamField body="id" type="number" required>
+  The ID of the client to update. This makes the request an update instead of a create.
 </ParamField>
 
-<ParamField body="permissions" type="object">
-  Updated permissions
+<ParamField body="email" type="string" required>
+  Client email address
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Client display name
+</ParamField>
+
+<ParamField body="password" type="string">
+  New login password for the client
+</ParamField>
+
+<ParamField body="logo" type="string">
+  Base64 encoded logo image
+</ParamField>
+
+<ParamField body="logo_url" type="string">
+  URL to the client logo image
+</ParamField>
+
+<ParamField body="uuid" type="string">
+  Unique identifier for the client
+</ParamField>
+
+<ParamField body="permission" type="array">
+  Array of permission strings
+</ParamField>
+
+<ParamField body="is_credit_assigned" type="boolean">
+  Whether credits are assigned to this client
+</ParamField>
+
+<ParamField body="email_credits" type="number">
+  Email credits allocated
+</ParamField>
+
+<ParamField body="lead_credits" type="number">
+  Lead credits allocated
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X PATCH "https://server.smartlead.ai/api/v1/clients/301?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/client/save?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Acme Agency LLC"}'
+  -d '{
+    "id": 301,
+    "email": "admin@acme.com",
+    "name": "Acme Agency Updated",
+    "email_credits": 20000
+  }'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  Updated client object
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -53,8 +100,15 @@ curl -X PATCH "https://server.smartlead.ai/api/v1/clients/301?api_key=YOUR_KEY" 
   "ok": true,
   "data": {
     "id": 301,
-    "name": "Acme Agency LLC"
+    "name": "Acme Agency Updated",
+    "email": "admin@acme.com"
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

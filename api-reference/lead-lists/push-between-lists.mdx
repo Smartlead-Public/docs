@@ -1,45 +1,57 @@
 ---
-title: "Push Leads Between Lists"
-api: "POST https://server.smartlead.ai/api/v1/lead-lists/{list_id}/push"
-description: "Push leads from one list to another"
+title: "Move Leads Between Lists"
+api: "POST https://server.smartlead.ai/api/v1/leads/leads/push-between-lists"
+description: "Copy or move leads from one list to another"
 ---
 
-## Path Parameters
+## Request Body
 
-<ParamField path="list_id" type="number" required>
-  Source list ID to push leads from
+<ParamField body="action" type="string" required>
+  Operation type: `copy` or `move`
 </ParamField>
 
-## Query Parameters
-
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+<ParamField body="leadIds" type="array">
+  Specific lead IDs to transfer. Array of numbers, 1-10,000 items. Provide either `leadIds` or `fromListId`.
 </ParamField>
 
-## Body Parameters
+<ParamField body="fromListId" type="number">
+  Source list ID to transfer all leads from. Provide either `leadIds` or `fromListId`.
+</ParamField>
 
-<ParamField body="target_list_id" type="number" required>
-  Destination list ID to push leads to
+<ParamField body="toListId" type="number" required>
+  Destination list ID to transfer leads to
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/lead-lists/201/push?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/leads/leads/push-between-lists?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"target_list_id": 202}'
+  -d '{
+    "action": "move",
+    "fromListId": 500,
+    "toListId": 501
+  }'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  Push summary with counts
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -48,8 +60,14 @@ curl -X POST "https://server.smartlead.ai/api/v1/lead-lists/201/push?api_key=YOU
 {
   "ok": true,
   "data": {
-    "pushed": 50
+    "total_leads_moved": 1250
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

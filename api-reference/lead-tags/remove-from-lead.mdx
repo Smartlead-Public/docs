@@ -1,44 +1,53 @@
 ---
 title: "Remove Tag from Lead"
-api: "DELETE https://server.smartlead.ai/api/v1/leads/{lead_id}/tags/{tag_id}"
-description: "Remove a tag from a specific lead"
+api: "DELETE https://server.smartlead.ai/api/v1/crm/leads/tags/{tagMappingId}"
+description: "Remove a specific tag mapping from a lead"
 ---
 
 ## Path Parameters
 
-<ParamField path="lead_id" type="number" required>
-  The unique identifier of the lead
-</ParamField>
-
-<ParamField path="tag_id" type="number" required>
-  The unique identifier of the tag
-</ParamField>
-
-## Query Parameters
-
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+<ParamField path="tagMappingId" type="number" required>
+  The tag mapping ID (not the tag ID). Get this from the Get Lead Tags response.
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X DELETE "https://server.smartlead.ai/api/v1/leads/123/tags/101?api_key=YOUR_KEY"
+curl -X DELETE "https://server.smartlead.ai/api/v1/crm/leads/tags/789?api_key=YOUR_KEY"
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "ok": true
+  "ok": true,
+  "message": "Tag removed from lead successfully"
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

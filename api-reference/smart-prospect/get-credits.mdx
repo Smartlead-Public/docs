@@ -1,8 +1,12 @@
 ---
-title: "Get Credits"
-api: "GET https://server.smartlead.ai/api/v1/smart-prospect/credits"
-description: "Retrieve the current Smart Prospect credit balance for your account"
+title: "Get Prospect Credits"
+api: "GET https://server.smartlead.ai/api/v1/search-email-leads/get-credits"
+description: "Get available Smart Prospect credits for your account"
 ---
+
+<Note>
+Check your remaining Smart Prospect credits. Credits are consumed when enriching or searching for lead data.
+</Note>
 
 ## Query Parameters
 
@@ -13,10 +17,28 @@ description: "Retrieve the current Smart Prospect credit balance for your accoun
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/smart-prospect/credits?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/search-email-leads/get-credits?api_key=YOUR_KEY"
 ```
 
 </RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
+</ResponseField>
 
 <ResponseExample>
 
@@ -25,9 +47,15 @@ curl "https://server.smartlead.ai/api/v1/smart-prospect/credits?api_key=YOUR_KEY
   "ok": true,
   "data": {
     "available_credits": 5000,
-    "used_credits": 1250,
-    "total_credits": 6250
+    "used_credits": 3500,
+    "total_credits": 8500
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

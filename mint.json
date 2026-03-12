@@ -111,18 +111,14 @@
       "group": "Lead Notes",
       "pages": [
         "api-reference/lead-notes/create",
-        "api-reference/lead-notes/get-all",
-        "api-reference/lead-notes/update",
-        "api-reference/lead-notes/delete"
+        "api-reference/lead-notes/get-all"
       ]
     },
     {
       "group": "Lead Tasks",
       "pages": [
         "api-reference/lead-tasks/create",
-        "api-reference/lead-tasks/get-all",
-        "api-reference/lead-tasks/update",
-        "api-reference/lead-tasks/delete"
+        "api-reference/lead-tasks/get-all"
       ]
     },
     {
@@ -131,8 +127,7 @@
         "api-reference/lead-tags/create",
         "api-reference/lead-tags/get-all",
         "api-reference/lead-tags/add-to-lead",
-        "api-reference/lead-tags/remove-from-lead",
-        "api-reference/lead-tags/delete"
+        "api-reference/lead-tags/remove-from-lead"
       ]
     },
     {
@@ -295,9 +290,7 @@
       "pages": [
         "api-reference/clients/create",
         "api-reference/clients/get-all",
-        "api-reference/clients/get-by-id",
         "api-reference/clients/update",
-        "api-reference/clients/delete",
         "api-reference/clients/api-keys"
       ]
     },
@@ -306,18 +299,8 @@
       "pages": [
         "api-reference/smart-prospect/get-credits",
         "api-reference/smart-prospect/update-credits",
-        "api-reference/smart-prospect/search-people",
-        "api-reference/smart-prospect/search-companies",
-        "api-reference/smart-prospect/get-all-searches",
-        "api-reference/smart-prospect/get-search-by-id",
-        "api-reference/smart-prospect/save-search",
-        "api-reference/smart-prospect/delete-search",
         "api-reference/smart-prospect/enrich-lead",
         "api-reference/smart-prospect/bulk-enrich",
-        "api-reference/smart-prospect/get-enrichment-status",
-        "api-reference/smart-prospect/export-enriched",
-        "api-reference/smart-prospect/get-lists",
-        "api-reference/smart-prospect/get-list-leads",
         "api-reference/smart-prospect/push-to-list",
         "api-reference/smart-prospect/push-to-campaign"
       ]

@@ -1,14 +1,22 @@
 ---
 title: "Manage Client API Keys"
-api: "POST https://server.smartlead.ai/api/v1/clients/{client_id}/api-keys"
-description: "Generate or manage API keys for a specific client"
+api: "POST https://server.smartlead.ai/api/v1/client/api-key"
+description: "Create, list, delete, and reset API keys for client sub-accounts"
 ---
 
-## Path Parameters
+<Note>
+Each client can have multiple API keys with custom names. Use these endpoints to manage programmatic access for your client sub-accounts.
+</Note>
 
-<ParamField path="client_id" type="number" required>
-  The unique identifier of the client
-</ParamField>
+## Overview
+
+Client API keys provide programmatic access to SmartLead on behalf of a specific client. You can create multiple keys per client, filter by status, and reset keys as needed.
+
+**Available Operations:**
+- **Create**: POST `/api/v1/client/api-key` - Generate a new API key
+- **List**: GET `/api/v1/client/api-key` - List all client API keys
+- **Delete**: DELETE `/api/v1/client/api-key/:id` - Remove an API key
+- **Reset**: PUT `/api/v1/client/api-key/reset/:id` - Regenerate an API key
 
 ## Query Parameters
 
@@ -16,30 +24,90 @@ description: "Generate or manage API keys for a specific client"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="action" type="string" required>
-  Action to perform. Values: `generate`, `revoke`
+<ParamField body="clientId" type="number" required>
+  The ID of the client to create the API key for
+</ParamField>
+
+<ParamField body="keyName" type="string" required>
+  A descriptive name for the API key. Must match pattern: letters, numbers, spaces, hyphens, and underscores only.
+</ParamField>
+
+## List Client API Keys
+
+```
+GET https://server.smartlead.ai/api/v1/client/api-key
+```
+
+### Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="clientId" type="number">
+  Filter by client ID
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by key status. Values: `active`, `inactive`
+</ParamField>
+
+<ParamField query="keyName" type="string">
+  Filter by key name (partial match)
+</ParamField>
+
+## Delete Client API Key
+
+```
+DELETE https://server.smartlead.ai/api/v1/client/api-key/:id
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The ID of the API key to delete
+</ParamField>
+
+## Reset Client API Key
+
+```
+PUT https://server.smartlead.ai/api/v1/client/api-key/reset/:id
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The ID of the API key to reset. This generates a new key value while keeping the same key record.
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/clients/301/api-keys?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/client/api-key?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"action": "generate"}'
+  -d '{"clientId": 301, "keyName": "Production Key"}'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  API key details
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -48,9 +116,19 @@ curl -X POST "https://server.smartlead.ai/api/v1/clients/301/api-keys?api_key=YO
 {
   "ok": true,
   "data": {
-    "api_key": "cl_new_xxxxxxxx",
+    "id": 45,
+    "client_id": 301,
+    "key_name": "Production Key",
+    "api_key": "cl_live_xxxxxxxxxxxxxxxx",
+    "status": "active",
     "created_at": "2025-12-01T10:00:00.000Z"
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

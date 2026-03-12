@@ -1,7 +1,7 @@
 ---
-title: "Update Credits"
-api: "POST https://server.smartlead.ai/api/v1/smart-prospect/credits"
-description: "Update the Smart Prospect credit allocation"
+title: "Update Prospect Credits"
+api: "PATCH https://server.smartlead.ai/api/v1/search-email-leads/update-credits"
+description: "Increase or decrease Smart Prospect credits for your account"
 ---
 
 ## Query Parameters
@@ -10,21 +10,43 @@ description: "Update the Smart Prospect credit allocation"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="credits" type="number" required>
-  Number of credits to add or set
+<ParamField body="amount" type="number" required>
+  Number of credits to add or subtract. Must be a positive integer >= 1.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Operation type. Values: `increase` (add credits) or `decrease` (subtract credits)
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/smart-prospect/credits?api_key=YOUR_KEY" \
+curl -X PATCH "https://server.smartlead.ai/api/v1/search-email-leads/update-credits?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"credits": 1000}'
+  -d '{"amount": 1000, "type": "increase"}'
 ```
 
 </RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
+</ResponseField>
 
 <ResponseExample>
 
@@ -32,8 +54,16 @@ curl -X POST "https://server.smartlead.ai/api/v1/smart-prospect/credits?api_key=
 {
   "ok": true,
   "data": {
-    "available_credits": 6000
+    "available_credits": 6000,
+    "used_credits": 3500,
+    "total_credits": 9500
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

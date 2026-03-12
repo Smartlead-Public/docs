@@ -1,45 +1,47 @@
 ---
 title: "Update Lead List"
-api: "PATCH https://server.smartlead.ai/api/v1/lead-lists/{list_id}"
-description: "Update the name or properties of a lead list"
+api: "PUT https://server.smartlead.ai/api/v1/lead-list/{id}"
+description: "Update the name of an existing lead list"
 ---
 
 ## Path Parameters
 
-<ParamField path="list_id" type="number" required>
-  The unique identifier of the lead list
+<ParamField path="id" type="number" required>
+  The unique ID of the lead list to update
 </ParamField>
 
-## Query Parameters
+## Request Body
 
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
-</ParamField>
-
-## Body Parameters
-
-<ParamField body="name" type="string" required>
+<ParamField body="listName" type="string" required>
   New name for the lead list
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X PATCH "https://server.smartlead.ai/api/v1/lead-lists/201?api_key=YOUR_KEY" \
+curl -X PUT "https://server.smartlead.ai/api/v1/lead-list/500?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Enterprise Prospects Q1 - Updated"}'
+  -d '{"listName": "Q1 2025 Enterprise Prospects - Updated"}'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  Updated list object
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -48,9 +50,15 @@ curl -X PATCH "https://server.smartlead.ai/api/v1/lead-lists/201?api_key=YOUR_KE
 {
   "ok": true,
   "data": {
-    "id": 201,
-    "name": "Enterprise Prospects Q1 - Updated"
+    "id": 500,
+    "name": "Q1 2025 Enterprise Prospects - Updated"
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

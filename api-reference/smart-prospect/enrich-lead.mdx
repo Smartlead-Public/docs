@@ -1,46 +1,73 @@
 ---
-title: "Enrich Lead"
-api: "POST https://server.smartlead.ai/api/v1/smart-prospect/enrich"
-description: "Enrich a single lead with additional data (email, phone, company info)"
+title: "Enrich Leads (API Key)"
+api: "POST https://server.smartlead.ai/api/v1/lead-enrichment/fetch"
+description: "Enrich lead data using an API key with webhook callback for results"
 ---
+
+<Note>
+Submit a lead enrichment request via API key authentication. Results are delivered asynchronously to your specified webhook URL.
+</Note>
 
 ## Query Parameters
 
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+<ParamField query="apiKey" type="string" required>
+  Your SmartLead API key (note: parameter name is `apiKey`, not `api_key`)
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="email" type="string">
-  Lead email to enrich
+<ParamField body="input" type="object" required>
+  Input data for enrichment (e.g., company domain, LinkedIn URL, email)
 </ParamField>
 
-<ParamField body="linkedin_url" type="string">
-  LinkedIn profile URL
+<ParamField body="name" type="string">
+  A name to identify this enrichment request
 </ParamField>
 
-<ParamField body="first_name" type="string">
-  First name (used with company for lookup)
+<ParamField body="type" type="object" required>
+  Enrichment type configuration specifying what data to look up
 </ParamField>
 
-<ParamField body="last_name" type="string">
-  Last name (used with company for lookup)
+<ParamField body="leadEnrichmentId" type="number">
+  Existing enrichment ID to update/continue
 </ParamField>
 
-<ParamField body="company" type="string">
-  Company name or domain
+<ParamField body="webhookUrl" type="string" required>
+  URL to receive enrichment results when processing completes
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/smart-prospect/enrich?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/lead-enrichment/fetch?apiKey=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"email": "jane@techco.com"}'
+  -d '{
+    "input": {"domain": "acme.com"},
+    "name": "ACME Corp Enrichment",
+    "type": {"people": true, "company": true},
+    "webhookUrl": "https://yourapp.com/webhook/enrichment"
+  }'
 ```
 
 </RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
+</ResponseField>
 
 <ResponseExample>
 
@@ -48,15 +75,16 @@ curl -X POST "https://server.smartlead.ai/api/v1/smart-prospect/enrich?api_key=Y
 {
   "ok": true,
   "data": {
-    "email": "jane@techco.com",
-    "first_name": "Jane",
-    "last_name": "Smith",
-    "title": "CEO",
-    "company": "TechCo",
-    "phone": "+1234567890",
-    "linkedin_url": "https://linkedin.com/in/janesmith",
-    "credits_used": 1
+    "enrichment_id": 12345,
+    "status": "processing",
+    "message": "Enrichment started. Results will be sent to your webhook URL."
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

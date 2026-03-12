@@ -1,8 +1,12 @@
 ---
 title: "Get All Clients"
-api: "GET https://server.smartlead.ai/api/v1/clients"
-description: "Retrieve all clients under your account"
+api: "GET https://server.smartlead.ai/api/v1/client/"
+description: "Retrieve all client sub-accounts under your main account"
 ---
+
+<Note>
+Returns a list of all whitelabel client sub-accounts. Use this to manage and monitor your agency clients.
+</Note>
 
 ## Query Parameters
 
@@ -13,19 +17,27 @@ description: "Retrieve all clients under your account"
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/clients?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/client/?api_key=YOUR_KEY"
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  Array of client objects
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -34,9 +46,25 @@ curl "https://server.smartlead.ai/api/v1/clients?api_key=YOUR_KEY"
 {
   "ok": true,
   "data": [
-    {"id": 301, "name": "Acme Agency", "email": "admin@acme.com"},
-    {"id": 302, "name": "Beta Co", "email": "admin@beta.com"}
+    {
+      "id": 301,
+      "name": "Acme Agency",
+      "email": "admin@acme.com",
+      "created_at": "2025-12-01T10:00:00.000Z"
+    },
+    {
+      "id": 302,
+      "name": "Beta Corp",
+      "email": "admin@beta.com",
+      "created_at": "2025-12-05T14:00:00.000Z"
+    }
   ]
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

@@ -1,44 +1,59 @@
 ---
-title: "Add Tag to Lead"
-api: "POST https://server.smartlead.ai/api/v1/leads/{lead_id}/tags/{tag_id}"
-description: "Assign an existing tag to a specific lead"
+title: "Add Tags to Lead"
+api: "POST https://server.smartlead.ai/api/v1/crm/leads/tags"
+description: "Assign one or more tags to a specific lead"
 ---
 
-## Path Parameters
+## Request Body
 
-<ParamField path="lead_id" type="number" required>
-  The unique identifier of the lead
+<ParamField body="leadId" type="number" required>
+  The lead ID to add tags to
 </ParamField>
 
-<ParamField path="tag_id" type="number" required>
-  The unique identifier of the tag
-</ParamField>
-
-## Query Parameters
-
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+<ParamField body="tagIds" type="array" required>
+  Array of tag IDs to assign to the lead
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/leads/123/tags/101?api_key=YOUR_KEY"
+curl -X POST "https://server.smartlead.ai/api/v1/crm/leads/tags?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"leadId": 123, "tagIds": [1, 2, 3]}'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "ok": true
+  "ok": true,
+  "message": "Tags added to lead successfully"
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

@@ -1,31 +1,45 @@
 ---
 title: "Get Email Account Tags"
-api: "GET https://server.smartlead.ai/api/v1/email-accounts/tags"
-description: "Retrieve all email account tags"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/tag-list"
+description: "Get tags associated with specific email accounts by email address"
 ---
 
-## Query Parameters
+<Note>
+Retrieve tag information for email accounts. Provide email addresses to get their associated tags and account IDs.
+</Note>
 
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+## Request Body
+
+<ParamField body="email_ids" type="array" required>
+  Array of email address strings to look up. Minimum 1 email required.
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/email-accounts/tags?api_key=YOUR_KEY"
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/tag-list" \
+  -H "Content-Type: application/json" \
+  -d '{"email_ids": ["sender@company.com", "outreach@company.com"]}'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  Array of tag objects
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -34,9 +48,21 @@ curl "https://server.smartlead.ai/api/v1/email-accounts/tags?api_key=YOUR_KEY"
 {
   "ok": true,
   "data": [
-    {"id": 501, "name": "Production Accounts"},
-    {"id": 502, "name": "Warmup Pool"}
+    {
+      "email_account_id": 101,
+      "from_email": "sender@company.com",
+      "tags": [
+        {"id": 1, "name": "Primary Senders", "color": "#4CAF50"},
+        {"id": 2, "name": "Campaign A", "color": "#2196F3"}
+      ]
+    }
   ]
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

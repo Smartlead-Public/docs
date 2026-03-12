@@ -1,13 +1,17 @@
 ---
 title: "Import Leads to List"
-api: "POST https://server.smartlead.ai/api/v1/lead-lists/{list_id}/leads"
+api: "POST https://server.smartlead.ai/api/v1/lead-list/{id}/import"
 description: "Import leads into a specific lead list"
 ---
 
+<Note>
+Bulk import leads into a list. Each lead object should contain at least an email field. Custom fields and CSV settings can be configured.
+</Note>
+
 ## Path Parameters
 
-<ParamField path="list_id" type="number" required>
-  The unique identifier of the lead list
+<ParamField path="id" type="number" required>
+  The ID of the lead list to import into
 </ParamField>
 
 ## Query Parameters
@@ -16,30 +20,63 @@ description: "Import leads into a specific lead list"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="leads" type="array" required>
-  Array of lead objects. Each must include `email` and can include `first_name`, `last_name`, `company_name`, `phone_number`, and custom fields
+<ParamField body="leadList" type="array" required>
+  Array of lead objects to import. Each lead should contain at minimum an email field, plus any additional fields like first_name, last_name, company, etc.
+</ParamField>
+
+<ParamField body="fileName" type="string" required>
+  A name to identify this import batch (e.g., the source CSV filename)
+</ParamField>
+
+<ParamField body="emailFieldsAdded" type="object">
+  Mapping of email fields in your data
+</ParamField>
+
+<ParamField body="customFields" type="object">
+  Custom field definitions for your lead data
+</ParamField>
+
+<ParamField body="csvSettings" type="object">
+  Import settings including `ignoreGlobalBlockList` (boolean) to skip blocked domain checking
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/lead-lists/201/leads?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/lead-list/500/import?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"leads": [{"email": "john@example.com", "first_name": "John", "last_name": "Doe"}]}'
+  -d '{
+    "leadList": [
+      {"email": "john@company.com", "first_name": "John", "last_name": "Doe", "company": "ACME Corp"},
+      {"email": "jane@startup.io", "first_name": "Jane", "last_name": "Smith", "company": "Startup Inc"}
+    ],
+    "fileName": "enterprise-prospects-jan2025.csv",
+    "csvSettings": {
+      "ignoreGlobalBlockList": false
+    }
+  }'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  Import summary with counts of added and skipped leads
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -48,10 +85,17 @@ curl -X POST "https://server.smartlead.ai/api/v1/lead-lists/201/leads?api_key=YO
 {
   "ok": true,
   "data": {
-    "added": 1,
-    "skipped": 0,
-    "total": 1
+    "total_leads": 2,
+    "imported": 2,
+    "duplicates": 0,
+    "blocked": 0
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

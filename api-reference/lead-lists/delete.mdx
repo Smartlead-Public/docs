@@ -1,40 +1,53 @@
 ---
 title: "Delete Lead List"
-api: "DELETE https://server.smartlead.ai/api/v1/lead-lists/{list_id}"
-description: "Permanently delete a lead list"
+api: "DELETE https://server.smartlead.ai/api/v1/lead-list/{id}"
+description: "Delete a lead list by its ID"
 ---
 
 ## Path Parameters
 
-<ParamField path="list_id" type="number" required>
-  The unique identifier of the lead list
-</ParamField>
-
-## Query Parameters
-
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+<ParamField path="id" type="number" required>
+  The unique ID of the lead list to delete
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X DELETE "https://server.smartlead.ai/api/v1/lead-lists/201?api_key=YOUR_KEY"
+curl -X DELETE "https://server.smartlead.ai/api/v1/lead-list/500?api_key=YOUR_KEY"
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "ok": true
+  "ok": true,
+  "message": "Lead list deleted successfully"
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

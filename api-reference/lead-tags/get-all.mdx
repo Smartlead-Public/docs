@@ -1,31 +1,39 @@
 ---
-title: "Get All Tags"
-api: "GET https://server.smartlead.ai/api/v1/leads/tags"
-description: "Retrieve all available lead tags"
+title: "Get Lead Tags"
+api: "GET https://server.smartlead.ai/api/v1/crm/leads/tags"
+description: "Get tags associated with a specific lead"
 ---
 
 ## Query Parameters
 
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+<ParamField query="leadId" type="number">
+  The lead ID to retrieve tags for. If omitted, returns all available tags.
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/leads/tags?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/crm/leads/tags?api_key=YOUR_KEY&leadId=123"
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  Array of tag objects
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -34,9 +42,25 @@ curl "https://server.smartlead.ai/api/v1/leads/tags?api_key=YOUR_KEY"
 {
   "ok": true,
   "data": [
-    {"id": 101, "name": "Hot Lead", "color": "#FF5733"},
-    {"id": 102, "name": "Qualified", "color": "#28A745"}
+    {
+      "id": 1,
+      "tag_mapping_id": 789,
+      "name": "VIP",
+      "color": "#FF5733"
+    },
+    {
+      "id": 2,
+      "tag_mapping_id": 790,
+      "name": "Enterprise",
+      "color": "#4CAF50"
+    }
   ]
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

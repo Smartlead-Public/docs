@@ -1,14 +1,8 @@
 ---
-title: "Assign Tags to Lead List"
-api: "POST https://server.smartlead.ai/api/v1/lead-lists/{list_id}/tags"
-description: "Assign one or more tags to all leads in a list"
+title: "Assign Tags to Lead Lists"
+api: "POST https://server.smartlead.ai/api/v1/lead-list/assign-tags"
+description: "Add or remove tags from one or more lead lists"
 ---
-
-## Path Parameters
-
-<ParamField path="list_id" type="number" required>
-  Lead list ID
-</ParamField>
 
 ## Query Parameters
 
@@ -16,33 +10,60 @@ description: "Assign one or more tags to all leads in a list"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="tag_ids" type="array" required>
-  Array of tag IDs to assign to all leads in the list
+<ParamField body="listIds" type="array" required>
+  Array of lead list IDs to tag. 1-10 lists allowed.
+</ParamField>
+
+<ParamField body="tagIds" type="array" required>
+  Array of tag IDs to assign. 1-10 tags allowed.
+</ParamField>
+
+<ParamField body="removeTagIds" type="array">
+  Array of tag IDs to remove. 1-10 tags allowed.
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/lead-lists/201/tags?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/lead-list/assign-tags?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"tag_ids": [101, 102]}'
+  -d '{"listIds": [500, 501], "tagIds": [1, 2], "removeTagIds": [3]}'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "ok": true
+  "ok": true,
+  "message": "Tags updated successfully"
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

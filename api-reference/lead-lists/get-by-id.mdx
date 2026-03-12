@@ -1,37 +1,39 @@
 ---
 title: "Get Lead List by ID"
-api: "GET https://server.smartlead.ai/api/v1/lead-lists/{list_id}"
-description: "Retrieve details of a specific lead list"
+api: "GET https://server.smartlead.ai/api/v1/lead-list/{id}"
+description: "Retrieve details of a specific lead list by its ID"
 ---
 
 ## Path Parameters
 
-<ParamField path="list_id" type="number" required>
-  The unique identifier of the lead list
-</ParamField>
-
-## Query Parameters
-
-<ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+<ParamField path="id" type="number" required>
+  The unique ID of the lead list
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/lead-lists/201?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/lead-list/500?api_key=YOUR_KEY"
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  Lead list details including name, count, and metadata
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -40,11 +42,18 @@ curl "https://server.smartlead.ai/api/v1/lead-lists/201?api_key=YOUR_KEY"
 {
   "ok": true,
   "data": {
-    "id": 201,
-    "name": "Enterprise Prospects Q1",
-    "lead_count": 150,
-    "created_at": "2025-12-01T10:00:00.000Z"
+    "id": 500,
+    "name": "Q1 2025 Enterprise Prospects",
+    "lead_count": 1250,
+    "created_at": "2025-12-01T10:00:00.000Z",
+    "updated_at": "2025-12-10T16:30:00.000Z"
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

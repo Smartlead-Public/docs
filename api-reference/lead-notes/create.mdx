@@ -1,14 +1,12 @@
 ---
 title: "Create Lead Note"
-api: "POST https://server.smartlead.ai/api/v1/leads/{lead_id}/notes"
-description: "Create a new note for a specific lead"
+api: "POST https://server.smartlead.ai/api/v1/master-inbox/create-note"
+description: "Create a note for a specific lead in a campaign"
 ---
 
-## Path Parameters
-
-<ParamField path="lead_id" type="number" required>
-  The unique identifier of the lead
-</ParamField>
+<Note>
+Add notes to leads to track interactions, observations, and follow-up reminders. Notes are visible to all team members with access to the campaign.
+</Note>
 
 ## Query Parameters
 
@@ -16,30 +14,45 @@ description: "Create a new note for a specific lead"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
 
-<ParamField body="note" type="string" required>
+<ParamField body="email_lead_map_id" type="number" required>
+  The campaign-lead mapping ID. This links the note to a specific lead within a specific campaign.
+</ParamField>
+
+<ParamField body="note_message" type="string" required>
   The content of the note
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/leads/123/notes?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/create-note?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"note": "Spoke with lead, interested in enterprise plan"}'
+  -d '{
+    "email_lead_map_id": 2433664091,
+    "note_message": "Spoke with lead, interested in enterprise plan. Follow up next week."
+  }'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  Created note object with id, note content, and timestamps
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -49,11 +62,16 @@ curl -X POST "https://server.smartlead.ai/api/v1/leads/123/notes?api_key=YOUR_KE
   "ok": true,
   "data": {
     "id": 456,
-    "lead_id": 123,
-    "note": "Spoke with lead, interested in enterprise plan",
-    "created_at": "2025-12-01T10:30:00.000Z",
-    "updated_at": "2025-12-01T10:30:00.000Z"
+    "email_lead_map_id": 2433664091,
+    "note_message": "Spoke with lead, interested in enterprise plan. Follow up next week.",
+    "created_at": "2025-12-01T10:30:00.000Z"
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 

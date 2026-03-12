@@ -1,8 +1,12 @@
 ---
 title: "Create Email Account Tag"
-api: "POST https://server.smartlead.ai/api/v1/email-accounts/tags"
-description: "Create a new tag for organizing email accounts"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/tag-manager"
+description: "Create or update an email account tag with a name and color"
 ---
+
+<Note>
+Tags help organize your email accounts into groups for filtering and management. Each tag has a unique color for visual identification.
+</Note>
 
 ## Query Parameters
 
@@ -10,30 +14,46 @@ description: "Create a new tag for organizing email accounts"
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Request Body
+
+<ParamField body="id" type="number" required>
+  Tag ID. Use an existing ID to update, or the system-assigned ID for new tags.
+</ParamField>
 
 <ParamField body="name" type="string" required>
-  Name of the tag
+  Tag display name
+</ParamField>
+
+<ParamField body="color" type="string" required>
+  Hex color code for the tag (e.g., `#FF5733`). Must be a valid 6-character hex color with `#` prefix.
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/tags?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/tag-manager?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Production Accounts"}'
+  -d '{"id": 1, "name": "Primary Senders", "color": "#4CAF50"}'
 ```
 
 </RequestExample>
 
-## Response Fields
+## Response Codes
 
-<ResponseField name="ok" type="boolean">
-  Whether the operation was successful
+<ResponseField name="200" type="Success">
+  Request successful
 </ResponseField>
 
-<ResponseField name="data" type="object">
-  Created tag object
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints.
 </ResponseField>
 
 <ResponseExample>
@@ -42,9 +62,16 @@ curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/tags?api_key=YOU
 {
   "ok": true,
   "data": {
-    "id": 501,
-    "name": "Production Accounts"
+    "id": 1,
+    "name": "Primary Senders",
+    "color": "#4CAF50"
   }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
 }
 ```
 
