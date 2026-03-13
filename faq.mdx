@@ -1,0 +1,147 @@
+---
+title: "FAQ"
+description: "Frequently asked questions about the SmartLead API"
+"og:title": "SmartLead API FAQ — Common Questions Answered"
+"og:description": "Get answers to the most common questions about the SmartLead API — authentication, rate limits, email warmup, webhooks, CRM integrations, and more."
+---
+
+<head>
+  <script type="application/ld+json">
+    {`{
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the SmartLead API and what can it do?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The SmartLead API is a RESTful interface that lets developers programmatically control the entire SmartLead cold email platform — creating and managing campaigns, importing leads, rotating email accounts, triggering sequences, and pulling analytics data. It uses API key authentication and supports both a recommended V1 endpoint (/api/v1/...) and a legacy endpoint for backward compatibility. Agencies and sales teams use it to embed cold email automation directly into their own CRMs, dashboards, or outbound stacks without manual platform interaction."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I authenticate with the SmartLead API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Authentication is handled via API keys. You generate your key from the SmartLead dashboard under Settings, then append it as a query parameter to every request: GET https://server.smartlead.ai/api/v1/campaigns/?api_key=YOUR_API_KEY. There is no OAuth flow required. All requests go to the base URL https://server.smartlead.ai/api, with V1 endpoints prefixed at /api/v1/."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are the SmartLead API rate limits?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Rate limits on the SmartLead API are tied to your subscription plan — they are not fixed across all tiers. If a request exceeds your limit, the API returns a 429 Too Many Requests HTTP status code. The recommended handling strategy is exponential backoff: wait progressively longer intervals before retrying. For exact rate limit values tied to your plan, contact SmartLead support or consult your account dashboard."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does SmartLead API handle email account rotation?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Through the API, you can connect multiple sending accounts (Gmail, Outlook, or custom SMTP) and SmartLead automatically distributes outgoing campaign volume across them. This rotation reduces the per-account send load, lowers the risk of any single mailbox being flagged for spam, and extends your overall daily sending capacity. The API lets you programmatically add, update, or remove email accounts and assign them to specific campaigns."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I automate email warmup using the SmartLead API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. SmartLead's AI-powered warmup system is accessible via the API and gradually ramps up sending volume from new or dormant accounts to build sender reputation before a full campaign launch. Warmup settings — including sending pace and duration — can be configured programmatically. This means you can integrate warmup scheduling into your own onboarding or provisioning workflows without manual dashboard intervention."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What CRMs and tools does SmartLead API integrate with?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SmartLead integrates natively with HubSpot, Salesforce, Pipedrive, Clay, Listkit, and more. Beyond native integrations, the API and webhook infrastructure allow connection to virtually any tool via Zapier, Make (formerly Integromat), and n8n. Common use cases include syncing lead status to a CRM when a reply is received, triggering Slack notifications on campaign events, and pushing enriched contact data from Clay directly into an active SmartLead sequence."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between SmartLead API V1 and the legacy API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SmartLead offers two API versions. The V1 API (/api/v1/...) is the current recommended version and includes all modern features, better performance, and improved response formats. The legacy API (/api/...) is maintained for backward compatibility only — existing integrations that rely on it will continue to work, but it will not receive new feature updates. All new integrations should be built on V1."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do SmartLead webhooks work and when should I use them?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SmartLead webhooks send real-time HTTP POST notifications to a URL you specify whenever a campaign event occurs — such as an email being opened, a reply received, a lead being categorized, or a bounce happening. This is useful when you want your external systems (CRM, Slack, database) to react instantly to outreach activity without polling the API repeatedly. You configure webhooks either through the dashboard or programmatically via the API, assigning them to specific campaigns or account-level events."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the SmartLead API suitable for agencies managing multiple clients?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, the SmartLead API is well-suited for agency use cases. One SmartLead account can serve an entire team, and the API supports programmatic campaign creation, lead management, and inbox access across multiple client workspaces. Agencies can use the API to build white-labeled dashboards, automate client onboarding workflows, and pull per-client performance data. The platform's volume-based (non-per-seat) pricing model makes API-driven, multi-client deployments significantly more cost-effective than per-user alternatives."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens when a lead replies — can the API manage that response automatically?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. When a reply is detected, SmartLead can automatically pause or stop follow-up sequences for that lead to prevent over-sending. The API lets you retrieve reply data, update lead status (e.g., Interested, Not Interested, Meeting Booked), and trigger webhook events that push the updated record to your CRM or workflow automation tool. You can set conditions for replies, pauses, or lead updates without manual input, enabling a fully automated reply-handling pipeline that escalates hot leads in real time."
+          }
+        }
+      ]
+    }`}
+  </script>
+</head>
+
+<AccordionGroup>
+
+<Accordion title="What is the SmartLead API and what can it do?">
+The SmartLead API is a RESTful interface that lets developers programmatically control the entire SmartLead cold email platform — creating and managing campaigns, importing leads, rotating email accounts, triggering sequences, and pulling analytics data. It uses API key authentication and supports both a recommended V1 endpoint (`/api/v1/...`) and a legacy endpoint for backward compatibility. Agencies and sales teams use it to embed cold email automation directly into their own CRMs, dashboards, or outbound stacks without manual platform interaction.
+</Accordion>
+
+<Accordion title="How do I authenticate with the SmartLead API?">
+Authentication is handled via API keys. You generate your key from the SmartLead dashboard under **Settings**, then append it as a query parameter to every request:
+
+```
+GET https://server.smartlead.ai/api/v1/campaigns/?api_key=YOUR_API_KEY
+```
+
+There is no OAuth flow required. All requests go to the base URL `https://server.smartlead.ai/api`, with V1 endpoints prefixed at `/api/v1/`.
+</Accordion>
+
+<Accordion title="What are the SmartLead API rate limits?">
+Rate limits on the SmartLead API are tied to your subscription plan — they are not fixed across all tiers. If a request exceeds your limit, the API returns a `429 Too Many Requests` HTTP status code. The recommended handling strategy is **exponential backoff**: wait progressively longer intervals before retrying. For exact rate limit values tied to your plan, contact SmartLead support or consult your account dashboard.
+</Accordion>
+
+<Accordion title="How does SmartLead API handle email account rotation?">
+Through the API, you can connect multiple sending accounts (Gmail, Outlook, or custom SMTP) and SmartLead automatically distributes outgoing campaign volume across them. This rotation reduces the per-account send load, lowers the risk of any single mailbox being flagged for spam, and extends your overall daily sending capacity. The API lets you programmatically add, update, or remove email accounts and assign them to specific campaigns.
+</Accordion>
+
+<Accordion title="Can I automate email warmup using the SmartLead API?">
+Yes. SmartLead's AI-powered warmup system is accessible via the API and gradually ramps up sending volume from new or dormant accounts to build sender reputation before a full campaign launch. Warmup settings — including sending pace and duration — can be configured programmatically. This means you can integrate warmup scheduling into your own onboarding or provisioning workflows without manual dashboard intervention.
+</Accordion>
+
+<Accordion title="What CRMs and tools does SmartLead API integrate with?">
+SmartLead integrates natively with HubSpot, Salesforce, Pipedrive, Clay, Listkit, and more. Beyond native integrations, the API and webhook infrastructure allow connection to virtually any tool via Zapier, Make (formerly Integromat), and n8n. Common use cases include syncing lead status to a CRM when a reply is received, triggering Slack notifications on campaign events, and pushing enriched contact data from Clay directly into an active SmartLead sequence.
+</Accordion>
+
+<Accordion title="What is the difference between SmartLead API V1 and the legacy API?">
+SmartLead offers two API versions. The **V1 API** (`/api/v1/...`) is the current recommended version and includes all modern features, better performance, and improved response formats. The **legacy API** (`/api/...`) is maintained for backward compatibility only — existing integrations that rely on it will continue to work, but it will not receive new feature updates. All new integrations should be built on V1.
+</Accordion>
+
+<Accordion title="How do SmartLead webhooks work and when should I use them?">
+SmartLead webhooks send real-time HTTP POST notifications to a URL you specify whenever a campaign event occurs — such as an email being opened, a reply received, a lead being categorized, or a bounce happening. This is useful when you want your external systems (CRM, Slack, database) to react instantly to outreach activity without polling the API repeatedly. You configure webhooks either through the dashboard or programmatically via the API, assigning them to specific campaigns or account-level events.
+</Accordion>
+
+<Accordion title="Is the SmartLead API suitable for agencies managing multiple clients?">
+Yes, the SmartLead API is well-suited for agency use cases. One SmartLead account can serve an entire team, and the API supports programmatic campaign creation, lead management, and inbox access across multiple client workspaces. Agencies can use the API to build white-labeled dashboards, automate client onboarding workflows, and pull per-client performance data. The platform's volume-based (non-per-seat) pricing model makes API-driven, multi-client deployments significantly more cost-effective than per-user alternatives.
+</Accordion>
+
+<Accordion title="What happens when a lead replies — can the API manage that response automatically?">
+Yes. When a reply is detected, SmartLead can automatically pause or stop follow-up sequences for that lead to prevent over-sending. The API lets you retrieve reply data, update lead status (e.g., Interested, Not Interested, Meeting Booked), and trigger webhook events that push the updated record to your CRM or workflow automation tool. You can set conditions for replies, pauses, or lead updates without manual input, enabling a fully automated reply-handling pipeline that escalates hot leads in real time.
+</Accordion>
+
+</AccordionGroup>
