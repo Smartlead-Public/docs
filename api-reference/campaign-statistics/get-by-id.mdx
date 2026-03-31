@@ -106,7 +106,30 @@ console.log(result);
 ```json 200 - Success
 {
   "ok": true,
-  "data": []
+  "data": [
+    {
+      "campaign_id": 123,
+      "sequence_number": 1,
+      "sent": 1240,
+      "opened": 372,
+      "clicked": 89,
+      "replied": 23,
+      "unsubscribed": 4,
+      "bounced": 18
+    },
+    {
+      "campaign_id": 123,
+      "sequence_number": 2,
+      "sent": 892,
+      "opened": 267,
+      "clicked": 54,
+      "replied": 12,
+      "unsubscribed": 2,
+      "bounced": 9
+    }
+  ],
+  "offset": 0,
+  "limit": 100
 }
 ```
 

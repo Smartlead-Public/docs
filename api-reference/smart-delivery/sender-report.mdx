@@ -89,33 +89,32 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "senders": [
-      {
-        "sender_email": "campaigns@example.com",
-        "sender_name": "Example Campaigns",
-        "tests_count": 12,
-        "avg_inbox_rate": 92.5,
-        "avg_spam_rate": 5.2,
-        "avg_bounce_rate": 2.3,
-        "reputation_score": 8.7,
-        "last_test_date": "2026-03-15T14:30:00Z"
-      },
-      {
-        "sender_email": "support@example.com",
-        "sender_name": "Example Support",
-        "tests_count": 8,
-        "avg_inbox_rate": 88.1,
-        "avg_spam_rate": 8.5,
-        "avg_bounce_rate": 3.4,
-        "reputation_score": 8.2,
-        "last_test_date": "2026-03-14T10:15:00Z"
-      }
-    ]
+[
+  {
+    "email": "campaigns@example.com",
+    "details": {
+      "sender_name": "Example Campaigns",
+      "tests_count": 12,
+      "avg_inbox_rate": 92.5,
+      "avg_spam_rate": 5.2,
+      "avg_bounce_rate": 2.3,
+      "reputation_score": 8.7,
+      "last_test_date": "2026-03-15T14:30:00Z"
+    }
+  },
+  {
+    "email": "support@example.com",
+    "details": {
+      "sender_name": "Example Support",
+      "tests_count": 8,
+      "avg_inbox_rate": 88.1,
+      "avg_spam_rate": 8.5,
+      "avg_bounce_rate": 3.4,
+      "reputation_score": 8.2,
+      "last_test_date": "2026-03-14T10:15:00Z"
+    }
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

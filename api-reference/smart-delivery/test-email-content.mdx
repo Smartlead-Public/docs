@@ -90,18 +90,11 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {
-    "test_id": "test_67890abcdef",
-    "email_subject": "Special Q1 Offer - Limited Time",
-    "email_from": "campaigns@example.com",
-    "email_from_name": "Example Campaigns",
-    "email_to": "test_mailbox_1@gmail.com",
-    "email_body": "<!DOCTYPE html><html><head><title>Q1 Offer</title></head><body><h1>Special Q1 Offer</h1><p>Get 30% off your next purchase</p><a href=\"https://example.com/offer\">Claim Offer</a></body></html>",
-    "email_body_text": "Special Q1 Offer\\nGet 30% off your next purchase\\nClaim Offer at https://example.com/offer",
-    "sent_date": "2026-03-15T14:30:00Z",
-    "received_date": "2026-03-15T14:30:45Z"
-  }
+  "spamTest": "test_001",
+  "subject": "Special Q1 Offer - Limited Time",
+  "text": "Get 30% off your next purchase. Claim your offer at https://example.com/offer",
+  "html": "<!DOCTYPE html><html><head><title>Q1 Offer</title></head><body><h1>Special Q1 Offer</h1><p>Get 30% off your next purchase</p><a href=\"https://example.com/offer\">Claim Offer</a></body></html>",
+  "rawEmailContent": "From: campaigns@example.com\nSubject: Special Q1 Offer - Limited Time\nContent-Type: text/html\n\n<!DOCTYPE html><html><body><h1>Special Q1 Offer</h1></body></html>"
 }
 ```
 

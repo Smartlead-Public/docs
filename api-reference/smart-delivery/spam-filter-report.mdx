@@ -97,33 +97,36 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "test_id": "test_67890abcdef",
-    "spam_filters_triggered": [
+[
+  {
+    "from_email": "campaigns@example.com",
+    "spam_filter_details": [
       {
         "filter": "SpamAssassin",
         "triggered_count": 5,
         "trigger_percentage": 5.0,
-        "reasons": [
-          "High spam score",
-          "Missing DKIM signature"
-        ]
+        "reasons": ["High spam score", "Missing DKIM signature"]
       },
       {
         "filter": "Gmail Spam Filter",
         "triggered_count": 3,
         "trigger_percentage": 3.0,
-        "reasons": [
-          "Suspicious sender reputation"
-        ]
+        "reasons": ["Suspicious sender reputation"]
       }
-    ],
-    "total_emails_tested": 100,
-    "overall_spam_trigger_rate": 8.0
+    ]
+  },
+  {
+    "from_email": "support@example.com",
+    "spam_filter_details": [
+      {
+        "filter": "Outlook Junk Filter",
+        "triggered_count": 2,
+        "trigger_percentage": 2.0,
+        "reasons": ["Low reputation score"]
+      }
+    ]
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

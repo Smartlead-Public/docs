@@ -98,18 +98,30 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {
-    "test_id": "test_888888",
-    "test_name": "Automated Recurring Test",
-    "test_type": "automated",
-    "status": "scheduled",
-    "created_at": "2026-03-15T14:30:00Z",
-    "schedule": "weekly",
-    "next_run": "2026-03-22T10:00:00Z",
-    "mailbox_count": 100,
-    "notification_email": "admin@example.com"
-  }
+  "created_at": "2026-03-15T14:30:00Z",
+  "updated_at": "2026-03-15T14:30:00Z",
+  "id": "test_888888",
+  "test_name": "Automated Recurring Test",
+  "description": "Weekly automated deliverability monitoring",
+  "spam_filters": true,
+  "link_checker": true,
+  "campaign_id": "camp_234567",
+  "sequence_mapping_id": "seq_890123",
+  "all_email_sent_without_time_gap": true,
+  "min_time_btwn_emails": 60,
+  "min_time_unit": "minutes",
+  "is_warmup": false,
+  "test_with_sl_account": true,
+  "has_seed_mapping": true,
+  "status": "active",
+  "user_id": "user_567890",
+  "test_type": "automated",
+  "email_track_id": "track_432109",
+  "provider_id": "outlook_eu",
+  "schedule_start_time": "2026-03-15T10:00:00Z",
+  "test_end_date": "2026-06-15T10:00:00Z",
+  "every_days": 7,
+  "scheduler_cron_value": "0 10 * * 0"
 }
 ```
 

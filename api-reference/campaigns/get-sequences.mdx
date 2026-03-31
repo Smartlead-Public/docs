@@ -110,21 +110,37 @@ console.log(result);
   "data": [
     {
       "id": 1001,
+      "created_at": "2026-02-10T10:30:00Z",
+      "updated_at": "2026-02-10T10:30:00Z",
+      "email_campaign_id": 123,
       "seq_number": 1,
       "subject": "Quick question about {{company_name}}",
       "email_body": "<p>Hi {{first_name}},</p><p>I noticed {{company_name}} is doing some interesting work...</p>",
-      "seq_delay_details": {
-        "delay_in_days": 0
-      }
+      "sequence_variants": [
+        {
+          "id": 5001,
+          "variant_name": "Variant A",
+          "subject": "Quick question about {{company_name}}",
+          "email_body": "<p>Hi {{first_name}},</p><p>I noticed {{company_name}} is doing some interesting work...</p>"
+        }
+      ]
     },
     {
       "id": 1002,
+      "created_at": "2026-02-10T10:30:00Z",
+      "updated_at": "2026-02-10T10:30:00Z",
+      "email_campaign_id": 123,
       "seq_number": 2,
-      "subject": "",
+      "subject": "Re: Quick question about {{company_name}}",
       "email_body": "<p>Following up on my previous email...</p>",
-      "seq_delay_details": {
-        "delay_in_days": 3
-      }
+      "sequence_variants": [
+        {
+          "id": 5002,
+          "variant_name": "Variant A",
+          "subject": "Re: Quick question about {{company_name}}",
+          "email_body": "<p>Following up on my previous email...</p>"
+        }
+      ]
     }
   ]
 }

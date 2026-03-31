@@ -97,32 +97,28 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "tests": [
-      {
-        "test_id": "test_001",
-        "test_name": "Gmail Inbox Placement Test",
-        "test_type": "automated",
-        "status": "completed",
-        "created_at": "2026-03-10T09:00:00Z",
-        "inbox_rate": 91.5
-      },
-      {
-        "test_id": "test_002",
-        "test_name": "Outlook Spam Filter Test",
-        "test_type": "manual",
-        "status": "in_progress",
-        "created_at": "2026-03-14T14:00:00Z",
-        "inbox_rate": null
-      }
-    ],
-    "total_count": 2,
-    "page": 1,
-    "page_size": 50
+[
+  {
+    "spam_test_id": "test_001",
+    "test_name": "Gmail Inbox Placement Test",
+    "test_type": "automated",
+    "status": "active",
+    "schedule_start_time": "2026-03-10T09:00:00Z",
+    "test_end_date": "2026-06-10T09:00:00Z",
+    "every_days": 7,
+    "current_test_run_no": 8
+  },
+  {
+    "spam_test_id": "test_002",
+    "test_name": "Outlook Spam Filter Test",
+    "test_type": "manual",
+    "status": "completed",
+    "schedule_start_time": "2026-03-14T14:00:00Z",
+    "test_end_date": "2026-03-20T14:00:00Z",
+    "every_days": null,
+    "current_test_run_no": 1
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

@@ -89,34 +89,26 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "senders": [
-      {
-        "sender_id": "sender_123",
-        "email": "campaigns@example.com",
-        "name": "Example Campaigns",
-        "verified": true,
-        "verified_date": "2026-02-01T10:00:00Z",
-        "dkim_configured": true,
-        "spf_configured": true,
-        "dmarc_configured": true
-      },
-      {
-        "sender_id": "sender_124",
-        "email": "support@example.com",
-        "name": "Example Support",
-        "verified": true,
-        "verified_date": "2026-02-15T10:00:00Z",
-        "dkim_configured": true,
-        "spf_configured": true,
-        "dmarc_configured": false
-      }
-    ],
-    "total_senders": 2
+[
+  {
+    "id": "sender_001",
+    "spam_test_id": "test_101",
+    "from_email": "campaigns@example.com",
+    "created_at": "2026-02-01T10:00:00Z",
+    "updated_at": "2026-03-15T14:30:00Z",
+    "client_id": "client_001",
+    "user_id": "user_001"
+  },
+  {
+    "id": "sender_002",
+    "spam_test_id": "test_101",
+    "from_email": "support@example.com",
+    "created_at": "2026-02-15T10:00:00Z",
+    "updated_at": "2026-03-15T14:30:00Z",
+    "client_id": "client_001",
+    "user_id": "user_001"
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

@@ -89,32 +89,34 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "ips": [
-      {
-        "ip_address": "192.168.1.100",
-        "is_blacklisted": false,
-        "blacklist_count": 0,
-        "blacklists": [],
-        "last_check_date": "2026-03-15T14:30:00Z"
-      },
-      {
-        "ip_address": "192.168.1.101",
-        "is_blacklisted": false,
-        "blacklist_count": 0,
-        "blacklists": [],
-        "last_check_date": "2026-03-15T14:30:00Z"
-      }
-    ],
-    "summary": {
-      "total_ips_checked": 2,
-      "blacklisted_ips": 0,
-      "total_blacklist_occurrences": 0
-    }
+[
+  {
+    "reply_id": "reply_001",
+    "reply": {
+      "from_email": "campaigns@example.com"
+    },
+    "to_email": "seed1@gmail.com",
+    "domain": "gmail.com",
+    "blacklist_type_value": "spamhaus",
+    "total_blacklist": 0,
+    "rdns": "mail.example.com",
+    "ip": "192.168.1.100",
+    "details": "IP not listed on Spamhaus"
+  },
+  {
+    "reply_id": "reply_002",
+    "reply": {
+      "from_email": "support@example.com"
+    },
+    "to_email": "seed3@yahoo.com",
+    "domain": "yahoo.com",
+    "blacklist_type_value": "barracuda",
+    "total_blacklist": 1,
+    "rdns": "mail2.example.com",
+    "ip": "192.168.1.101",
+    "details": "IP listed on Barracuda Block List"
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

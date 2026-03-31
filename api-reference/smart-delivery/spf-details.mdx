@@ -89,20 +89,36 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "domain": "example.com",
-    "spf_enabled": true,
-    "spf_status": "valid",
-    "spf_record": "v=spf1 include:sendgrid.net include:mailgun.org ~all",
-    "authorized_ips": ["192.168.1.100", "192.168.1.101"],
-    "authorized_domains": ["sendgrid.net", "mailgun.org"],
-    "last_validated": "2026-03-15T14:30:00Z",
-    "validation_score": 100,
-    "issues": []
+[
+  {
+    "from_email": "campaigns@example.com",
+    "seed_accounts": [
+      {
+        "id": "seed_001",
+        "email": "seed1@gmail.com",
+        "esp": "Gmail",
+        "spf_verified": true
+      },
+      {
+        "id": "seed_002",
+        "email": "seed2@outlook.com",
+        "esp": "Outlook",
+        "spf_verified": true
+      }
+    ]
+  },
+  {
+    "from_email": "support@example.com",
+    "seed_accounts": [
+      {
+        "id": "seed_003",
+        "email": "seed3@yahoo.com",
+        "esp": "Yahoo",
+        "spf_verified": false
+      }
+    ]
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

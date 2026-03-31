@@ -205,20 +205,21 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {
-    "message": "Sequences updated successfully",
-    "sequences": [
-      {
-        "id": 1001,
-        "seq_number": 1
-      },
-      {
-        "id": 1002,
-        "seq_number": 2
-      }
-    ]
-  }
+  "ok": true,
+  "data": [
+    {
+      "id": 1001,
+      "seq_number": 1,
+      "subject": "Hello {{first_name}}",
+      "email_body": "<p>Hi {{first_name}},</p><p>I wanted to reach out...</p>"
+    },
+    {
+      "id": 1002,
+      "seq_number": 2,
+      "subject": "Re: Hello {{first_name}}",
+      "email_body": "<p>Just following up on my previous email...</p>"
+    }
+  ]
 }
 ```
 

@@ -89,37 +89,30 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "test_id": "test_automated_123",
-    "test_name": "Weekly Deliverability Check",
-    "schedule": "weekly",
-    "total_runs": 15,
-    "successful_runs": 14,
-    "failed_runs": 1,
-    "runs": [
-      {
-        "run_number": 15,
-        "run_date": "2026-03-15T10:00:00Z",
-        "status": "completed",
-        "inbox_rate": 91.8,
-        "spam_rate": 6.1,
-        "bounce_rate": 2.1,
-        "mailboxes_tested": 200
-      },
-      {
-        "run_number": 14,
-        "run_date": "2026-03-08T10:00:00Z",
-        "status": "completed",
-        "inbox_rate": 90.5,
-        "spam_rate": 7.2,
-        "bounce_rate": 2.3,
-        "mailboxes_tested": 200
-      }
-    ]
+[
+  {
+    "spam_test_id": "test_001",
+    "test_run_no": 15,
+    "status": "completed",
+    "inbox_count": 184,
+    "tab_count": 12,
+    "spam_count": 4,
+    "reply_hour_interval_start": 0,
+    "reply_hour_interval_end": 24,
+    "adjusted_total_email_count": 200
+  },
+  {
+    "spam_test_id": "test_001",
+    "test_run_no": 14,
+    "status": "completed",
+    "inbox_count": 181,
+    "tab_count": 14,
+    "spam_count": 5,
+    "reply_hour_interval_start": 0,
+    "reply_hour_interval_end": 24,
+    "adjusted_total_email_count": 200
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

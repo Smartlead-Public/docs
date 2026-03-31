@@ -89,37 +89,32 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "ips": [
-      {
-        "ip_address": "192.168.1.100",
-        "ip_type": "dedicated",
-        "isp": "Example ISP",
-        "location": "United States",
-        "reverse_dns": "mail1.example.com",
-        "reputation_score": 95,
-        "age_days": 365,
-        "daily_limits": 10000,
-        "current_usage": 8500,
-        "blacklist_count": 0
-      },
-      {
-        "ip_address": "192.168.1.101",
-        "ip_type": "dedicated",
-        "isp": "Example ISP",
-        "location": "United States",
-        "reverse_dns": "mail2.example.com",
-        "reputation_score": 93,
-        "age_days": 180,
-        "daily_limits": 10000,
-        "current_usage": 7200,
-        "blacklist_count": 0
-      }
-    ]
+[
+  {
+    "ip": "192.168.1.100",
+    "blacklisted": false,
+    "summary": "IP reputation is excellent with no blacklist listings",
+    "whois_data": {
+      "isp": "Example ISP",
+      "location": "United States",
+      "reverse_dns": "mail1.example.com",
+      "organization": "Example Organization"
+    },
+    "created_at": "2025-03-01T10:00:00Z"
+  },
+  {
+    "ip": "192.168.1.101",
+    "blacklisted": false,
+    "summary": "IP reputation is good with no blacklist listings",
+    "whois_data": {
+      "isp": "Example ISP",
+      "location": "United States",
+      "reverse_dns": "mail2.example.com",
+      "organization": "Example Organization"
+    },
+    "created_at": "2025-09-01T10:00:00Z"
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

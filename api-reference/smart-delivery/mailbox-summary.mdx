@@ -89,25 +89,41 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "total_mailboxes": 930,
-    "mailboxes_by_provider": {
-      "Gmail": 350,
-      "Outlook": 310,
-      "Yahoo": 240,
-      "ProtonMail": 30
-    },
-    "mailboxes_by_region": {
-      "North America": 400,
-      "Europe": 350,
-      "Asia Pacific": 180
-    },
-    "active_tests": 5,
-    "last_test_date": "2026-03-15T14:30:00Z"
+[
+  {
+    "id": "mb_001",
+    "from_email": "campaigns@example.com",
+    "esp": "Gmail",
+    "total_email_count": 100,
+    "inbox_count": 91,
+    "tab_count": 6,
+    "spam_count": 3,
+    "failed_count": 0,
+    "placement_score": 91.0
+  },
+  {
+    "id": "mb_002",
+    "from_email": "campaigns@example.com",
+    "esp": "Outlook",
+    "total_email_count": 100,
+    "inbox_count": 88,
+    "tab_count": 8,
+    "spam_count": 4,
+    "failed_count": 0,
+    "placement_score": 88.0
+  },
+  {
+    "id": "mb_003",
+    "from_email": "support@example.com",
+    "esp": "Yahoo",
+    "total_email_count": 100,
+    "inbox_count": 85,
+    "tab_count": 10,
+    "spam_count": 5,
+    "failed_count": 0,
+    "placement_score": 85.0
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized

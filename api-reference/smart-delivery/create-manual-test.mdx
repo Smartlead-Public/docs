@@ -98,20 +98,26 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {
-    "test_id": "test_999999",
-    "test_name": "Manual Placement Test",
-    "test_type": "manual",
-    "status": "created",
-    "created_at": "2026-03-15T14:30:00Z",
-    "mailboxes": [
-      "test1@gmail.com",
-      "test2@outlook.com",
-      "test3@yahoo.com"
-    ],
-    "mailbox_count": 3
-  }
+  "created_at": "2026-03-15T14:30:00Z",
+  "updated_at": "2026-03-15T14:30:00Z",
+  "id": "test_999999",
+  "test_name": "Manual Placement Test",
+  "description": "Testing email deliverability across regions",
+  "spam_filters": true,
+  "link_checker": true,
+  "campaign_id": "camp_123456",
+  "sequence_mapping_id": "seq_789012",
+  "all_email_sent_without_time_gap": false,
+  "min_time_btwn_emails": 30,
+  "min_time_unit": "minutes",
+  "is_warmup": false,
+  "test_with_sl_account": false,
+  "has_seed_mapping": true,
+  "status": "active",
+  "user_id": "user_456789",
+  "test_type": "manual",
+  "email_track_id": "track_321098",
+  "provider_id": "gmail_na"
 }
 ```
 

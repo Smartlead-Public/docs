@@ -89,18 +89,36 @@ console.log(result);
 <ResponseExample>
 
 ```json 200 - Success
-{
-  "success": true,
-  "data": {
-    "domain": "example.com",
-    "is_blacklisted": false,
-    "blacklist_count": 0,
-    "checks_performed": ["Spamhaus", "Barracuda", "Sorbs", "URIBL"],
-    "last_check_date": "2026-03-15T14:30:00Z",
-    "reputation_status": "clean",
-    "recommendations": []
+[
+  {
+    "from_email": "campaigns@example.com",
+    "seed_accounts": [
+      {
+        "id": "seed_001",
+        "email": "seed1@gmail.com",
+        "esp": "Gmail",
+        "domain_blacklisted": false
+      },
+      {
+        "id": "seed_002",
+        "email": "seed2@outlook.com",
+        "esp": "Outlook",
+        "domain_blacklisted": false
+      }
+    ]
+  },
+  {
+    "from_email": "support@example.com",
+    "seed_accounts": [
+      {
+        "id": "seed_003",
+        "email": "seed3@yahoo.com",
+        "esp": "Yahoo",
+        "domain_blacklisted": false
+      }
+    ]
   }
-}
+]
 ```
 
 ```json 401 - Unauthorized
