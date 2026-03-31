@@ -1,7 +1,7 @@
 ---
 title: "Place Order"
-api: "POST https://server.smartlead.ai/api/v1/smart-senders/place-order"
-description: "Place order for mailboxes through Smart Senders marketplace"
+api: "POST https://smart-senders.smartlead.ai/api/v1/smart-senders/place-order"
+description: "Place an order to purchase domains and provision mailboxes through a Smart Senders vendor"
 ---
 
 <Note>
@@ -12,7 +12,31 @@ description: "Place order for mailboxes through Smart Senders marketplace"
 ## Query Parameters
 
 <ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+  API key used to authenticate and authorise the request.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="vendor_id" type="integer" required>
+  Unique identifier of the vendor with whom the order will be placed.
+</ParamField>
+
+<ParamField body="domains" type="array" required>
+  Array of domain objects. Each object should contain `domain_name` and an array of mailbox details.
+</ParamField>
+
+<ParamField body="forwarding_domain" type="string" required>
+  Domain to which purchased domains will be configured to forward (e.g., `smartlead.ai` or customer's tracking domain).
+</ParamField>
+
+<ParamField body="user_details" type="object">
+  Customer or billing/contact details required by the vendor for domain purchase and provisioning. Includes `name` and other contact fields.
+</ParamField>
+
+## Headers
+
+<ParamField header="Content-Type" type="string">
+  Must be `application/json`
 </ParamField>
 
 
@@ -20,9 +44,21 @@ description: "Place order for mailboxes through Smart Senders marketplace"
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/smart-senders/place-order?api_key=YOUR_KEY" \
+curl -X POST "https://smart-senders.smartlead.ai/api/v1/smart-senders/place-order?api_key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "vendor_id": 1,
+    "domains": [
+      {
+        "domain_name": "example.com",
+        "mailboxes": ["john@example.com", "jane@example.com"]
+      }
+    ],
+    "forwarding_domain": "smartlead.ai",
+    "user_details": {
+      "name": "John Doe"
+    }
+  }'
 ```
 
 ```python Python
@@ -30,10 +66,24 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
+payload = {
+    "vendor_id": 1,
+    "domains": [
+        {
+            "domain_name": "example.com",
+            "mailboxes": ["john@example.com", "jane@example.com"]
+        }
+    ],
+    "forwarding_domain": "smartlead.ai",
+    "user_details": {
+        "name": "John Doe"
+    }
+}
+
 response = requests.post(
-    "https://server.smartlead.ai/api/v1/smart-senders/place-order",
+    "https://smart-senders.smartlead.ai/api/v1/smart-senders/place-order",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
@@ -43,12 +93,26 @@ print(result)
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
+const payload = {
+  vendor_id: 1,
+  domains: [
+    {
+      domain_name: 'example.com',
+      mailboxes: ['john@example.com', 'jane@example.com']
+    }
+  ],
+  forwarding_domain: 'smartlead.ai',
+  user_details: {
+    name: 'John Doe'
+  }
+};
+
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/smart-senders/place-order?api_key=${API_KEY}`,
+  `https://smart-senders.smartlead.ai/api/v1/smart-senders/place-order?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 
@@ -63,7 +127,7 @@ console.log(result);
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
+  Order placed successfully. Returns order confirmation details.
 </ResponseField>
 
 <ResponseField name="400" type="Bad Request">
@@ -74,50 +138,22 @@ console.log(result);
   Invalid or missing API key. Check your authentication.
 </ResponseField>
 
-<ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
 <ResponseField name="500" type="Internal Server Error">
   Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "data": []
 }
 ```
 
 ```json 401 - Unauthorized
 {
   "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
 }
 ```
 

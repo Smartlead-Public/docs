@@ -274,11 +274,13 @@
     {
       "group": "Smart Senders",
       "pages": [
+        "api-reference/smart-senders/get-otp",
+        "api-reference/smart-senders/auto-generate",
         "api-reference/smart-senders/search-domain",
         "api-reference/smart-senders/get-vendors",
-        "api-reference/smart-senders/auto-generate",
         "api-reference/smart-senders/place-order",
-        "api-reference/smart-senders/domain-list"
+        "api-reference/smart-senders/domain-list",
+        "api-reference/smart-senders/order-details"
       ]
     },
     {
@@ -828,7 +830,7 @@
     },
     {
       "source": "/reference/get-mailbox-otp",
-      "destination": "/api-reference/smart-senders/auto-generate"
+      "destination": "/api-reference/smart-senders/get-otp"
     },
     {
       "source": "/reference/get_new-endpoint",
@@ -852,7 +854,7 @@
     },
     {
       "source": "/reference/get-order-details-api",
-      "destination": "/api-reference/smart-senders/place-order"
+      "destination": "/api-reference/smart-senders/order-details"
     },
     {
       "source": "/reference/get_v1-analytics-campaign-list",

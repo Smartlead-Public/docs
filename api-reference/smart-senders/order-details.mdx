@@ -1,7 +1,7 @@
 ---
-title: "Search Domain"
-api: "GET https://smart-senders.smartlead.ai/api/v1/smart-senders/search-domain"
-description: "Search for available domains in Smart Senders marketplace"
+title: "Get Order Details"
+api: "GET https://smart-senders.smartlead.ai/api/v1/smart-senders/order-details"
+description: "Retrieve the status and details of a specific order placed through Smart Senders"
 ---
 
 <Note>
@@ -12,15 +12,11 @@ description: "Search for available domains in Smart Senders marketplace"
 ## Query Parameters
 
 <ParamField query="api_key" type="string" required>
-  The authentication key used to verify and authorise the API request from the client.
+  API key used to authenticate and authorize the request.
 </ParamField>
 
-<ParamField query="domain_name" type="string">
-  The domain name for which availability or related operations are being requested.
-</ParamField>
-
-<ParamField query="vendor_id" type="integer">
-  The unique identifier of the vendor whose service will be used to process the domain request.
+<ParamField query="order_id" type="string" required>
+  Unique order reference ID for which details are being requested.
 </ParamField>
 
 
@@ -28,7 +24,7 @@ description: "Search for available domains in Smart Senders marketplace"
 <RequestExample>
 
 ```bash cURL
-curl "https://smart-senders.smartlead.ai/api/v1/smart-senders/search-domain?api_key=YOUR_API_KEY&vendor_id=1&domain_name=techbuilddemo"
+curl "https://smart-senders.smartlead.ai/api/v1/smart-senders/order-details?api_key=YOUR_API_KEY&order_id=ORD_12345"
 ```
 
 ```python Python
@@ -37,11 +33,10 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://smart-senders.smartlead.ai/api/v1/smart-senders/search-domain",
+    "https://smart-senders.smartlead.ai/api/v1/smart-senders/order-details",
     params={
         "api_key": API_KEY,
-        "vendor_id": 1,
-        "domain_name": "techbuilddemo"
+        "order_id": "ORD_12345"
     }
 )
 
@@ -54,12 +49,11 @@ const API_KEY = 'YOUR_API_KEY';
 
 const params = new URLSearchParams({
   api_key: API_KEY,
-  vendor_id: '1',
-  domain_name: 'techbuilddemo'
+  order_id: 'ORD_12345'
 });
 
 const response = await fetch(
-  `https://smart-senders.smartlead.ai/api/v1/smart-senders/search-domain?${params}`
+  `https://smart-senders.smartlead.ai/api/v1/smart-senders/order-details?${params}`
 );
 
 const result = await response.json();
@@ -73,7 +67,7 @@ console.log(result);
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Returns available domains matching the search criteria. Domains are priced at $15 or less.
+  Returns the order status, payment details, and related messages.
 </ResponseField>
 
 <ResponseField name="400" type="Bad Request">
@@ -93,7 +87,7 @@ console.log(result);
 ```json 200 - Success
 {
   "ok": true,
-  "data": []
+  "data": {}
 }
 ```
 
