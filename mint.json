@@ -1005,6 +1005,42 @@
       "destination": "/api-reference/inbox/update-team-member"
     },
     {
+      "source": "/reference/fetch-snoozed-messages",
+      "destination": "/api-reference/inbox/get-snoozed"
+    },
+    {
+      "source": "/reference/fetch-important-marked-messages",
+      "destination": "/api-reference/inbox/get-important"
+    },
+    {
+      "source": "/reference/fetch-messages-with-reminders",
+      "destination": "/api-reference/inbox/get-reminders"
+    },
+    {
+      "source": "/reference/fetched-archived-messages",
+      "destination": "/api-reference/inbox/get-archived"
+    },
+    {
+      "source": "/reference/fetch-master-inbox-lead-by-id",
+      "destination": "/api-reference/inbox/get-by-id"
+    },
+    {
+      "source": "/reference/fetch-untracked-replies",
+      "destination": "/api-reference/inbox/get-untracked"
+    },
+    {
+      "source": "/reference/create-a-manual-placement",
+      "destination": "/api-reference/smart-delivery/create-manual-test"
+    },
+    {
+      "source": "/reference/get_v1-analytics-day-wise-stats",
+      "destination": "/api-reference/analytics/day-wise-stats"
+    },
+    {
+      "source": "/reference/get_v1-analytics-day-wise-sent-time",
+      "destination": "/api-reference/analytics/day-wise-sent-time"
+    },
+    {
       "source": "/reference/getdepartments",
       "destination": "/api-reference/smart-prospect/departments"
     },

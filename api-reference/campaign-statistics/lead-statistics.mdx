@@ -1,13 +1,41 @@
 ---
-title: "Get Campaign Lead Statistics"
-api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/lead-stats"
-description: "Analyze lead-level metrics showing distribution across statuses and categories"
+title: "Fetch Campaign Lead Statistics"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/lead-statistics"
+description: "Fetch campaign lead statistics using the campaign's ID"
 ---
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="integer" required>
+  The ID of the campaign
+</ParamField>
 
 ## Query Parameters
 
 <ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+  Your API key
+</ParamField>
+
+<ParamField query="limit" type="string" default="1">
+  The number of leads you want to fetch in one go, max 100 (optional)
+</ParamField>
+
+<ParamField query="created_at_gt" type="string" default="2022-12-23">
+  Created at date in YYYY-MM-DD format. If you want to filter by a particular lead based on when it was added to the campaign (optional)
+</ParamField>
+
+<ParamField query="event_time_gt" type="string" default="2022-12-23">
+  Replied/Sent at date in YYYY-MM-DD format. If you want to filter by when the last event for the lead was received by. This can be a reply event, send event etc (optional)
+</ParamField>
+
+<ParamField query="offset" type="string" default="1">
+  Used to paginate lead data (optional)
+</ParamField>
+
+## Headers
+
+<ParamField header="accept" type="string" default="application/json">
+  Response content type. Allowed: `application/json`, `text/plain`
 </ParamField>
 
 
@@ -15,17 +43,22 @@ description: "Analyze lead-level metrics showing distribution across statuses an
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/lead-stats?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/campaigns/12345/lead-statistics?api_key=YOUR_API_KEY&limit=100&offset=1"
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+CAMPAIGN_ID = 12345
 
 response = requests.get(
-    "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/lead-stats",
-    params={"api_key": API_KEY}
+    f"https://server.smartlead.ai/api/v1/campaigns/{CAMPAIGN_ID}/lead-statistics",
+    params={
+        "api_key": API_KEY,
+        "limit": 100,
+        "offset": 1
+    }
 )
 
 result = response.json()
@@ -34,9 +67,10 @@ print(result)
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const CAMPAIGN_ID = 12345;
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/lead-stats?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/campaigns/${CAMPAIGN_ID}/lead-statistics?api_key=${API_KEY}&limit=100&offset=1`
 );
 
 const result = await response.json();
@@ -62,49 +96,21 @@ console.log(result);
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  The requested resource does not exist or you don't have access to it
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "data": []
 }
 ```
 
 ```json 401 - Unauthorized
 {
   "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
 }
 ```
 

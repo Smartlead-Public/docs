@@ -1,13 +1,49 @@
 ---
-title: "Get Mailbox Statistics"
-api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/mailbox-stats"
-description: "Get performance breakdown by email account for a specific campaign"
+title: "Fetch Campaign Mailbox Statistics"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/mailbox-statistics"
+description: "Fetch mailbox statistics specific to a campaign"
 ---
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="integer" required>
+  The ID of the campaign
+</ParamField>
 
 ## Query Parameters
 
 <ParamField query="api_key" type="string" required>
-  Your SmartLead API key
+  Your API key
+</ParamField>
+
+<ParamField query="client_id" type="string" default="1">
+  The ID of your client if this campaign is client specific
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Pagination offset
+</ParamField>
+
+<ParamField query="limit" type="integer" default="5">
+  Number of results to return. Min 1, max 20.
+</ParamField>
+
+<ParamField query="start_date" type="date">
+  Start date for filtering. Both start_date and end_date must be provided, otherwise data will be for the full campaign length.
+</ParamField>
+
+<ParamField query="end_date" type="date">
+  End date for filtering. Both start_date and end_date must be provided, otherwise data will be for the full campaign length.
+</ParamField>
+
+<ParamField query="time_zone" type="string" default="UTC">
+  The campaign timezone, e.g. `America/Los_Angeles`. Same format as shown in your campaign UI next to the date filter.
+</ParamField>
+
+## Headers
+
+<ParamField header="accept" type="string" default="application/json">
+  Response content type. Allowed: `application/json`, `text/plain`
 </ParamField>
 
 
@@ -15,17 +51,22 @@ description: "Get performance breakdown by email account for a specific campaign
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/mailbox-stats?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/campaigns/12345/mailbox-statistics?api_key=YOUR_API_KEY&limit=10&offset=0"
 ```
 
 ```python Python
 import requests
 
 API_KEY = "YOUR_API_KEY"
+CAMPAIGN_ID = 12345
 
 response = requests.get(
-    "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/mailbox-stats",
-    params={"api_key": API_KEY}
+    f"https://server.smartlead.ai/api/v1/campaigns/{CAMPAIGN_ID}/mailbox-statistics",
+    params={
+        "api_key": API_KEY,
+        "limit": 10,
+        "offset": 0
+    }
 )
 
 result = response.json()
@@ -34,9 +75,10 @@ print(result)
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const CAMPAIGN_ID = 12345;
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/mailbox-stats?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/campaigns/${CAMPAIGN_ID}/mailbox-statistics?api_key=${API_KEY}&limit=10&offset=0`
 );
 
 const result = await response.json();
@@ -62,49 +104,21 @@ console.log(result);
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  The requested resource does not exist or you don't have access to it
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "data": []
 }
 ```
 
 ```json 401 - Unauthorized
 {
   "message": "Invalid API Key"
-}
-```
-
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
 }
 ```
 
