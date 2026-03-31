@@ -1,0 +1,183 @@
+---
+title: "Get Reply Status"
+api: "GET https://server.smartlead.ai/api/v1/master-inbox/reply-status"
+description: "Check the delivery status of a sent reply from the unified inbox"
+---
+
+<Note>
+Track whether your reply was successfully delivered. Use this to confirm email delivery status and troubleshoot sending issues.
+</Note>
+
+## Overview
+
+Returns the delivery status of a specific reply sent from the master inbox. Use the `message_id` from the email headers to look up the current status of the reply.
+
+**Use Cases**:
+- **Delivery confirmation**: Verify that a reply was successfully sent
+- **Troubleshooting**: Diagnose delivery failures or delays
+- **Automation workflows**: Poll status after sending a reply via API
+- **Audit trails**: Track when replies were actually delivered
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="message_id" type="string" required>
+  The email Message-ID header value of the reply you want to check.
+
+  This is the RFC 5322 Message-ID assigned to the email, typically in angle bracket format: `<uuid@domain.com>`
+
+  Example: `<4d9ff292-b7a4-45a1-80aa-e1ac2c925404-133jc7w@dealversego.co>`
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/master-inbox/reply-status?api_key=YOUR_KEY&message_id=%3C4d9ff292-b7a4-45a1-80aa-e1ac2c925404-133jc7w%40dealversego.co%3E"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+MESSAGE_ID = "<4d9ff292-b7a4-45a1-80aa-e1ac2c925404-133jc7w@dealversego.co>"
+
+response = requests.get(
+    "https://server.smartlead.ai/api/v1/master-inbox/reply-status",
+    params={
+        "api_key": API_KEY,
+        "message_id": MESSAGE_ID
+    }
+)
+
+result = response.json()
+
+if result["ok"]:
+    data = result["data"]
+    print(f"Status: {data['status']}")
+    print(f"Message: {data['status_message']}")
+    print(f"Delivered at: {data['event_time']}")
+else:
+    print("Failed to retrieve status")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const MESSAGE_ID = '<4d9ff292-b7a4-45a1-80aa-e1ac2c925404-133jc7w@dealversego.co>';
+
+const params = new URLSearchParams({
+  api_key: API_KEY,
+  message_id: MESSAGE_ID
+});
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/master-inbox/reply-status?${params}`
+);
+
+const result = await response.json();
+
+if (result.ok) {
+  console.log(`Status: ${result.data.status}`);
+  console.log(`Message: ${result.data.status_message}`);
+  console.log(`Event time: ${result.data.event_time}`);
+}
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="ok" type="boolean">
+  Whether the request was successful
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Reply status details
+
+  <Expandable title="data properties">
+    <ResponseField name="data.message_id" type="string">
+      The email Message-ID that was queried
+    </ResponseField>
+
+    <ResponseField name="data.status" type="string">
+      Delivery status of the reply (e.g., `COMPLETED` when the email was successfully delivered)
+    </ResponseField>
+
+    <ResponseField name="data.status_message" type="string">
+      Human-readable description of the current status (e.g., `"Email sent successfully!"`)
+    </ResponseField>
+
+    <ResponseField name="data.event_time" type="string">
+      ISO 8601 timestamp of when the status event occurred (e.g., when the email was delivered)
+    </ResponseField>
+
+    <ResponseField name="data.scheduled_time" type="string | null">
+      ISO 8601 timestamp of when the email is scheduled to be sent. `null` if the email was sent immediately.
+    </ResponseField>
+
+    <ResponseField name="data.email_stats_id" type="string">
+      Internal SmartLead identifier for the email statistics record. Can be used to correlate with other analytics data.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful — reply status retrieved
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  No reply found for the given message_id
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Missing or invalid `message_id` parameter
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+    "ok": true,
+    "data": {
+        "message_id": "<4d9ff292-b7a4-45a1-80aa-e1ac2c925404-133jc7w@dealversego.co>",
+        "status": "COMPLETED",
+        "status_message": "Email sent successfully!",
+        "event_time": "2026-03-12T11:29:05.173Z",
+        "scheduled_time": null,
+        "email_stats_id": "4d9ff292-b7a4-45a1-80aa-e1ac2c925404"
+    }
+}
+```
+
+```json 401 - Unauthorized
+{
+    "message": "Invalid API Key"
+}
+```
+
+```json 404 - Not Found
+{
+    "ok": false,
+    "error": "No reply found for the given message_id"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Reply to Message](/api-reference/inbox/reply) — Send a reply from the inbox
+- [Get Inbox Replies](/api-reference/inbox/get-messages) — Get all inbox replies
+- [Get Sent Emails](/api-reference/inbox/get-sent) — View all sent emails

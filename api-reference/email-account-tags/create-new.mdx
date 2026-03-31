@@ -1,0 +1,130 @@
+---
+title: "Create Tag"
+api: "POST https://server.smartlead.ai/api/v1/tags"
+description: "Create a new email account tag with a name and optional color"
+---
+
+<Note>
+Create tags to organize your email accounts into groups for easy filtering and management. Each tag can have a custom color for visual identification.
+</Note>
+
+## Overview
+
+Creates a new tag that can be assigned to email accounts. Unlike the [Update Tag](/api-reference/email-account-tags/create) endpoint, this does not require an existing tag ID — the system generates one automatically.
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+  Display name for the tag
+</ParamField>
+
+<ParamField body="color" type="string">
+  Hex color code for the tag (e.g., `#FF5733`). Must be a valid 6-character hex color with `#` prefix. If not provided, a default color will be assigned.
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/tags?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Primary Senders", "color": "#4CAF50"}'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/tags",
+    params={"api_key": API_KEY},
+    json={
+        "name": "Primary Senders",
+        "color": "#4CAF50"
+    }
+)
+
+result = response.json()
+print(result)
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/tags?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Primary Senders',
+      color: '#4CAF50'
+    })
+  }
+);
+
+const result = await response.json();
+console.log(result);
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Tag created successfully
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Common issues:
+  - Missing `name` field
+  - Invalid hex color format (must match `#RRGGBB`)
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "ok": true,
+  "data": {
+    "id": 42,
+    "name": "Primary Senders",
+    "color": "#4CAF50"
+  }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+```json 422 - Validation Error
+{
+  "error": "\"name\" is required"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Update Tag](/api-reference/email-account-tags/create) — Update an existing tag's name or color
+- [Get All Tags](/api-reference/email-account-tags/get-all) — List all email account tags
+- [Assign Tag](/api-reference/email-account-tags/assign) — Assign a tag to an email account
+- [Remove Tag](/api-reference/email-account-tags/remove) — Remove a tag from an email account

@@ -1,11 +1,11 @@
 ---
-title: "Create Email Account Tag"
+title: "Update Email Account Tag"
 api: "POST https://server.smartlead.ai/api/v1/email-accounts/tag-manager"
-description: "Create or update an email account tag with a name and color"
+description: "Update an existing email account tag's name and color"
 ---
 
 <Note>
-Tags help organize your email accounts into groups for filtering and management. Each tag has a unique color for visual identification.
+Update an existing tag's name or color. To **create a new tag**, use the [Create Tag](/api-reference/email-account-tags/create-new) endpoint instead — it does not require an ID.
 </Note>
 
 ## Query Parameters
@@ -17,7 +17,7 @@ Tags help organize your email accounts into groups for filtering and management.
 ## Request Body
 
 <ParamField body="id" type="number" required>
-  Tag ID. Use an existing ID to update, or the system-assigned ID for new tags.
+  Tag ID of the existing tag to update. Get tag IDs from [Get All Tags](/api-reference/email-account-tags/get-all).
 </ParamField>
 
 <ParamField body="name" type="string" required>
