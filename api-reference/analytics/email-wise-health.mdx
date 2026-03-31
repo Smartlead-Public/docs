@@ -104,7 +104,32 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": [
+    {
+      "email": "john.smith@company.com",
+      "provider": "Gmail",
+      "sent_count": 450,
+      "bounce_count": 4,
+      "spam_count": 22,
+      "unsubscribe_count": 2,
+      "bounce_rate": 0.89,
+      "spam_rate": 4.89,
+      "health_score": 94.2,
+      "status": "healthy"
+    },
+    {
+      "email": "sarah.johnson@company.com",
+      "provider": "Outlook",
+      "sent_count": 380,
+      "bounce_count": 5,
+      "spam_count": 19,
+      "unsubscribe_count": 1,
+      "bounce_rate": 1.32,
+      "spam_rate": 5.0,
+      "health_score": 92.8,
+      "status": "healthy"
+    }
+  ]
 }
 ```
 

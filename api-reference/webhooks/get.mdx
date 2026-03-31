@@ -98,7 +98,14 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "id": 456,
+    "name": "Campaign Analytics Webhook",
+    "webhook_url": "https://your-server.com/webhooks/smartlead",
+    "event_types": ["email_sent", "email_opened", "email_clicked", "email_replied"],
+    "categories": ["campaign_events"],
+    "created_at": "2026-03-15T10:30:00Z"
+  }
 }
 ```
 

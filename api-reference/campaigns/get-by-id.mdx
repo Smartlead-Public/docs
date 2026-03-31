@@ -137,7 +137,20 @@ console.log(`Campaign: ${campaign.name}`);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "id": 123,
+    "name": "Q2 2026 Outreach",
+    "status": "ACTIVE",
+    "created_at": "2026-03-15T10:30:00Z",
+    "updated_at": "2026-04-01T14:22:00Z",
+    "client_id": 456,
+    "track_settings": ["DONT_EMAIL_OPEN"],
+    "stop_lead_settings": "REPLY_TO_AN_EMAIL",
+    "sending_limit": 500,
+    "total_leads": 5240,
+    "leads_contacted": 4128,
+    "leads_replied": 312
+  }
 }
 ```
 

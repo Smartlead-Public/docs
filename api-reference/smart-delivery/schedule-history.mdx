@@ -91,7 +91,34 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "test_id": "test_automated_123",
+    "test_name": "Weekly Deliverability Check",
+    "schedule": "weekly",
+    "total_runs": 15,
+    "successful_runs": 14,
+    "failed_runs": 1,
+    "runs": [
+      {
+        "run_number": 15,
+        "run_date": "2026-03-15T10:00:00Z",
+        "status": "completed",
+        "inbox_rate": 91.8,
+        "spam_rate": 6.1,
+        "bounce_rate": 2.1,
+        "mailboxes_tested": 200
+      },
+      {
+        "run_number": 14,
+        "run_date": "2026-03-08T10:00:00Z",
+        "status": "completed",
+        "inbox_rate": 90.5,
+        "spam_rate": 7.2,
+        "bounce_rate": 2.3,
+        "mailboxes_tested": 200
+      }
+    ]
+  }
 }
 ```
 

@@ -87,7 +87,23 @@ console.log(result);
 ```json 200 - Success
 {
   "ok": true,
-  "data": {}
+  "data": {
+    "order_id": "ORD_12345",
+    "status": "completed",
+    "domain": "sales-outreach.com",
+    "email_accounts": [
+      {
+        "email": "john.smith@sales-outreach.com",
+        "password": "encrypted_password_hash"
+      },
+      {
+        "email": "alice.johnson@sales-outreach.com",
+        "password": "encrypted_password_hash"
+      }
+    ],
+    "created_at": "2026-02-10T14:22:00Z",
+    "expires_at": "2026-03-10T14:22:00Z"
+  }
 }
 ```
 

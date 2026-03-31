@@ -99,7 +99,32 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "test_id": "test_67890abcdef",
+    "regions": [
+      {
+        "region": "North America",
+        "inbox_rate": 92.5,
+        "spam_rate": 5.2,
+        "bounce_rate": 2.3,
+        "mailbox_count": 300
+      },
+      {
+        "region": "Europe",
+        "inbox_rate": 88.9,
+        "spam_rate": 8.1,
+        "bounce_rate": 3.0,
+        "mailbox_count": 280
+      },
+      {
+        "region": "Asia Pacific",
+        "inbox_rate": 85.3,
+        "spam_rate": 10.2,
+        "bounce_rate": 4.5,
+        "mailbox_count": 200
+      }
+    ]
+  }
 }
 ```
 

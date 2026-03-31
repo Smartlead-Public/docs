@@ -91,7 +91,31 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "senders": [
+      {
+        "sender_id": "sender_123",
+        "email": "campaigns@example.com",
+        "name": "Example Campaigns",
+        "verified": true,
+        "verified_date": "2026-02-01T10:00:00Z",
+        "dkim_configured": true,
+        "spf_configured": true,
+        "dmarc_configured": true
+      },
+      {
+        "sender_id": "sender_124",
+        "email": "support@example.com",
+        "name": "Example Support",
+        "verified": true,
+        "verified_date": "2026-02-15T10:00:00Z",
+        "dkim_configured": true,
+        "spf_configured": true,
+        "dmarc_configured": false
+      }
+    ],
+    "total_senders": 2
+  }
 }
 ```
 

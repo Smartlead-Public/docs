@@ -91,7 +91,16 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "domain": "example.com",
+    "dkim_enabled": true,
+    "dkim_status": "valid",
+    "dkim_record": "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3...",
+    "selector": "default",
+    "last_validated": "2026-03-15T14:30:00Z",
+    "validation_score": 100,
+    "issues": []
+  }
 }
 ```
 

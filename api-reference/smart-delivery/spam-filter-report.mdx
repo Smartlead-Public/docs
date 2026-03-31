@@ -99,7 +99,30 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "test_id": "test_67890abcdef",
+    "spam_filters_triggered": [
+      {
+        "filter": "SpamAssassin",
+        "triggered_count": 5,
+        "trigger_percentage": 5.0,
+        "reasons": [
+          "High spam score",
+          "Missing DKIM signature"
+        ]
+      },
+      {
+        "filter": "Gmail Spam Filter",
+        "triggered_count": 3,
+        "trigger_percentage": 3.0,
+        "reasons": [
+          "Suspicious sender reputation"
+        ]
+      }
+    ],
+    "total_emails_tested": 100,
+    "overall_spam_trigger_rate": 8.0
+  }
 }
 ```
 

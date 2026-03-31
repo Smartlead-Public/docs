@@ -91,7 +91,28 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "ips": [
+      {
+        "ip_address": "192.168.1.100",
+        "blacklist_count": 0,
+        "status": "clean",
+        "last_check_date": "2026-03-15T14:30:00Z"
+      },
+      {
+        "ip_address": "192.168.1.101",
+        "blacklist_count": 0,
+        "status": "clean",
+        "last_check_date": "2026-03-15T14:30:00Z"
+      }
+    ],
+    "summary": {
+      "total_ips": 2,
+      "clean_ips": 2,
+      "flagged_ips": 0,
+      "total_blacklist_occurrences": 0
+    }
+  }
 }
 ```
 

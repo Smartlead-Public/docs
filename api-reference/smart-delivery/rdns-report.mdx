@@ -99,7 +99,25 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "ips": [
+      {
+        "ip_address": "192.168.1.100",
+        "reverse_dns": "mail.example.com",
+        "rdns_configured": true,
+        "rdns_valid": true,
+        "forward_dns_match": true
+      },
+      {
+        "ip_address": "192.168.1.101",
+        "reverse_dns": "mail2.example.com",
+        "rdns_configured": true,
+        "rdns_valid": true,
+        "forward_dns_match": true
+      }
+    ],
+    "check_timestamp": "2026-03-15T14:25:00Z"
+  }
 }
 ```
 

@@ -1,12 +1,8 @@
 ---
-title: "Domain-wise Health Metrics"
-api: "GET https://server.smartlead.ai/api/v1/analytics/mailbox/domain-wise-health-metrics"
-description: "Analyze health and deliverability metrics aggregated by domain with bounce rates"
+title: "Mailbox Overall Stats"
+api: "GET https://server.smartlead.ai/api/v1/analytics/mailbox/overall-stats"
+description: "Get overall health and performance statistics for all mailboxes"
 ---
-
-## Path Parameters
-
-<Note>No path parameters</Note>
 
 ## Query Parameters
 
@@ -14,16 +10,30 @@ description: "Analyze health and deliverability metrics aggregated by domain wit
   Your SmartLead API key
 </ParamField>
 
+<ParamField query="start_date" type="string" required>
+  Start date (YYYY-MM-DD format)
+</ParamField>
 
+<ParamField query="end_date" type="string" required>
+  End date (YYYY-MM-DD format)
+</ParamField>
 
-## Request Body
+<ParamField query="timezone" type="string">
+  Timezone (e.g., "America/New_York")
+</ParamField>
 
-<Note>No request body required</Note>
+<ParamField query="client_ids" type="string">
+  Comma-separated client IDs
+</ParamField>
+
+<ParamField query="campaign_ids" type="string">
+  Comma-separated campaign IDs
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/analytics/mailbox/name-wise-health-metrics?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/analytics/mailbox/overall-stats?api_key=YOUR_KEY&start_date=2024-01-01&end_date=2024-01-31"
 ```
 
 ```python Python
@@ -32,8 +42,12 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://server.smartlead.ai/api/v1/analytics/mailbox/name-wise-health-metrics",
-    params={"api_key": API_KEY}
+    "https://server.smartlead.ai/api/v1/analytics/mailbox/overall-stats",
+    params={
+        "api_key": API_KEY,
+        "start_date": "2024-01-01",
+        "end_date": "2024-01-31"
+    }
 )
 
 result = response.json()
@@ -44,7 +58,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/analytics/mailbox/name-wise-health-metrics?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/analytics/mailbox/overall-stats?api_key=${API_KEY}&start_date=2024-01-01&end_date=2024-01-31`
 );
 
 const result = await response.json();
@@ -94,7 +108,18 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "total_mailboxes": 8,
+    "healthy_count": 7,
+    "at_risk_count": 1,
+    "unhealthy_count": 0,
+    "average_health_score": 93.1,
+    "average_bounce_rate": 1.08,
+    "average_spam_rate": 4.98,
+    "total_sent": 2740,
+    "total_bounce": 27,
+    "total_spam": 137
+  }
 }
 ```
 
@@ -120,4 +145,5 @@ console.log(result);
 
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Domain-wise Health Metrics](/api-reference/analytics/domain-wise-health)
+- [Name-wise Health Metrics](/api-reference/analytics/email-wise-health)

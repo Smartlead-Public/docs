@@ -91,7 +91,24 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "test_id": "test_67890abcdef",
+    "test_name": "Q1 Campaign Spam Test",
+    "test_type": "manual",
+    "status": "completed",
+    "created_at": "2026-03-15T14:30:00Z",
+    "completed_at": "2026-03-15T15:45:00Z",
+    "inbox_rate": 91.5,
+    "spam_rate": 6.2,
+    "bounce_rate": 2.3,
+    "total_count": 200,
+    "inbox_count": 183,
+    "spam_count": 12,
+    "bounce_count": 5,
+    "avg_delivery_time_seconds": 47,
+    "mailbox_providers": ["Gmail", "Outlook", "Yahoo"],
+    "regions_tested": ["North America", "Europe", "Asia Pacific"]
+  }
 }
 ```
 

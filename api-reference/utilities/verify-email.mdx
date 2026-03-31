@@ -126,7 +126,32 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": [
+    {
+      "email": "john.doe@example.com",
+      "status": "valid",
+      "reason": "Email is syntactically correct with valid domain",
+      "is_disposable": false,
+      "is_role_account": false,
+      "mx_found": true
+    },
+    {
+      "email": "jane.smith@company.org",
+      "status": "valid",
+      "reason": "Email verified with SMTP check",
+      "is_disposable": false,
+      "is_role_account": false,
+      "mx_found": true
+    },
+    {
+      "email": "sales@business.net",
+      "status": "risky",
+      "reason": "Email address does not accept external connections",
+      "is_disposable": false,
+      "is_role_account": true,
+      "mx_found": true
+    }
+  ]
 }
 ```
 

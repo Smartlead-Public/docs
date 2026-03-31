@@ -91,7 +91,50 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "regions": [
+      {
+        "region": "North America",
+        "providers": [
+          {
+            "provider": "Gmail",
+            "provider_id": "gmail_na",
+            "mailbox_count": 150
+          },
+          {
+            "provider": "Outlook",
+            "provider_id": "outlook_na",
+            "mailbox_count": 120
+          },
+          {
+            "provider": "Yahoo",
+            "provider_id": "yahoo_na",
+            "mailbox_count": 130
+          }
+        ]
+      },
+      {
+        "region": "Europe",
+        "providers": [
+          {
+            "provider": "Gmail",
+            "provider_id": "gmail_eu",
+            "mailbox_count": 140
+          },
+          {
+            "provider": "Outlook",
+            "provider_id": "outlook_eu",
+            "mailbox_count": 130
+          },
+          {
+            "provider": "Yahoo",
+            "provider_id": "yahoo_eu",
+            "mailbox_count": 80
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 

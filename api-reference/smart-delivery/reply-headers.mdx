@@ -91,7 +91,26 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "test_id": "test_67890abcdef",
+    "replies": [
+      {
+        "mailbox_id": "mb_001",
+        "provider": "Gmail",
+        "reply_received": true,
+        "reply_date": "2026-03-15T15:30:00Z",
+        "headers": {
+          "From": "user@gmail.com",
+          "To": "campaigns@example.com",
+          "Subject": "Re: Special Q1 Offer",
+          "Date": "Sat, 15 Mar 2026 15:30:00 +0000",
+          "Authentication-Results": "gmail.com; dkim=pass; spf=pass; dmarc=pass"
+        }
+      }
+    ],
+    "reply_count": 1,
+    "total_tested": 10
+  }
 }
 ```
 

@@ -107,7 +107,26 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": [
+    {
+      "id": 2001,
+      "email_address": "sales@mycompany.com",
+      "from_name": "Sarah Lee",
+      "type": "SMTP",
+      "is_active": true,
+      "daily_limit": 150,
+      "sent_today": 127
+    },
+    {
+      "id": 2002,
+      "email_address": "outreach@mycompany.com",
+      "from_name": "David Smith",
+      "type": "SMTP",
+      "is_active": true,
+      "daily_limit": 150,
+      "sent_today": 94
+    }
+  ]
 }
 ```
 

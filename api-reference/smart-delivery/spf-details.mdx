@@ -91,7 +91,17 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "domain": "example.com",
+    "spf_enabled": true,
+    "spf_status": "valid",
+    "spf_record": "v=spf1 include:sendgrid.net include:mailgun.org ~all",
+    "authorized_ips": ["192.168.1.100", "192.168.1.101"],
+    "authorized_domains": ["sendgrid.net", "mailgun.org"],
+    "last_validated": "2026-03-15T14:30:00Z",
+    "validation_score": 100,
+    "issues": []
+  }
 }
 ```
 

@@ -91,7 +91,31 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "providers": [
+      {
+        "provider": "Gmail",
+        "count": 350,
+        "percentage": 37.6
+      },
+      {
+        "provider": "Outlook",
+        "count": 310,
+        "percentage": 33.3
+      },
+      {
+        "provider": "Yahoo",
+        "count": 240,
+        "percentage": 25.8
+      },
+      {
+        "provider": "ProtonMail",
+        "count": 30,
+        "percentage": 3.2
+      }
+    ],
+    "total_mailboxes": 930
+  }
 }
 ```
 

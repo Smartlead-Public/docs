@@ -91,7 +91,22 @@ console.log(result);
 ```json 200 - Success
 {
   "success": true,
-  "data": {}
+  "data": {
+    "total_mailboxes": 930,
+    "mailboxes_by_provider": {
+      "Gmail": 350,
+      "Outlook": 310,
+      "Yahoo": 240,
+      "ProtonMail": 30
+    },
+    "mailboxes_by_region": {
+      "North America": 400,
+      "Europe": 350,
+      "Asia Pacific": 180
+    },
+    "active_tests": 5,
+    "last_test_date": "2026-03-15T14:30:00Z"
+  }
 }
 ```
 
