@@ -22,7 +22,7 @@ description: "List all spam tests with filtering by date, type, and status"
 ```bash cURL
 curl -X POST "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/list?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{}'
 ```
 
 ```python Python
@@ -33,7 +33,7 @@ API_KEY = "YOUR_API_KEY"
 response = requests.post(
     "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/list",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json={}
 )
 
 result = response.json()
@@ -48,7 +48,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify({})
   }
 );
 

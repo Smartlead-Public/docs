@@ -74,7 +74,28 @@ Cannot modify sequences while campaign is **ACTIVE**. Pause campaign first, make
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "sequences": [
+      {
+        "id": null,
+        "seq_number": 1,
+        "subject": "Hello {{first_name}}",
+        "email_body": "<p>Hi {{first_name}},</p><p>I wanted to reach out...</p>",
+        "seq_delay_details": {
+          "delay_in_days": 0
+        }
+      },
+      {
+        "id": null,
+        "seq_number": 2,
+        "subject": "",
+        "email_body": "<p>Just following up on my previous email...</p>",
+        "seq_delay_details": {
+          "delay_in_days": 3
+        }
+      }
+    ]
+  }'
 ```
 
 ```python Python
@@ -85,7 +106,24 @@ API_KEY = "YOUR_API_KEY"
 response = requests.post(
     "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/sequences",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json={
+        "sequences": [
+            {
+                "id": None,
+                "seq_number": 1,
+                "subject": "Hello {{first_name}}",
+                "email_body": "<p>Hi {{first_name}},</p><p>I wanted to reach out...</p>",
+                "seq_delay_details": {"delay_in_days": 0}
+            },
+            {
+                "id": None,
+                "seq_number": 2,
+                "subject": "",
+                "email_body": "<p>Just following up on my previous email...</p>",
+                "seq_delay_details": {"delay_in_days": 3}
+            }
+        ]
+    }
 )
 
 result = response.json()
@@ -96,11 +134,28 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/sequences?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/sequences?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify({
+      sequences: [
+        {
+          id: null,
+          seq_number: 1,
+          subject: 'Hello {{first_name}}',
+          email_body: '<p>Hi {{first_name}},</p><p>I wanted to reach out...</p>',
+          seq_delay_details: { delay_in_days: 0 }
+        },
+        {
+          id: null,
+          seq_number: 2,
+          subject: '',
+          email_body: '<p>Just following up on my previous email...</p>',
+          seq_delay_details: { delay_in_days: 3 }
+        }
+      ]
+    })
   }
 );
 

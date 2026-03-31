@@ -1,6 +1,6 @@
 ---
 title: "Verify Email"
-api: "POST https://server.smartlead.ai/api/v1/verify-emails"
+api: "POST https://server.smartlead.ai/api/v1/verify-email/list"
 description: "Validate email deliverability with syntax, domain, SMTP, and quality checks"
 ---
 
@@ -18,14 +18,22 @@ description: "Validate email deliverability with syntax, domain, SMTP, and quali
 
 ## Request Body
 
-<Note>No request body required</Note>
+<ParamField body="emailList" type="array" required>
+  Array of email addresses to verify. Each email should be a string in valid email format
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/verify-emails?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/verify-email/list?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "emailList": [
+      "john.doe@example.com",
+      "jane.smith@company.org",
+      "sales@business.net"
+    ]
+  }'
 ```
 
 ```python Python
@@ -33,10 +41,18 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
+payload = {
+    "emailList": [
+        "john.doe@example.com",
+        "jane.smith@company.org",
+        "sales@business.net"
+    ]
+}
+
 response = requests.post(
-    "https://server.smartlead.ai/api/v1/verify-emails",
+    "https://server.smartlead.ai/api/v1/verify-email/list",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
@@ -46,12 +62,20 @@ print(result)
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
+const payload = {
+  emailList: [
+    'john.doe@example.com',
+    'jane.smith@company.org',
+    'sales@business.net'
+  ]
+};
+
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/verify-emails?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/verify-email/list?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 

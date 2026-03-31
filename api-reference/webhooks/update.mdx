@@ -1,16 +1,18 @@
 ---
-title: "Update Webhook"
-api: "PUT https://server.smartlead.ai/api/v1/webhook/update/{webhook_id}"
-description: "Modify existing webhook configuration including URL and event types"
+title: "Add / Update Campaign Webhook"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks"
+description: "Add a new webhook or update an existing webhook for a campaign"
 ---
+
+<Note>
+Use this endpoint to add a new webhook or update an existing one. To create a new webhook, omit the `id` field. To update an existing webhook, include the webhook `id`.
+</Note>
 
 ## Path Parameters
 
-<ParamField path="webhook_id" type="number" required>
-  The webhook id
+<ParamField path="campaign_id" type="number" required>
+  The campaign ID to add/update the webhook for
 </ParamField>
-
-
 
 ## Query Parameters
 
@@ -18,18 +20,39 @@ description: "Modify existing webhook configuration including URL and event type
   Your SmartLead API key
 </ParamField>
 
-
-
 ## Request Body
 
-<Note>No request body required</Note>
+<ParamField body="id" type="number">
+  Webhook ID. Omit or set to null to create a new webhook. Include to update an existing webhook.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  A descriptive name for the webhook
+</ParamField>
+
+<ParamField body="webhook_url" type="string" required>
+  The URL to receive webhook events
+</ParamField>
+
+<ParamField body="event_types" type="array" required>
+  Array of event types to subscribe to (e.g. `EMAIL_SENT`, `EMAIL_OPENED`, `EMAIL_REPLIED`, `EMAIL_CLICKED`, `LEAD_UNSUBSCRIBED`, `EMAIL_BOUNCED`)
+</ParamField>
+
+<ParamField body="categories" type="array">
+  Array of lead categories to filter events by
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X PUT "https://server.smartlead.ai/api/v1/webhook/update/{webhook_id}?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "name": "My CRM Webhook",
+    "webhook_url": "https://example.com/webhook",
+    "event_types": ["EMAIL_SENT", "EMAIL_REPLIED", "EMAIL_BOUNCED"],
+    "categories": []
+  }'
 ```
 
 ```python Python
@@ -37,10 +60,15 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
-response = requests.put(
-    "https://server.smartlead.ai/api/v1/webhook/update/{webhook_id}",
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json={
+        "name": "My CRM Webhook",
+        "webhook_url": "https://example.com/webhook",
+        "event_types": ["EMAIL_SENT", "EMAIL_REPLIED", "EMAIL_BOUNCED"],
+        "categories": []
+    }
 )
 
 result = response.json()
@@ -51,11 +79,16 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/webhook/update/${webhook_id}?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/webhooks?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify({
+      name: 'My CRM Webhook',
+      webhook_url: 'https://example.com/webhook',
+      event_types: ['EMAIL_SENT', 'EMAIL_REPLIED', 'EMAIL_BOUNCED'],
+      categories: []
+    })
   }
 );
 
@@ -65,48 +98,31 @@ console.log(result);
 
 </RequestExample>
 
-
-
 ## Response Codes
 
 <ResponseField name="200" type="Success">
-  Request successful
+  Webhook added/updated successfully
 </ResponseField>
 
 <ResponseField name="400" type="Bad Request">
-  Invalid request parameters or malformed request body
+  Invalid request parameters
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
-  Invalid or missing API key. Check your authentication.
+  Invalid or missing API key
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  The requested resource (campaign, lead, email account, etc.) does not exist or you don't have access to it
-</ResponseField>
-
-<ResponseField name="422" type="Validation Error">
-  Request validation failed. Check parameter types, required fields, and value constraints.
-</ResponseField>
-
-<ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
-</ResponseField>
-
-<ResponseField name="500" type="Internal Server Error">
-  Server error occurred. Please try again or contact support if the issue persists.
-</ResponseField>
-
-<ResponseField name="503" type="Service Unavailable">
-  API is temporarily unavailable or under maintenance. Please try again later.
+  Campaign not found
 </ResponseField>
 
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": {}
+  "ok": true,
+  "id": 12345,
+  "message": "Webhook saved successfully"
 }
 ```
 
@@ -116,20 +132,9 @@ console.log(result);
 }
 ```
 
-```json 404 - Not Found
-{
-  "error": "Resource not found"
-}
-```
-
-```json 422 - Validation Error
-{
-  "error": "Invalid parameters provided"
-}
-```
-
 </ResponseExample>
 
 ## Related Endpoints
 
-- [Related endpoint](#)
+- [Get Campaign Webhooks](/api-reference/webhooks/get)
+- [Delete Campaign Webhook](/api-reference/webhooks/delete)

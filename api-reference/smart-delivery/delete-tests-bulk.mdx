@@ -22,7 +22,7 @@ description: "Delete multiple spam tests at once by test IDs"
 ```bash cURL
 curl -X POST "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/delete-bulk?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{}'
 ```
 
 ```python Python
@@ -33,7 +33,7 @@ API_KEY = "YOUR_API_KEY"
 response = requests.post(
     "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/delete-bulk",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json={}
 )
 
 result = response.json()
@@ -48,7 +48,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify({})
   }
 );
 

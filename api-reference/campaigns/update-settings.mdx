@@ -30,43 +30,64 @@ Updates campaign configuration including: tracking settings (enable/disable open
 
 ## Request Body
 
-<ParamField body="track_settings" type="object">
-  Email tracking configuration
-  
-  <Expandable title="Track Settings">
-    <ParamField body="track_open" type="boolean">
-      Enable open tracking
-    </ParamField>
-    
-    <ParamField body="track_click" type="boolean">
-      Enable click tracking
-    </ParamField>
-  </Expandable>
+<ParamField body="name" type="string">
+  Campaign name
 </ParamField>
 
-<ParamField body="sending_limit" type="number">
-  Maximum leads to contact per day
-</ParamField>
-
-<ParamField body="min_time_btwn_emails" type="number">
-  Minimum minutes to wait between consecutive emails
+<ParamField body="track_settings" type="string">
+  Email tracking configuration. Allowed values: `DONT_TRACK_EMAIL_OPEN`, `DONT_TRACK_LINK_CLICK`, `DONT_TRACK_REPLY_TO_AN_EMAIL`
 </ParamField>
 
 <ParamField body="stop_lead_settings" type="string">
-  When to stop emailing a lead
-  
-  Valid values:
-  - `REPLY_TO_AN_EMAIL` - Stop on reply
-  - `OPENED_EMAIL` - Stop after open
-  - `CLICKED_LINK` - Stop after click
+  When to stop emailing a lead. Allowed values: `CLICK_ON_A_LINK`, `OPEN_AN_EMAIL`
+</ParamField>
+
+<ParamField body="unsubscribe_text" type="string">
+  Unsubscribe text to append to emails
+</ParamField>
+
+<ParamField body="send_as_plain_text" type="boolean">
+  Send emails as plain text (no HTML)
+</ParamField>
+
+<ParamField body="force_plain_text" type="boolean">
+  Force convert all emails to plain text
+</ParamField>
+
+<ParamField body="follow_up_percentage" type="integer">
+  Follow-up percentage (0-100)
+</ParamField>
+
+<ParamField body="client_id" type="integer">
+  Client ID. Leave as null if not needed
 </ParamField>
 
 <ParamField body="enable_ai_esp_matching" type="boolean">
   Use AI to match leads with best email accounts
 </ParamField>
 
-<ParamField body="send_as_plain_text" type="boolean">
-  Send emails as plain text (no HTML)
+<ParamField body="auto_pause_domain_leads_on_reply" type="boolean">
+  Pause leads from same domain after reply
+</ParamField>
+
+<ParamField body="ignore_ss_mailbox_sending_limit" type="boolean">
+  Ignore SmartSenders mailbox sending limit
+</ParamField>
+
+<ParamField body="bounce_autopause_threshold" type="string">
+  Bounce auto-pause threshold
+</ParamField>
+
+<ParamField body="domain_level_rate_limit" type="boolean">
+  Enable domain-level rate limiting
+</ParamField>
+
+<ParamField body="out_of_office_detection_settings" type="object">
+  Out of office detection configuration
+</ParamField>
+
+<ParamField body="ai_categorisation_options" type="array">
+  AI categorisation options
 </ParamField>
 
 <RequestExample>
@@ -74,7 +95,14 @@ Updates campaign configuration including: tracking settings (enable/disable open
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/settings?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "name": "My Campaign",
+    "track_settings": "DONT_TRACK_EMAIL_OPEN",
+    "stop_lead_settings": "CLICK_ON_A_LINK",
+    "send_as_plain_text": false,
+    "follow_up_percentage": 100,
+    "enable_ai_esp_matching": true
+  }'
 ```
 
 ```python Python
@@ -85,7 +113,14 @@ API_KEY = "YOUR_API_KEY"
 response = requests.post(
     "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/settings",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json={
+        "name": "My Campaign",
+        "track_settings": "DONT_TRACK_EMAIL_OPEN",
+        "stop_lead_settings": "CLICK_ON_A_LINK",
+        "send_as_plain_text": False,
+        "follow_up_percentage": 100,
+        "enable_ai_esp_matching": True
+    }
 )
 
 result = response.json()
@@ -96,11 +131,18 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/settings?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/settings?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify({
+      name: 'My Campaign',
+      track_settings: 'DONT_TRACK_EMAIL_OPEN',
+      stop_lead_settings: 'CLICK_ON_A_LINK',
+      send_as_plain_text: false,
+      follow_up_percentage: 100,
+      enable_ai_esp_matching: true
+    })
   }
 );
 

@@ -18,14 +18,55 @@ description: "Send one-off transactional email outside of campaigns with attachm
 
 ## Request Body
 
-<Note>No request body required</Note>
+<ParamField body="to" type="string" required>
+  Recipient email address
+</ParamField>
+
+<ParamField body="subject" type="string" required>
+  Email subject line
+</ParamField>
+
+<ParamField body="body" type="string" required>
+  Email body content (HTML or plain text)
+</ParamField>
+
+<ParamField body="fromEmail" type="string">
+  Sender email address. Either `fromEmail` or `fromEmailId` is required
+</ParamField>
+
+<ParamField body="fromEmailId" type="number">
+  ID of the sender email account. Either `fromEmail` or `fromEmailId` is required
+</ParamField>
+
+<ParamField body="fromName" type="string">
+  Display name for the sender (optional)
+</ParamField>
+
+<ParamField body="replyTo" type="string">
+  Reply-to email address (optional)
+</ParamField>
+
+<ParamField body="attachments" type="array">
+  Array of attachment objects (optional). Each attachment requires:
+  - `filename` (string): Name of the file
+  - `content` (string): Base64-encoded file content
+  - `mimeType` (string): MIME type of the file (e.g., "application/pdf")
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
 curl -X POST "https://server.smartlead.ai/api/v1/send-email/initiate?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"key": "value"}'
+  -d '{
+    "to": "recipient@example.com",
+    "subject": "Welcome to SmartLead",
+    "body": "<h1>Hello!</h1><p>This is your welcome email.</p>",
+    "fromEmail": "sender@example.com",
+    "fromName": "SmartLead Team",
+    "replyTo": "support@example.com",
+    "attachments": []
+  }'
 ```
 
 ```python Python
@@ -33,10 +74,20 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
+payload = {
+    "to": "recipient@example.com",
+    "subject": "Welcome to SmartLead",
+    "body": "<h1>Hello!</h1><p>This is your welcome email.</p>",
+    "fromEmail": "sender@example.com",
+    "fromName": "SmartLead Team",
+    "replyTo": "support@example.com",
+    "attachments": []
+}
+
 response = requests.post(
     "https://server.smartlead.ai/api/v1/send-email/initiate",
     params={"api_key": API_KEY},
-    json={"key": "value"}
+    json=payload
 )
 
 result = response.json()
@@ -46,12 +97,22 @@ print(result)
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
+const payload = {
+  to: 'recipient@example.com',
+  subject: 'Welcome to SmartLead',
+  body: '<h1>Hello!</h1><p>This is your welcome email.</p>',
+  fromEmail: 'sender@example.com',
+  fromName: 'SmartLead Team',
+  replyTo: 'support@example.com',
+  attachments: []
+};
+
 const response = await fetch(
   `https://server.smartlead.ai/api/v1/send-email/initiate?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'value' })
+    body: JSON.stringify(payload)
   }
 );
 
