@@ -6,7 +6,7 @@ description: "Fetch campaign statistics using the campaign's ID"
 
 ## Path Parameters
 
-<ParamField path="campaign_id" type="string" required>
+<ParamField path="campaign_id" type="integer" required>
   Campaign ID
 </ParamField>
 
@@ -21,11 +21,11 @@ description: "Fetch campaign statistics using the campaign's ID"
 </ParamField>
 
 <ParamField query="limit" type="integer">
-  Max number of stats to return
+  Max number of stats to return (max 1000)
 </ParamField>
 
-<ParamField query="email_sequence_number" type="string">
-  Email sequence. Example: `{1,2,3,4}`
+<ParamField query="email_sequence_number" type="integer">
+  Single sequence number (min: 1, max: 20)
 </ParamField>
 
 <ParamField query="email_status" type="string">
