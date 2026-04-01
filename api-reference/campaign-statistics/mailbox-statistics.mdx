@@ -16,7 +16,7 @@ description: "Fetch mailbox statistics specific to a campaign"
   Your API key
 </ParamField>
 
-<ParamField query="client_id" type="string" default="1">
+<ParamField query="client_id" type="integer" default="1">
   The ID of your client if this campaign is client specific
 </ParamField>
 
@@ -28,22 +28,20 @@ description: "Fetch mailbox statistics specific to a campaign"
   Number of results to return. Min 1, max 20.
 </ParamField>
 
-<ParamField query="start_date" type="date">
-  Start date for filtering. Both start_date and end_date must be provided, otherwise data will be for the full campaign length.
+<ParamField query="start_date" type="string">
+  Start date for filtering in YYYY-MM-DD format. Both start_date and end_date must be provided, otherwise data will be for the full campaign length.
 </ParamField>
 
-<ParamField query="end_date" type="date">
-  End date for filtering. Both start_date and end_date must be provided, otherwise data will be for the full campaign length.
+<ParamField query="end_date" type="string">
+  End date for filtering in YYYY-MM-DD format. Both start_date and end_date must be provided, otherwise data will be for the full campaign length.
 </ParamField>
 
 <ParamField query="time_zone" type="string" default="UTC">
   The campaign timezone, e.g. `America/Los_Angeles`. Same format as shown in your campaign UI next to the date filter.
 </ParamField>
 
-## Headers
-
-<ParamField header="accept" type="string" default="application/json">
-  Response content type. Allowed: `application/json`, `text/plain`
+<ParamField query="private_api_key" type="string">
+  Private API key for additional authorization (optional)
 </ParamField>
 
 
