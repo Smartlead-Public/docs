@@ -53,6 +53,14 @@ Webhooks allow you to receive real-time HTTP POST notifications when specific ev
   Client ID (required when association_type=2)
 </ParamField>
 
+<ParamField body="event_type" type="string">
+  Specific event type to subscribe to
+</ParamField>
+
+<ParamField body="category_id" type="number">
+  Specific lead category ID to filter events by
+</ParamField>
+
 <ParamField body="webhook_type" type="string">
   Webhook type identifier
 </ParamField>

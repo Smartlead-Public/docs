@@ -1,6 +1,6 @@
 ---
 title: "Get Spam Test Details"
-api: "GET https://smartdelivery.smartlead.ai/api/v1/smart-delivery/test/{test_id}"
+api: "GET https://smartdelivery.smartlead.ai/api/v1/spam-test/{spamTestId}"
 description: "Get complete spam test results including inbox placement and scores"
 ---
 
@@ -20,7 +20,7 @@ description: "Get complete spam test results including inbox placement and score
 <RequestExample>
 
 ```bash cURL
-curl "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/test/{test_id}?api_key=YOUR_KEY"
+curl "https://smartdelivery.smartlead.ai/api/v1/spam-test/{spamTestId}?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/test/{test_id}",
+    "https://smartdelivery.smartlead.ai/api/v1/spam-test/{spamTestId}",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/test/${test_id}?api_key=${API_KEY}`
+  `https://smartdelivery.smartlead.ai/api/v1/spam-test/{spamTestId}?api_key=${API_KEY}`
 );
 
 const result = await response.json();

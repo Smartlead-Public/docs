@@ -1,6 +1,6 @@
 ---
 title: "IP Details"
-api: "GET https://smartdelivery.smartlead.ai/api/v1/smart-delivery/ip-details"
+api: "GET https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/ip-analytics"
 description: "Get comprehensive information about sending IP addresses"
 ---
 
@@ -20,7 +20,7 @@ description: "Get comprehensive information about sending IP addresses"
 <RequestExample>
 
 ```bash cURL
-curl "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/ip-details?api_key=YOUR_KEY"
+curl "https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/ip-analytics?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/ip-details",
+    "https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/ip-analytics",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/ip-details?api_key=${API_KEY}`
+  `https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/ip-analytics?api_key=${API_KEY}`
 );
 
 const result = await response.json();

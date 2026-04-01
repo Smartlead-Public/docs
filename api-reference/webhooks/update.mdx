@@ -1,17 +1,17 @@
 ---
-title: "Add / Update Campaign Webhook"
-api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks"
-description: "Add a new webhook or update an existing webhook for a campaign"
+title: "Update Webhook"
+api: "PUT https://server.smartlead.ai/api/v1/webhook/update/:webhook_id"
+description: "Update the configuration of an existing webhook"
 ---
 
 <Note>
-Use this endpoint to add a new webhook or update an existing one. To create a new webhook, omit the `id` field. To update an existing webhook, include the webhook `id`.
+Use this endpoint to update the configuration of an existing webhook.
 </Note>
 
 ## Path Parameters
 
-<ParamField path="campaign_id" type="number" required>
-  The campaign ID to add/update the webhook for
+<ParamField path="webhook_id" type="number" required>
+  The webhook ID to update
 </ParamField>
 
 ## Query Parameters
@@ -22,19 +22,15 @@ Use this endpoint to add a new webhook or update an existing one. To create a ne
 
 ## Request Body
 
-<ParamField body="id" type="number">
-  Webhook ID. Omit or set to null to create a new webhook. Include to update an existing webhook.
-</ParamField>
-
-<ParamField body="name" type="string" required>
+<ParamField body="name" type="string">
   A descriptive name for the webhook
 </ParamField>
 
-<ParamField body="webhook_url" type="string" required>
+<ParamField body="webhook_url" type="string">
   The URL to receive webhook events
 </ParamField>
 
-<ParamField body="event_types" type="array" required>
+<ParamField body="event_types" type="array">
   Array of event types to subscribe to (e.g. `EMAIL_SENT`, `EMAIL_OPENED`, `EMAIL_REPLIED`, `EMAIL_CLICKED`, `LEAD_UNSUBSCRIBED`, `EMAIL_BOUNCED`)
 </ParamField>
 
@@ -45,10 +41,10 @@ Use this endpoint to add a new webhook or update an existing one. To create a ne
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks?api_key=YOUR_KEY" \
+curl -X PUT "https://server.smartlead.ai/api/v1/webhook/update/12345?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "My CRM Webhook",
+    "name": "My Updated Webhook",
     "webhook_url": "https://example.com/webhook",
     "event_types": ["EMAIL_SENT", "EMAIL_REPLIED", "EMAIL_BOUNCED"],
     "categories": []
@@ -59,12 +55,13 @@ curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhook
 import requests
 
 API_KEY = "YOUR_API_KEY"
+WEBHOOK_ID = 12345
 
-response = requests.post(
-    "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhooks",
+response = requests.put(
+    f"https://server.smartlead.ai/api/v1/webhook/update/{WEBHOOK_ID}",
     params={"api_key": API_KEY},
     json={
-        "name": "My CRM Webhook",
+        "name": "My Updated Webhook",
         "webhook_url": "https://example.com/webhook",
         "event_types": ["EMAIL_SENT", "EMAIL_REPLIED", "EMAIL_BOUNCED"],
         "categories": []
@@ -77,14 +74,15 @@ print(result)
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const WEBHOOK_ID = 12345;
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/webhooks?api_key=${API_KEY}`,
+  `https://server.smartlead.ai/api/v1/webhook/update/${WEBHOOK_ID}?api_key=${API_KEY}`,
   {
-    method: 'POST',
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: 'My CRM Webhook',
+      name: 'My Updated Webhook',
       webhook_url: 'https://example.com/webhook',
       event_types: ['EMAIL_SENT', 'EMAIL_REPLIED', 'EMAIL_BOUNCED'],
       categories: []

@@ -1,6 +1,6 @@
 ---
 title: "Delete Folder"
-api: "DELETE https://smartdelivery.smartlead.ai/api/v1/smart-delivery/folders/{folder_id}"
+api: "DELETE https://smartdelivery.smartlead.ai/api/v1/spam-test/folder/{folderId}"
 description: "Delete an empty test folder"
 ---
 
@@ -20,7 +20,7 @@ description: "Delete an empty test folder"
 <RequestExample>
 
 ```bash cURL
-curl -X DELETE "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/folders/{folder_id}?api_key=YOUR_KEY"
+curl -X DELETE "https://smartdelivery.smartlead.ai/api/v1/spam-test/folder/{folderId}?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.delete(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/folders/{folder_id}",
+    "https://smartdelivery.smartlead.ai/api/v1/spam-test/folder/{folderId}",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/folders/${folder_id}?api_key=${API_KEY}`
+  `https://smartdelivery.smartlead.ai/api/v1/spam-test/folder/{folderId}?api_key=${API_KEY}`
 );
 
 const result = await response.json();

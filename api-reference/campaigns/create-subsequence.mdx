@@ -1,18 +1,12 @@
 ---
 title: "Create Subsequence Campaign"
-api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/create-subsequence"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/create-subsequence"
 description: "Create a child campaign (subsequence) with conditional logic"
 ---
 
 <Note>
 Create branching campaign logic by defining subsequences that triggers based on lead behavior. Essential for sophisticated nurture workflows.
 </Note>
-
-## Path Parameters
-
-<ParamField path="campaign_id" type="number" required>
-  Parent campaign ID
-</ParamField>
 
 ## Query Parameters
 
@@ -22,9 +16,9 @@ Create branching campaign logic by defining subsequences that triggers based on 
 
 ## Request Body
 
-<Warning>
-Complex schema - implementation details need verification from `/server/controller/v1/campaigns/createSubsequence.js` for complete documentation.
-</Warning>
+<ParamField body="parent_campaign_id" type="number" required>
+  Parent campaign ID
+</ParamField>
 
 <ParamField body="subsequence_name" type="string">
   Name for the subsequence campaign
@@ -37,19 +31,26 @@ Complex schema - implementation details need verification from `/server/controll
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/create-subsequence?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/create-subsequence?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{
+    "parent_campaign_id": 123,
+    "subsequence_name": "Follow-up Sequence",
+    "condition_events": []
+  }'
 ```
 
 ```python Python
 import requests
 
-# Schema needs verification
 response = requests.post(
-    f"https://server.smartlead.ai/api/v1/campaigns/123/create-subsequence",
+    "https://server.smartlead.ai/api/v1/campaigns/create-subsequence",
     params={"api_key": "YOUR_API_KEY"},
-    json={}
+    json={
+        "parent_campaign_id": 123,
+        "subsequence_name": "Follow-up Sequence",
+        "condition_events": []
+    }
 )
 ```
 
@@ -68,9 +69,6 @@ response = requests.post(
 
 </ResponseExample>
 
-<Warning>
-Complete schema documentation requires verification from controller implementation at `/server/controller/v1/campaigns/createSubsequence.js`
-</Warning>
 
 ## Related Endpoints
 

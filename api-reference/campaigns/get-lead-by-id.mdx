@@ -1,18 +1,14 @@
 ---
-title: "Get Campaign Lead by ID"
-api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/{lead_id}"
-description: "Retrieve detailed information about a specific lead in a campaign"
+title: "Get Lead by ID"
+api: "GET https://server.smartlead.ai/api/v1/leads/{lead_id}"
+description: "Retrieve detailed information about a specific lead"
 ---
 
 <Note>
-Get complete lead details including contact info, engagement stats, category, and custom fields.
+Get complete lead details including contact info, engagement stats, category, and custom fields. This is a global lead lookup across all campaigns.
 </Note>
 
 ## Path Parameters
-
-<ParamField path="campaign_id" type="number" required>
-  Campaign ID
-</ParamField>
 
 <ParamField path="lead_id" type="number" required>
   Lead ID
@@ -27,14 +23,14 @@ Get complete lead details including contact info, engagement stats, category, an
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/campaigns/123/leads/789?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/leads/789?api_key=YOUR_KEY"
 ```
 
 ```python Python
 import requests
 
 response = requests.get(
-    f"https://server.smartlead.ai/api/v1/campaigns/123/leads/789",
+    "https://server.smartlead.ai/api/v1/leads/789",
     params={"api_key": "YOUR_API_KEY"}
 )
 

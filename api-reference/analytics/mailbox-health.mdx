@@ -107,18 +107,14 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
+  "ok": true,
   "data": {
-    "total_mailboxes": 8,
-    "healthy_count": 7,
-    "at_risk_count": 1,
-    "unhealthy_count": 0,
-    "average_health_score": 93.1,
-    "average_bounce_rate": 1.08,
-    "average_spam_rate": 4.98,
-    "total_sent": 2740,
-    "total_bounce": 27,
-    "total_spam": 137
+    "overall_mailbox_stats": {
+      "total_connected": 25,
+      "in_use": 20,
+      "disconnected": 3,
+      "enabled_without_warmup": 2
+    }
   }
 }
 ```

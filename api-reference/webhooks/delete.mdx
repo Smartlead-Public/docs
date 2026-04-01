@@ -1,16 +1,8 @@
 ---
-title: "Delete Webhook"
-api: "DELETE https://server.smartlead.ai/api/v1/webhook/delete/{webhook_id}"
-description: "Permanently delete a webhook and stop all event notifications"
+title: "Delete Campaign Webhook"
+api: "DELETE https://server.smartlead.ai/api/v1/webhook/delete"
+description: "Permanently delete a campaign webhook and stop all event notifications"
 ---
-
-## Path Parameters
-
-<ParamField path="webhook_id" type="number" required>
-  The webhook id
-</ParamField>
-
-
 
 ## Query Parameters
 
@@ -18,16 +10,20 @@ description: "Permanently delete a webhook and stop all event notifications"
   Your SmartLead API key
 </ParamField>
 
-
-
 ## Request Body
 
-<Note>No request body required</Note>
+<ParamField body="id" type="number" required>
+  The webhook ID to delete
+</ParamField>
 
 <RequestExample>
 
 ```bash cURL
-curl -X DELETE "https://server.smartlead.ai/api/v1/webhook/delete/{webhook_id}?api_key=YOUR_KEY"
+curl -X DELETE "https://server.smartlead.ai/api/v1/webhook/delete?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 12345
+  }'
 ```
 
 ```python Python
@@ -36,8 +32,9 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.delete(
-    "https://server.smartlead.ai/api/v1/webhook/delete/{webhook_id}",
-    params={"api_key": API_KEY}
+    "https://server.smartlead.ai/api/v1/webhook/delete",
+    params={"api_key": API_KEY},
+    json={"id": 12345}
 )
 
 result = response.json()
@@ -48,7 +45,12 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://server.smartlead.ai/api/v1/webhook/delete/${webhook_id}?api_key=${API_KEY}`
+  `https://server.smartlead.ai/api/v1/webhook/delete?api_key=${API_KEY}`,
+  {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: 12345 })
+  }
 );
 
 const result = await response.json();
