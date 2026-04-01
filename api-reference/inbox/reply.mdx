@@ -1,6 +1,6 @@
 ---
 title: "Reply to Email"
-api: "POST https://server.smartlead.ai/api/v1/email-campaigns/send-email-thread"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/reply-email-thread"
 description: "Send a reply to a lead in an email thread"
 ---
 
@@ -20,6 +20,12 @@ Sends a reply email to a lead, maintaining the email thread. Can send immediatel
 - Signature inclusion
 - Reply tracking in conversation history
 
+## Path Parameters
+
+<ParamField path="campaign_id" type="integer" required>
+  Campaign ID
+</ParamField>
+
 ## Query Parameters
 
 <ParamField query="api_key" type="string" required>
@@ -28,47 +34,39 @@ Sends a reply email to a lead, maintaining the email thread. Can send immediatel
 
 ## Request Body
 
-<ParamField body="campaignId" type="number" required>
-  Campaign ID
-</ParamField>
-
-<ParamField body="emailStatsId" type="string" required>
+<ParamField body="email_stats_id" type="string" required>
   Email stats ID for the message to reply to
 </ParamField>
 
-<ParamField body="emailBody" type="string" required>
+<ParamField body="email_body" type="string" required>
   Reply email body content
 </ParamField>
 
-<ParamField body="id" type="number">
-  Thread ID (optional)
-</ParamField>
-
-<ParamField body="toEmail" type="string">
+<ParamField body="to_email" type="string">
   Recipient email (optional, defaults to lead email)
 </ParamField>
 
-<ParamField body="toFirstName" type="string">
+<ParamField body="to_first_name" type="string">
   Recipient first name (optional)
 </ParamField>
 
-<ParamField body="toLastName" type="string">
+<ParamField body="to_last_name" type="string">
   Recipient last name (optional)
 </ParamField>
 
-<ParamField body="scheduledTime" type="string">
+<ParamField body="scheduled_time" type="string">
   Schedule send time (ISO 8601 format)
 </ParamField>
 
-<ParamField body="replyMessageId" type="string">
+<ParamField body="reply_message_id" type="string">
   Message ID being replied to
 </ParamField>
 
-<ParamField body="replyEmailBody" type="string">
+<ParamField body="reply_email_body" type="string">
   Original email body being replied to
 </ParamField>
 
-<ParamField body="replyEmailTime" type="string">
+<ParamField body="reply_email_time" type="string">
   Original email timestamp
 </ParamField>
 
@@ -80,34 +78,34 @@ Sends a reply email to a lead, maintaining the email thread. Can send immediatel
   BCC recipients (comma-separated)
 </ParamField>
 
-<ParamField body="scheduleCondition" type="string">
+<ParamField body="schedule_condition" type="string">
   Scheduling condition (optional)
 </ParamField>
 
-<ParamField body="addSignature" type="boolean">
+<ParamField body="add_signature" type="boolean">
   Include email signature
 </ParamField>
 
-<ParamField body="seqType" type="string">
+<ParamField body="seq_type" type="string">
   Sequence type (optional)
 </ParamField>
 
 <ParamField body="attachments" type="array">
   File attachments array
-  
+
   <Expandable title="attachment properties">
     <ParamField body="file_name" type="string">
       File name
     </ParamField>
-    
+
     <ParamField body="file_url" type="string" required>
       File URL (required)
     </ParamField>
-    
+
     <ParamField body="file_type" type="string">
       MIME type
     </ParamField>
-    
+
     <ParamField body="file_size" type="number">
       File size in bytes
     </ParamField>
@@ -117,13 +115,12 @@ Sends a reply email to a lead, maintaining the email thread. Can send immediatel
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/email-campaigns/send-email-thread?api_key=YOUR_KEY" \
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/12345/reply-email-thread?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "campaignId": 12345,
-    "emailStatsId": "abc-123",
-    "emailBody": "Thanks for your interest! Let me know if you have any questions.",
-    "addSignature": true
+    "email_stats_id": "abc-123",
+    "email_body": "Thanks for your interest! Let me know if you have any questions.",
+    "add_signature": true
   }'
 ```
 
@@ -131,61 +128,61 @@ curl -X POST "https://server.smartlead.ai/api/v1/email-campaigns/send-email-thre
 import requests
 
 API_KEY = "YOUR_API_KEY"
+CAMPAIGN_ID = 12345
 
 def send_reply(campaign_id, email_stats_id, body, schedule_time=None, add_signature=True):
     payload = {
-        "campaignId": campaign_id,
-        "emailStatsId": email_stats_id,
-        "emailBody": body,
-        "addSignature": add_signature
+        "email_stats_id": email_stats_id,
+        "email_body": body,
+        "add_signature": add_signature
     }
-    
+
     if schedule_time:
-        payload["scheduledTime"] = schedule_time
-    
+        payload["scheduled_time"] = schedule_time
+
     response = requests.post(
-        "https://server.smartlead.ai/api/v1/email-campaigns/send-email-thread",
+        f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/reply-email-thread",
         params={"api_key": API_KEY},
         json=payload
     )
-    
+
     return response.json()
 
 # Send immediate reply
-send_reply(12345, "abc-123", "Thanks for your interest!")
+send_reply(CAMPAIGN_ID, "abc-123", "Thanks for your interest!")
 
 # Schedule reply for tomorrow 9 AM
 from datetime import datetime, timedelta
 tomorrow_9am = (datetime.now() + timedelta(days=1)).replace(hour=9, minute=0).isoformat() + 'Z'
-send_reply(12345, "abc-124", "Following up on our previous conversation", schedule_time=tomorrow_9am)
+send_reply(CAMPAIGN_ID, "abc-124", "Following up on our previous conversation", schedule_time=tomorrow_9am)
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
+const CAMPAIGN_ID = 12345;
 
 async function sendReply(campaignId, emailStatsId, body, options = {}) {
   const payload = {
-    campaignId,
-    emailStatsId,
-    emailBody: body,
-    addSignature: options.addSignature !== false,
+    email_stats_id: emailStatsId,
+    email_body: body,
+    add_signature: options.add_signature !== false,
     ...options
   };
-  
+
   const response = await fetch(
-    `https://server.smartlead.ai/api/v1/email-campaigns/send-email-thread?api_key=${API_KEY}`,
+    `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/reply-email-thread?api_key=${API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }
   );
-  
+
   return response.json();
 }
 
 // Send reply
-await sendReply(12345, 'abc-123', 'Happy to help!');
+await sendReply(CAMPAIGN_ID, 'abc-123', 'Happy to help!');
 ```
 
 </RequestExample>

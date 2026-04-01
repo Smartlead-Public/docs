@@ -16,12 +16,16 @@ description: "Fetch campaign statistics using the campaign's ID filtered by date
   Your API key
 </ParamField>
 
-<ParamField query="start_date" type="string" default="2022-12-16">
+<ParamField query="start_date" type="string" required>
   Start date in YYYY-MM-DD format
 </ParamField>
 
-<ParamField query="end_date" type="string" default="2022-12-23">
+<ParamField query="end_date" type="string" required>
   End date in YYYY-MM-DD format
+</ParamField>
+
+<ParamField query="time_zone" type="string">
+  IANA timezone string (e.g. "America/New_York")
 </ParamField>
 
 ## Headers
