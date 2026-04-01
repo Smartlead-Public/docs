@@ -103,21 +103,19 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": [
-    {
-      "date": "2024-01-15",
-      "sent_time_hour": 9,
-      "positive_reply_count": 7,
-      "total_sent": 120
-    },
-    {
-      "date": "2024-01-15",
-      "sent_time_hour": 14,
-      "positive_reply_count": 5,
-      "total_sent": 95
-    }
-  ]
+  "ok": true,
+  "data": {
+    "day_wise_stats": [
+      {
+        "date": "2024-01-15",
+        "positive_replied": 5
+      },
+      {
+        "date": "2024-01-16",
+        "positive_replied": 7
+      }
+    ]
+  }
 }
 ```
 

@@ -1,12 +1,12 @@
 ---
 title: "Get Webhook Summary"
-api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/webhook-summary"
-description: "Get webhook execution summary and statistics"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaignId}/webhooks/summary"
+description: "Get webhook execution summary and statistics for a campaign"
 ---
 
 ## Path Parameters
 
-<ParamField path="campaign_id" type="number" required>
+<ParamField path="campaignId" type="number" required>
   Campaign ID
 </ParamField>
 
@@ -16,18 +16,30 @@ description: "Get webhook execution summary and statistics"
   Your SmartLead API key
 </ParamField>
 
+<ParamField query="fromTime" type="string" required>
+  Start date in ISO format (e.g. `2024-01-01T00:00:00.000Z`)
+</ParamField>
+
+<ParamField query="toTime" type="string" required>
+  End date in ISO format (e.g. `2024-01-31T23:59:59.999Z`)
+</ParamField>
+
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/campaigns/123/webhook-summary?api_key=YOUR_KEY"
+curl "https://server.smartlead.ai/api/v1/campaigns/123/webhooks/summary?api_key=YOUR_KEY&fromTime=2024-01-01T00:00:00.000Z&toTime=2024-01-31T23:59:59.999Z"
 ```
 
 ```python Python
 import requests
 
 response = requests.get(
-    f"https://server.smartlead.ai/api/v1/campaigns/123/webhook-summary",
-    params={"api_key": "YOUR_API_KEY"}
+    f"https://server.smartlead.ai/api/v1/campaigns/123/webhooks/summary",
+    params={
+        "api_key": "YOUR_API_KEY",
+        "fromTime": "2024-01-01T00:00:00.000Z",
+        "toTime": "2024-01-31T23:59:59.999Z"
+    }
 )
 
 summary = response.json()

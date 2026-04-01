@@ -128,31 +128,26 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": [
-    {
-      "campaign_id": "camp_001",
-      "campaign_name": "Q1 Outreach",
-      "sent_count": 1250,
-      "open_count": 425,
-      "click_count": 187,
-      "reply_count": 94,
-      "bounce_count": 23,
-      "open_rate": 34.0,
-      "reply_rate": 7.52
-    },
-    {
-      "campaign_id": "camp_002",
-      "campaign_name": "Follow-up Series",
-      "sent_count": 890,
-      "open_count": 312,
-      "click_count": 124,
-      "reply_count": 67,
-      "bounce_count": 18,
-      "open_rate": 35.06,
-      "reply_rate": 7.53
-    }
-  ]
+  "ok": true,
+  "data": {
+    "campaign_wise_performance": [
+      {
+        "id": 12345,
+        "campaign_name": "Q1 Cold Outreach",
+        "sent": 500,
+        "opened": 250,
+        "replied": 45,
+        "bounced": 8,
+        "open_rate": "50%",
+        "reply_rate": "9%",
+        "bounce_rate": "1.6%",
+        "positive_reply_rate": "5%",
+        "positive_replied": 25,
+        "unique_lead_count": 480,
+        "unique_open_count": 230
+      }
+    ]
+  }
 }
 ```
 

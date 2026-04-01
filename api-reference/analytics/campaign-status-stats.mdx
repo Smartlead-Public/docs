@@ -103,12 +103,22 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
+  "ok": true,
   "data": {
-    "active_count": 5,
-    "paused_count": 2,
-    "completed_count": 12,
-    "draft_count": 3
+    "campaign_status_stats": [
+      {
+        "status": "STARTED",
+        "count": 5
+      },
+      {
+        "status": "PAUSED",
+        "count": 2
+      },
+      {
+        "status": "COMPLETED",
+        "count": 8
+      }
+    ]
   }
 }
 ```

@@ -103,25 +103,18 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": [
-    {
-      "campaign_id": "camp_001",
-      "campaign_name": "Q1 Outreach",
-      "interested_count": 54,
-      "not_interested_count": 28,
-      "maybe_later_count": 12,
-      "out_of_office_count": 5
-    },
-    {
-      "campaign_id": "camp_002",
-      "campaign_name": "Follow-up Series",
-      "interested_count": 38,
-      "not_interested_count": 18,
-      "maybe_later_count": 8,
-      "out_of_office_count": 3
-    }
-  ]
+  "ok": true,
+  "data": {
+    "campaign_wise_response_stats": [
+      {
+        "campaign_id": 12345,
+        "campaign_name": "Q1 Outreach",
+        "positive_reply": 25,
+        "neutral_reply": 10,
+        "negative_reply": 5
+      }
+    ]
+  }
 }
 ```
 

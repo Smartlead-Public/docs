@@ -124,21 +124,22 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
-  "data": [
-    {
-      "sent_count": 1250,
-      "open_count": 425,
-      "click_count": 187,
-      "reply_count": 94,
-      "bounce_count": 23,
-      "unsubscribe_count": 8,
-      "open_rate": 34.0,
-      "click_rate": 14.96,
-      "reply_rate": 7.52,
-      "bounce_rate": 1.84
+  "ok": true,
+  "data": {
+    "overall_stats": {
+      "sent": 1250,
+      "opened": 425,
+      "replied": 94,
+      "bounced": 23,
+      "unique_lead_count": 1100,
+      "unique_open_count": 380,
+      "positive_replied": 52,
+      "open_rate": "34%",
+      "reply_rate": "7.5%",
+      "positive_reply_rate": "4.2%",
+      "bounce_rate": "1.8%"
     }
-  ]
+  }
 }
 ```
 

@@ -103,13 +103,22 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "success": true,
+  "ok": true,
   "data": {
-    "average_hours": 42.5,
-    "median_hours": 36.0,
-    "min_hours": 0.5,
-    "max_hours": 168.0,
-    "total_replies": 287
+    "lead_to_reply_time": [
+      {
+        "time_range": "0-1h",
+        "count": 15
+      },
+      {
+        "time_range": "1-6h",
+        "count": 25
+      },
+      {
+        "time_range": "6-24h",
+        "count": 18
+      }
+    ]
   }
 }
 ```

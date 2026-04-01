@@ -1,12 +1,12 @@
 ---
 title: "Retrigger Campaign Webhooks"
-api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/retrigger-webhooks"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaignId}/webhooks/retrigger-failed-events"
 description: "Manually retry failed webhook deliveries"
 ---
 
 ## Path Parameters
 
-<ParamField path="campaign_id" type="number" required>
+<ParamField path="campaignId" type="number" required>
   Campaign ID
 </ParamField>
 
@@ -16,21 +16,40 @@ description: "Manually retry failed webhook deliveries"
   Your SmartLead API key
 </ParamField>
 
+## Request Body
+
+<ParamField body="fromTime" type="string" required>
+  Start date in ISO format (e.g. `2024-01-01T00:00:00.000Z`)
+</ParamField>
+
+<ParamField body="toTime" type="string" required>
+  End date in ISO format (e.g. `2024-01-31T23:59:59.999Z`)
+</ParamField>
+
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/retrigger-webhooks?api_key=YOUR_KEY"
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/webhooks/retrigger-failed-events?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fromTime": "2024-01-01T00:00:00.000Z",
+    "toTime": "2024-01-31T23:59:59.999Z"
+  }'
 ```
 
 ```python Python
 import requests
 
 response = requests.post(
-    f"https://server.smartlead.ai/api/v1/campaigns/123/retrigger-webhooks",
-    params={"api_key": "YOUR_API_KEY"}
+    f"https://server.smartlead.ai/api/v1/campaigns/123/webhooks/retrigger-failed-events",
+    params={"api_key": "YOUR_API_KEY"},
+    json={
+        "fromTime": "2024-01-01T00:00:00.000Z",
+        "toTime": "2024-01-31T23:59:59.999Z"
+    }
 )
 
-print("✅ Webhooks retriggered")
+print("Webhooks retriggered")
 ```
 
 </RequestExample>

@@ -1,6 +1,6 @@
 ---
 title: "Domain Blacklist"
-api: "GET https://smartdelivery.smartlead.ai/api/v1/smart-delivery/domain-blacklist"
+api: "GET https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/domain-blacklist"
 description: "Check if sending domain is blacklisted"
 ---
 
@@ -20,7 +20,7 @@ description: "Check if sending domain is blacklisted"
 <RequestExample>
 
 ```bash cURL
-curl "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/domain-blacklist?api_key=YOUR_KEY"
+curl "https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/domain-blacklist?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -29,7 +29,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/domain-blacklist",
+    "https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/domain-blacklist",
     params={"api_key": API_KEY}
 )
 
@@ -41,7 +41,7 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/domain-blacklist?api_key=${API_KEY}`
+  `https://smartdelivery.smartlead.ai/api/v1/spam-test/report/{spamTestId}/domain-blacklist?api_key=${API_KEY}`
 );
 
 const result = await response.json();
