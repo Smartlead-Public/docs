@@ -37,10 +37,7 @@ Retrieves emails with active reminders. Unique sorting by reminder time (ascendi
 </ParamField>
 
 <ParamField body="filters" type="object">
-  Standard inbox filters (see [Complete Schema](./COMPREHENSIVE_SCHEMA_TEMPLATE.md))
-  - campaignId: max 5
-  - emailAccountId: max 10
-  - All arrays: max 10
+  Filter object with the following optional fields: `search` (string), `campaignId` (number or array, max 5), `emailAccountId` (number or array, max 10), `emailStatus` (string or array — valid values: `Opened`, `Clicked`, `Replied`, `Unsubscribed`, `Bounced`, `Accepted`, `Not Replied`), `leadCategories` (object with `categoryIdsIn`, `categoryIdsNotIn`, `unassigned`, `isAssigned`), `campaignTeamMemberId` (number or array, max 10), `campaignTagId` (number or array, max 10), `campaignClientId` (number or array, max 10), `replyTimeBetween` (array of 2 date strings).
 </ParamField>
 
 <ParamField body="sortBy" type="string">

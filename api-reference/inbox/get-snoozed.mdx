@@ -45,12 +45,7 @@ Retrieves snoozed emails that are scheduled to reappear at a later time. Snoozin
 </ParamField>
 
 <ParamField body="filters" type="object">
-  See [Complete Schema Template](./COMPREHENSIVE_SCHEMA_TEMPLATE.md) for all filter options.
-  
-  **Array Limits for this endpoint:**
-  - campaignId: max 5
-  - emailAccountId: max 10
-  - Other arrays: max 10
+  Filter object with the following optional fields: `search` (string), `campaignId` (number or array, max 5), `emailAccountId` (number or array, max 10), `emailStatus` (string or array — valid values: `Opened`, `Clicked`, `Replied`, `Unsubscribed`, `Bounced`, `Accepted`, `Not Replied`), `leadCategories` (object with `categoryIdsIn`, `categoryIdsNotIn`, `unassigned`, `isAssigned`), `campaignTeamMemberId` (number or array, max 10), `campaignTagId` (number or array, max 10), `campaignClientId` (number or array, max 10), `replyTimeBetween` (array of 2 date strings).
 </ParamField>
 
 <ParamField body="sortBy" type="string">
