@@ -1,0 +1,165 @@
+---
+title: "Duplicate Campaign"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/duplicate"
+description: "Creates a copy of an existing campaign including sequences, settings, and optionally sub-sequences and client labels."
+---
+<Note>
+Duplicates an existing campaign with all its configuration — sequences, variants, settings, schedule, email accounts, and LinkedIn cookies. Leads are **not** copied.
+</Note>
+
+## Overview
+
+Creates a full copy of a campaign, preserving its sequences (with variants), schedule, settings, email account mappings, and LinkedIn cookie mappings. Useful for replicating a proven campaign setup without manually recreating it.
+
+**What Gets Duplicated:**
+- Campaign settings (tracking, sending limits, stop conditions, AI categorisation, etc.)
+- All email sequences with variants and A/B test settings
+- Schedule and timezone configuration
+- Email account associations
+- LinkedIn cookie mappings
+- Optionally: sub-sequences and client label
+
+**What Does Not Get Duplicated:**
+- Leads — the new campaign starts empty
+- Campaign analytics and statistics
+- Webhook configurations
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  ID of the campaign to duplicate
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key for authentication
+</ParamField>
+
+## Request Body
+
+<ParamField body="duplicate_sub_sequence" type="boolean">
+  Whether to also duplicate sub-sequences (conditional follow-up sequences) attached to the campaign. Defaults to `false` if not provided.
+</ParamField>
+
+<ParamField body="duplicate_client_label" type="boolean">
+  Whether to retain the same client association on the duplicated campaign. Useful for agency accounts that want the copy assigned to the same client. Defaults to `false` if not provided.
+</ParamField>
+
+## Response
+
+<ResponseField name="ok" type="boolean">
+  Always `true` for successful duplication
+</ResponseField>
+
+<ResponseField name="newCampaignId" type="number">
+  Unique identifier for the newly created duplicate campaign
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/125/duplicate?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "duplicate_sub_sequence": true,
+    "duplicate_client_label": true
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+CAMPAIGN_ID = 125
+url = f"https://server.smartlead.ai/api/v1/campaigns/{CAMPAIGN_ID}/duplicate"
+
+payload = {
+    "duplicate_sub_sequence": True,
+    "duplicate_client_label": True
+}
+
+response = requests.post(
+    url,
+    params={"api_key": API_KEY},
+    json=payload
+)
+
+result = response.json()
+print(f"Duplicated campaign created with ID: {result['newCampaignId']}")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const CAMPAIGN_ID = 125;
+
+async function duplicateCampaign() {
+  const response = await fetch(
+    `https://server.smartlead.ai/api/v1/campaigns/${CAMPAIGN_ID}/duplicate?api_key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        duplicate_sub_sequence: true,
+        duplicate_client_label: true,
+      }),
+    }
+  );
+
+  const data = await response.json();
+  console.log(`Duplicated campaign created with ID: ${data.newCampaignId}`);
+  return data;
+}
+
+duplicateCampaign();
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Campaign duplicated successfully
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Invalid campaign ID or the campaign does not belong to your account
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "ok": true,
+  "newCampaignId": 842
+}
+```
+
+```json 500 - Invalid Campaign
+{
+  "message": "Invalid campaign Id!"
+}
+```
+
+</ResponseExample>
+
+<Warning>
+  The duplicated campaign is created in **DRAFTED** status. You will need to add leads and start it separately.
+</Warning>
+
+## Related Endpoints
+
+- [Create Campaign](/api-reference/campaigns/create)
+- [Get Campaign by ID](/api-reference/campaigns/get-by-id)
+- [Add Leads to Campaign](/api-reference/campaigns/add-leads)
+- [Update Campaign Status](/api-reference/campaigns/update-status)

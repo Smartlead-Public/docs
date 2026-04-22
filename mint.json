@@ -72,6 +72,7 @@
         "api-reference/campaigns/update-status",
         "api-reference/campaigns/update-settings",
         "api-reference/campaigns/update-schedule",
+        "api-reference/campaigns/duplicate",
         "api-reference/campaigns/delete",
         "api-reference/campaigns/get-sequences",
         "api-reference/campaigns/update-sequences",
