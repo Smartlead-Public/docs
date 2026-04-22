@@ -21,16 +21,36 @@ description: "Place an order to purchase domains and provision mailboxes through
   Unique identifier of the vendor with whom the order will be placed.
 </ParamField>
 
-<ParamField body="domains" type="array" required>
-  Array of domain objects. Each object should contain `domain_name` and an array of mailbox details.
-</ParamField>
-
 <ParamField body="forwarding_domain" type="string" required>
-  Domain to which purchased domains will be configured to forward (e.g., `smartlead.ai` or customer's tracking domain).
+  Domain to which purchased domains will be configured to forward (e.g., `example.com` or customer's tracking domain).
 </ParamField>
 
-<ParamField body="user_details" type="object">
-  Customer or billing/contact details required by the vendor for domain purchase and provisioning. Includes `name` and other contact fields.
+<ParamField body="user_details" type="object" required>
+  Customer billing/contact details required by the vendor for domain purchase and provisioning. Fields include:
+  - `email` (string) — Contact email
+  - `firstName` (string) — First name
+  - `lastName` (string) — Last name
+  - `company` (string) — Company name
+  - `country` (string) — Country
+  - `city` (string) — City
+  - `addressLineOne` (string) — Primary address
+  - `addressLineTwo` (string) — Secondary address (optional)
+  - `postalCode` (string) — Postal/ZIP code
+  - `state` (string) — State/province
+  - `phoneCc` (string) — Phone country code (e.g., `+91`)
+  - `phone` (string) — Phone number
+  - `languagePreference` (string) — Language preference (e.g., `en`)
+</ParamField>
+
+<ParamField body="domains" type="array" required>
+  Array of domain objects. Each object contains:
+  - `domain_name` (string) — The domain to purchase
+  - `mailbox_details` (array) — Array of mailbox objects, each containing:
+    - `mailbox` (string, required) — Full email address for the mailbox
+    - `first_name` (string, required) — First name for the mailbox
+    - `last_name` (string, required) — Last name for the mailbox
+    - `profile_pic` (string) — Profile picture filename
+    - `parent_account_id` (number) — ID of the parent email account to link to (optional)
 </ParamField>
 
 ## Headers
@@ -47,17 +67,54 @@ description: "Place an order to purchase domains and provision mailboxes through
 curl -X POST "https://smart-senders.smartlead.ai/api/v1/smart-senders/place-order?api_key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "vendor_id": 1,
+    "vendor_id": 2,
+    "forwarding_domain": "example.com",
+    "user_details": {
+      "email": "manjit@example.com",
+      "firstName": "Manjit",
+      "lastName": "Singh",
+      "company": "Smartlead",
+      "country": "India",
+      "city": "Bangalore",
+      "addressLineOne": "123 MG Road",
+      "addressLineTwo": "",
+      "postalCode": "560001",
+      "state": "Karnataka",
+      "phoneCc": "+91",
+      "phone": "9876543210",
+      "languagePreference": "en"
+    },
     "domains": [
       {
         "domain_name": "example.com",
-        "mailboxes": ["john@example.com", "jane@example.com"]
+        "mailbox_details": [
+          {
+            "mailbox": "manjit.singh@example.com",
+            "first_name": "Manjit",
+            "last_name": "Singh",
+            "profile_pic": "profile1.jpg",
+            "parent_account_id": 123
+          },
+          {
+            "mailbox": "singh@example.com",
+            "first_name": "Manjit",
+            "last_name": "Singh",
+            "profile_pic": "profile2.jpg"
+          }
+        ]
+      },
+      {
+        "domain_name": "testdomain.com",
+        "mailbox_details": [
+          {
+            "mailbox": "john.doe@testdomain.com",
+            "first_name": "John",
+            "last_name": "Doe",
+            "profile_pic": "profile3.jpg"
+          }
+        ]
       }
-    ],
-    "forwarding_domain": "smartlead.ai",
-    "user_details": {
-      "name": "John Doe"
-    }
+    ]
   }'
 ```
 
@@ -67,17 +124,54 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 payload = {
-    "vendor_id": 1,
+    "vendor_id": 2,
+    "forwarding_domain": "example.com",
+    "user_details": {
+        "email": "manjit@example.com",
+        "firstName": "Manjit",
+        "lastName": "Singh",
+        "company": "Smartlead",
+        "country": "India",
+        "city": "Bangalore",
+        "addressLineOne": "123 MG Road",
+        "addressLineTwo": "",
+        "postalCode": "560001",
+        "state": "Karnataka",
+        "phoneCc": "+91",
+        "phone": "9876543210",
+        "languagePreference": "en"
+    },
     "domains": [
         {
             "domain_name": "example.com",
-            "mailboxes": ["john@example.com", "jane@example.com"]
+            "mailbox_details": [
+                {
+                    "mailbox": "manjit.singh@example.com",
+                    "first_name": "Manjit",
+                    "last_name": "Singh",
+                    "profile_pic": "profile1.jpg",
+                    "parent_account_id": 123
+                },
+                {
+                    "mailbox": "singh@example.com",
+                    "first_name": "Manjit",
+                    "last_name": "Singh",
+                    "profile_pic": "profile2.jpg"
+                }
+            ]
+        },
+        {
+            "domain_name": "testdomain.com",
+            "mailbox_details": [
+                {
+                    "mailbox": "john.doe@testdomain.com",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "profile_pic": "profile3.jpg"
+                }
+            ]
         }
-    ],
-    "forwarding_domain": "smartlead.ai",
-    "user_details": {
-        "name": "John Doe"
-    }
+    ]
 }
 
 response = requests.post(
@@ -94,17 +188,54 @@ print(result)
 const API_KEY = 'YOUR_API_KEY';
 
 const payload = {
-  vendor_id: 1,
+  vendor_id: 2,
+  forwarding_domain: 'example.com',
+  user_details: {
+    email: 'manjit@example.com',
+    firstName: 'Manjit',
+    lastName: 'Singh',
+    company: 'Smartlead',
+    country: 'India',
+    city: 'Bangalore',
+    addressLineOne: '123 MG Road',
+    addressLineTwo: '',
+    postalCode: '560001',
+    state: 'Karnataka',
+    phoneCc: '+91',
+    phone: '9876543210',
+    languagePreference: 'en'
+  },
   domains: [
     {
       domain_name: 'example.com',
-      mailboxes: ['john@example.com', 'jane@example.com']
+      mailbox_details: [
+        {
+          mailbox: 'manjit.singh@example.com',
+          first_name: 'Manjit',
+          last_name: 'Singh',
+          profile_pic: 'profile1.jpg',
+          parent_account_id: 123
+        },
+        {
+          mailbox: 'singh@example.com',
+          first_name: 'Manjit',
+          last_name: 'Singh',
+          profile_pic: 'profile2.jpg'
+        }
+      ]
+    },
+    {
+      domain_name: 'testdomain.com',
+      mailbox_details: [
+        {
+          mailbox: 'john.doe@testdomain.com',
+          first_name: 'John',
+          last_name: 'Doe',
+          profile_pic: 'profile3.jpg'
+        }
+      ]
     }
-  ],
-  forwarding_domain: 'smartlead.ai',
-  user_details: {
-    name: 'John Doe'
-  }
+  ]
 };
 
 const response = await fetch(
