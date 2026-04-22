@@ -1,6 +1,6 @@
 ---
 title: "Webhook Integration Guide"
-description: "Set up real-time webhooks to sync SmartLead events with your CRM, database, or automation tools — including event types, payload formats, and security verification"
+description: "Set up real-time webhooks to sync SmartLead events with your CRM, database, or automation tools — including event types, payload formats, and best practices"
 ---
 
 ## Overview
@@ -11,31 +11,52 @@ This guide covers how to set up webhooks, handle events, verify payloads, and in
 
 ## Setting Up a Webhook
 
-Register a webhook URL to start receiving events:
+Register a webhook URL using the [Create Webhook](/api-reference/webhooks/create) endpoint:
 
 <CodeGroup>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/webhook/create?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Campaign Notifications",
+    "webhook_url": "https://yourapp.com/webhooks/smartlead",
+    "association_type": "campaign",
+    "email_campaign_id": 123,
+    "event_type_map": {
+      "EMAIL_SENT": true,
+      "EMAIL_OPEN": true,
+      "EMAIL_REPLY": true,
+      "EMAIL_BOUNCE": true,
+      "LEAD_UNSUBSCRIBED": true,
+      "LEAD_CATEGORY_UPDATED": true
+    }
+  }'
+```
 
 ```python Python
 import requests
 import os
 
 API_KEY = os.getenv("SMARTLEAD_API_KEY")
-BASE_URL = "https://server.smartlead.ai/api/v1"
 
 webhook_payload = {
+    "name": "Campaign Notifications",
     "webhook_url": "https://yourapp.com/webhooks/smartlead",
-    "event_types": [
-        "EMAIL_SENT",
-        "EMAIL_OPENED",
-        "EMAIL_REPLIED",
-        "EMAIL_BOUNCED",
-        "LEAD_UNSUBSCRIBED"
-    ],
-    "is_active": True
+    "association_type": "campaign",
+    "email_campaign_id": 123,
+    "event_type_map": {
+        "EMAIL_SENT": True,
+        "EMAIL_OPEN": True,
+        "EMAIL_REPLY": True,
+        "EMAIL_BOUNCE": True,
+        "LEAD_UNSUBSCRIBED": True,
+        "LEAD_CATEGORY_UPDATED": True
+    }
 }
 
 response = requests.post(
-    f"{BASE_URL}/webhooks",
+    "https://server.smartlead.ai/api/v1/webhook/create",
     params={"api_key": API_KEY},
     json=webhook_payload
 )
@@ -46,23 +67,28 @@ print(f"Webhook created: {webhook['id']}")
 
 ```javascript JavaScript
 const API_KEY = process.env.SMARTLEAD_API_KEY;
-const BASE_URL = 'https://server.smartlead.ai/api/v1';
 
-const response = await fetch(`${BASE_URL}/webhooks?api_key=${API_KEY}`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    webhook_url: 'https://yourapp.com/webhooks/smartlead',
-    event_types: [
-      'EMAIL_SENT',
-      'EMAIL_OPENED',
-      'EMAIL_REPLIED',
-      'EMAIL_BOUNCED',
-      'LEAD_UNSUBSCRIBED'
-    ],
-    is_active: true
-  })
-});
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/webhook/create?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Campaign Notifications',
+      webhook_url: 'https://yourapp.com/webhooks/smartlead',
+      association_type: 'campaign',
+      email_campaign_id: 123,
+      event_type_map: {
+        EMAIL_SENT: true,
+        EMAIL_OPEN: true,
+        EMAIL_REPLY: true,
+        EMAIL_BOUNCE: true,
+        LEAD_UNSUBSCRIBED: true,
+        LEAD_CATEGORY_UPDATED: true
+      }
+    })
+  }
+);
 
 const webhook = await response.json();
 console.log(`Webhook created: ${webhook.id}`);
@@ -70,54 +96,173 @@ console.log(`Webhook created: ${webhook.id}`);
 
 </CodeGroup>
 
+## Webhook Levels
+
+SmartLead supports three webhook scopes, set via the `association_type` field:
+
+| Level | `association_type` | Scope | Use Case |
+|---|---|---|---|
+| **User** | `"user"` | All campaigns owned by the user | Centralized notifications |
+| **Client** | `"client"` | All campaigns for a specific client | Agency/white-label setups |
+| **Campaign** | `"campaign"` | A single campaign | Per-campaign tracking |
+
+<Warning>
+  If a **User-level** webhook exists, it takes priority over Client and Campaign-level webhooks for the same event type. Keep this in mind when configuring webhooks at multiple levels.
+</Warning>
+
 ## Event Types
 
 | Event | Description | When It Fires |
 |---|---|---|
 | `EMAIL_SENT` | Email was sent to a lead | Each sequence step send |
-| `EMAIL_OPENED` | Lead opened an email | First open per email |
-| `EMAIL_CLICKED` | Lead clicked a link | Each unique link click |
-| `EMAIL_REPLIED` | Lead replied to an email | Each reply received |
-| `EMAIL_BOUNCED` | Email bounced | Soft or hard bounce |
+| `FIRST_EMAIL_SENT` | First email of a sequence sent | Only sequence step 1 |
+| `EMAIL_OPEN` | Lead opened an email | First open detected |
+| `EMAIL_LINK_CLICK` | Lead clicked a tracked link | Each unique link click |
+| `EMAIL_REPLY` | Lead replied to an email | Each reply received |
+| `EMAIL_BOUNCE` | Email bounced | Soft or hard bounce |
 | `LEAD_UNSUBSCRIBED` | Lead clicked unsubscribe | Unsubscribe action |
 | `LEAD_CATEGORY_UPDATED` | Lead's category changed | Manual or auto-categorization |
+| `CAMPAIGN_STATUS_CHANGED` | Campaign status changed | Start, pause, complete, etc. |
+| `UNTRACKED_REPLIES` | Untracked reply received | Reply from unknown sender |
+| `MANUAL_STEP_REACHED` | Lead reached a manual step | Phone call, LinkedIn step, etc. |
 
 <Tip>
-  Start with `EMAIL_REPLIED`, `EMAIL_BOUNCED`, and `LEAD_UNSUBSCRIBED` — these are the events that require action in your CRM. Add others as needed.
+  Start with `EMAIL_REPLY`, `EMAIL_BOUNCE`, and `LEAD_UNSUBSCRIBED` — these are the events that typically require action in your CRM. Add others as needed.
 </Tip>
 
 ## Webhook Payload Format
 
-Every webhook sends a JSON POST request with this structure:
+Every webhook sends a JSON POST request. The payload is a flat JSON object with an `event_type` field identifying the event. The remaining fields vary by event type.
+
+### EMAIL_SENT / FIRST_EMAIL_SENT
 
 ```json
 {
-  "event_type": "EMAIL_REPLIED",
-  "timestamp": "2025-01-15T14:32:00Z",
-  "campaign_id": 12345,
+  "event_type": "EMAIL_SENT",
+  "from_email": "sender@yourcompany.com",
+  "to_email": "lead@example.com",
+  "to_name": "John Doe",
+  "time_sent": "2025-01-15T09:00:00Z",
   "campaign_name": "Q1 SaaS Outreach",
-  "lead": {
-    "id": 67890,
-    "email": "alex@acmecorp.com",
-    "first_name": "Alex",
-    "last_name": "Chen",
-    "company_name": "Acme Corp"
-  },
-  "email_account": {
-    "id": 101,
-    "from_email": "sarah@yourcompany.com"
-  },
+  "campaign_id": 123,
   "sequence_number": 1,
-  "message_id": "abc123",
-  "reply_body": "Hi Sarah, that sounds interesting. Let's set up a call next Tuesday."
+  "custom_subject": "Quick question about Acme Corp",
+  "custom_email_message": "<html>Email body...</html>",
+  "message_id": "abc123def456"
 }
 ```
+
+### EMAIL_REPLY
+
+```json
+{
+  "event_type": "EMAIL_REPLY",
+  "from_email": "sender@yourcompany.com",
+  "subject": "Re: Quick question about Acme Corp",
+  "to_email": "lead@example.com",
+  "to_name": "John Doe",
+  "time_replied": "2025-01-15T11:00:00Z",
+  "reply_body": "<html>Thanks for reaching out. Let's set up a call.</html>",
+  "preview_text": "Thanks for reaching out. Let's set up a call.",
+  "campaign_name": "Q1 SaaS Outreach",
+  "campaign_id": 123,
+  "client_id": 456,
+  "sequence_number": 1
+}
+```
+
+### EMAIL_OPEN
+
+```json
+{
+  "event_type": "EMAIL_OPEN",
+  "from_email": "sender@yourcompany.com",
+  "to_email": "lead@example.com",
+  "to_name": "John Doe",
+  "time_opened": "2025-01-15T10:30:00Z",
+  "campaign_name": "Q1 SaaS Outreach",
+  "campaign_id": 123,
+  "sequence_number": 1
+}
+```
+
+### EMAIL_LINK_CLICK
+
+```json
+{
+  "event_type": "EMAIL_LINK_CLICK",
+  "from_email": "sender@yourcompany.com",
+  "to_email": "lead@example.com",
+  "to_name": "John Doe",
+  "time_clicked": "2025-01-15T10:45:00Z",
+  "link_clicked": ["https://example.com/demo"],
+  "campaign_name": "Q1 SaaS Outreach",
+  "campaign_id": 123,
+  "sequence_number": 1
+}
+```
+
+### LEAD_UNSUBSCRIBED
+
+```json
+{
+  "event_type": "LEAD_UNSUBSCRIBED",
+  "lead_email": "lead@example.com",
+  "lead_name": "John Doe",
+  "campaign_name": "Q1 SaaS Outreach",
+  "campaign_id": 123,
+  "unsubscribed_client_id_map": {}
+}
+```
+
+### LEAD_CATEGORY_UPDATED
+
+```json
+{
+  "event_type": "LEAD_CATEGORY_UPDATED",
+  "lead_id": 789,
+  "lead_email": "lead@example.com",
+  "lead_name": "John",
+  "lead_data": {
+    "email": "lead@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "company_name": "Acme Corp",
+    "custom_fields": {},
+    "category": {
+      "name": "Interested",
+      "sentiment_type": "positive"
+    }
+  },
+  "category": "Interested",
+  "lead_category_id": 5,
+  "campaign_name": "Q1 SaaS Outreach",
+  "campaign_id": 123,
+  "from": "sender@yourcompany.com",
+  "to": "lead@example.com",
+  "history": [
+    {"type": "SENT", "time": "2025-01-15T09:00:00Z", "email_body": "...", "subject": "Quick question"},
+    {"type": "REPLY", "time": "2025-01-15T11:00:00Z", "email_body": "Thanks for reaching out..."}
+  ],
+  "lastReply": {
+    "type": "REPLY",
+    "time": "2025-01-15T11:00:00Z",
+    "email_body": "Thanks for reaching out..."
+  }
+}
+```
+
+<Note>
+The `LEAD_CATEGORY_UPDATED` payload includes the full conversation `history` between the sending account and the lead, including all sent emails, replies, and threaded replies.
+</Note>
+
+For complete payload details on all event types, see the [Webhook Events Reference](/api-reference/webhooks/events).
 
 ## Handling Webhooks
 
 ### Node.js / Express
 
-```javascript JavaScript
+```javascript
 const express = require('express');
 const app = express();
 
@@ -126,28 +271,34 @@ app.use(express.json());
 app.post('/webhooks/smartlead', (req, res) => {
   const event = req.body;
 
+  // Acknowledge receipt immediately
+  res.status(200).json({ received: true });
+
+  // Process asynchronously
   switch (event.event_type) {
-    case 'EMAIL_REPLIED':
-      console.log(`Reply from ${event.lead.email}: ${event.reply_body}`);
+    case 'EMAIL_REPLY':
+      console.log(`Reply from ${event.to_email}: ${event.preview_text}`);
       // Update CRM, notify sales team, etc.
       break;
 
-    case 'EMAIL_BOUNCED':
-      console.log(`Bounce: ${event.lead.email}`);
+    case 'EMAIL_BOUNCE':
+      console.log(`Bounce: ${event.to_email}`);
       // Remove from mailing lists, flag in CRM
       break;
 
     case 'LEAD_UNSUBSCRIBED':
-      console.log(`Unsubscribed: ${event.lead.email}`);
+      console.log(`Unsubscribed: ${event.lead_email}`);
       // Update suppression list
+      break;
+
+    case 'LEAD_CATEGORY_UPDATED':
+      console.log(`${event.lead_email} categorized as ${event.category}`);
+      // Sync category to CRM
       break;
 
     default:
       console.log(`Event: ${event.event_type}`);
   }
-
-  // Always respond with 200 to acknowledge receipt
-  res.status(200).json({ received: true });
 });
 
 app.listen(3000, () => console.log('Webhook server running on port 3000'));
@@ -155,7 +306,7 @@ app.listen(3000, () => console.log('Webhook server running on port 3000'));
 
 ### Python / Flask
 
-```python Python
+```python
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -164,17 +315,21 @@ app = Flask(__name__)
 def handle_webhook():
     event = request.json
 
-    if event['event_type'] == 'EMAIL_REPLIED':
-        print(f"Reply from {event['lead']['email']}")
+    if event['event_type'] == 'EMAIL_REPLY':
+        print(f"Reply from {event['to_email']}")
         # Sync to CRM, create task, notify Slack
 
-    elif event['event_type'] == 'EMAIL_BOUNCED':
-        print(f"Bounce: {event['lead']['email']}")
+    elif event['event_type'] == 'EMAIL_BOUNCE':
+        print(f"Bounce: {event.get('to_email')}")
         # Flag in database, update lead quality score
 
     elif event['event_type'] == 'LEAD_UNSUBSCRIBED':
-        print(f"Unsubscribed: {event['lead']['email']}")
+        print(f"Unsubscribed: {event['lead_email']}")
         # Add to suppression list
+
+    elif event['event_type'] == 'LEAD_CATEGORY_UPDATED':
+        print(f"{event['lead_email']} -> {event['category']}")
+        # Sync category to CRM
 
     return jsonify({'received': True}), 200
 
@@ -183,8 +338,95 @@ if __name__ == '__main__':
 ```
 
 <Warning>
-  Always return a `200` status code within 30 seconds. If your endpoint times out or returns an error, SmartLead will retry the webhook up to 3 times with exponential backoff.
+  Always return a `200` status code quickly. If your endpoint times out or returns an error, SmartLead will retry the webhook. Return `2xx` for success, `4xx` for permanent failures (no retry), `5xx` for temporary failures (will retry).
 </Warning>
+
+## Webhook Headers
+
+SmartLead includes the following headers with webhook deliveries:
+
+| Header | Description |
+|---|---|
+| `Content-Type` | `application/json` |
+| `X-Smartlead-Signature` | HMAC SHA256 signature for payload verification |
+| `X-Request-Id` | Unique identifier for each webhook delivery |
+| `X-Webhook-Level` | Webhook scope: `user`, `client`, or `campaign` |
+
+### Verifying Webhook Signatures
+
+Use the `X-Smartlead-Signature` header and your signing secret to validate that webhook payloads are authentically from SmartLead:
+
+```python Python
+import hmac
+import hashlib
+
+def verify_webhook_signature(payload_body, signature_header, signing_secret):
+    """Verify the webhook signature using HMAC SHA256."""
+    expected_signature = 'sha256=' + hmac.new(
+        signing_secret.encode('utf-8'),
+        payload_body,
+        hashlib.sha256
+    ).hexdigest()
+
+    return hmac.compare_digest(expected_signature, signature_header)
+
+# In your Flask handler:
+@app.route('/webhooks/smartlead', methods=['POST'])
+def handle_webhook():
+    signature = request.headers.get('X-Smartlead-Signature', '')
+    request_id = request.headers.get('X-Request-Id', '')
+
+    if not verify_webhook_signature(request.data, signature, SIGNING_SECRET):
+        return jsonify({'error': 'Invalid signature'}), 401
+
+    # Process event...
+    return jsonify({'received': True}), 200
+```
+
+### Implementing Idempotency
+
+Use the `X-Request-Id` header to prevent processing duplicate webhook deliveries:
+
+```python Python
+processed_events = set()  # Use Redis or a database in production
+
+@app.route('/webhooks/smartlead', methods=['POST'])
+def handle_webhook():
+    request_id = request.headers.get('X-Request-Id', '')
+
+    if request_id in processed_events:
+        return jsonify({'status': 'already_processed'}), 200
+
+    processed_events.add(request_id)
+    # Process event...
+    return jsonify({'received': True}), 200
+```
+
+## Category Filtering
+
+For `LEAD_CATEGORY_UPDATED` events, you can filter which categories trigger the webhook using the `category_id_map`:
+
+```python Python
+payload = {
+    "name": "Hot Lead Alerts",
+    "webhook_url": "https://yourapp.com/webhooks/hot-leads",
+    "association_type": "campaign",
+    "email_campaign_id": 123,
+    "event_type_map": {
+        "LEAD_CATEGORY_UPDATED": True
+    },
+    "category_id_map": {
+        "5": True,   # Interested
+        "7": True    # Meeting Booked
+    }
+}
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/webhook/create",
+    params={"api_key": API_KEY},
+    json=payload
+)
+```
 
 ## CRM Integration Examples
 
@@ -192,21 +434,20 @@ if __name__ == '__main__':
 
 ```python Python
 import requests
+import os
 
 HUBSPOT_API_KEY = os.getenv("HUBSPOT_API_KEY")
 
 def sync_reply_to_hubspot(event):
     """Create a HubSpot engagement when a lead replies."""
-    # Find or create contact
     contact_response = requests.get(
-        f"https://api.hubapi.com/contacts/v1/contact/email/{event['lead']['email']}/profile",
+        f"https://api.hubapi.com/contacts/v1/contact/email/{event['to_email']}/profile",
         headers={"Authorization": f"Bearer {HUBSPOT_API_KEY}"}
     )
 
     if contact_response.status_code == 200:
         contact_id = contact_response.json()["vid"]
 
-        # Log the reply as an engagement
         requests.post(
             "https://api.hubapi.com/engagements/v1/engagements",
             headers={
@@ -217,8 +458,8 @@ def sync_reply_to_hubspot(event):
                 "engagement": {"type": "EMAIL"},
                 "associations": {"contactIds": [contact_id]},
                 "metadata": {
-                    "subject": f"Reply from SmartLead campaign: {event['campaign_name']}",
-                    "text": event.get("reply_body", "")
+                    "subject": event.get("subject", ""),
+                    "text": event.get("preview_text", "")
                 }
             }
         )
@@ -228,18 +469,19 @@ def sync_reply_to_hubspot(event):
 
 ```python Python
 import requests
+import os
 
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
 def notify_slack(event):
     """Send a Slack message when a lead replies."""
     message = {
-        "text": f"New reply from *{event['lead']['first_name']} {event['lead']['last_name']}* "
-                f"({event['lead']['company_name']})\n"
-                f"Campaign: {event['campaign_name']}\n"
-                f"Reply: _{event.get('reply_body', 'N/A')[:200]}_"
+        "text": (
+            f"*New reply from {event['to_name']}* ({event['to_email']})\n"
+            f"Campaign: {event['campaign_name']}\n"
+            f"Reply: _{event.get('preview_text', 'N/A')[:200]}_"
+        )
     }
-
     requests.post(SLACK_WEBHOOK_URL, json=message)
 ```
 
@@ -253,33 +495,43 @@ SmartLead retries failed webhook deliveries automatically:
 | 2nd retry | 5 minutes | Second retry |
 | 3rd retry | 30 minutes | Final retry |
 
-After 3 failed attempts, the event is marked as failed. You can view failed webhooks and manually retry them through the SmartLead dashboard.
+After 3 failed attempts, the event is marked as failed. Use the [Retrigger Webhooks](/api-reference/campaigns/retrigger-webhooks) endpoint to manually retry failed deliveries, or view webhook statistics via the [Webhook Summary](/api-reference/campaigns/get-webhook-summary) endpoint.
+
+**Response code behavior:**
+- `2xx` — Success, no retry
+- `4xx` — Permanent failure, no retry
+- `5xx` — Temporary failure, SmartLead will retry
 
 ## Managing Webhooks
 
-### List All Webhooks
+### Get Webhook Details
 
 ```python Python
+webhook_id = 456
+
 response = requests.get(
-    f"{BASE_URL}/webhooks",
+    f"https://server.smartlead.ai/api/v1/webhook/{webhook_id}",
     params={"api_key": API_KEY}
 )
 
-for webhook in response.json():
-    print(f"ID: {webhook['id']} | URL: {webhook['webhook_url']} | Active: {webhook['is_active']}")
+webhook = response.json()
+print(f"ID: {webhook['id']} | URL: {webhook['webhook_url']}")
 ```
 
 ### Update a Webhook
 
 ```python Python
-webhook_id = 999
+webhook_id = 456
 
-response = requests.patch(
-    f"{BASE_URL}/webhooks/{webhook_id}",
+response = requests.put(
+    f"https://server.smartlead.ai/api/v1/webhook/update/{webhook_id}",
     params={"api_key": API_KEY},
     json={
-        "event_types": ["EMAIL_REPLIED", "EMAIL_BOUNCED"],
-        "is_active": True
+        "event_type_map": {
+            "EMAIL_REPLY": True,
+            "EMAIL_BOUNCE": True,
+            "LEAD_CATEGORY_UPDATED": True
+        }
     }
 )
 ```
@@ -287,8 +539,10 @@ response = requests.patch(
 ### Delete a Webhook
 
 ```python Python
+webhook_id = 456
+
 response = requests.delete(
-    f"{BASE_URL}/webhooks/{webhook_id}",
+    f"https://server.smartlead.ai/api/v1/webhook/delete/{webhook_id}",
     params={"api_key": API_KEY}
 )
 ```
@@ -297,25 +551,35 @@ response = requests.delete(
 
 <AccordionGroup>
   <Accordion title="Webhooks are not being received">
-    Verify your endpoint is publicly accessible (not localhost). Check that the webhook is active (`is_active: true`). Ensure your endpoint returns a 200 response within 30 seconds. Check server logs for incoming requests.
+    Verify your endpoint is publicly accessible (not localhost). Check that the webhook is active. Ensure your endpoint returns a `200` response within 30 seconds. Check server logs for incoming requests. Use a tool like [webhook.site](https://webhook.site) for testing.
   </Accordion>
 
   <Accordion title="Receiving duplicate events">
-    SmartLead may retry if your server didn't respond with 200 in time. Implement idempotency by checking the `message_id` or `timestamp` — skip events you've already processed.
+    SmartLead may retry if your server didn't respond with `200` in time. Implement idempotency by checking the `X-Request-Id` header — skip events you've already processed.
   </Accordion>
 
   <Accordion title="Webhook payloads are missing fields">
-    Not all event types include all fields. For example, `reply_body` is only present on `EMAIL_REPLIED` events. Always check for the existence of fields before accessing them.
+    Not all event types include all fields. For example, `reply_body` and `preview_text` are only present on `EMAIL_REPLY` events. The `LEAD_UNSUBSCRIBED` event uses `lead_email` instead of `to_email`. Always check for field existence before accessing.
+  </Accordion>
+
+  <Accordion title="User-level webhook overriding campaign webhook">
+    If a User-level webhook exists for the same event type, it takes priority over Client and Campaign-level webhooks. Check your webhook configuration at all levels.
   </Accordion>
 </AccordionGroup>
 
 ## What's Next?
 
 <CardGroup cols={2}>
-  <Card title="Campaign Setup Guide" icon="paper-plane" href="/guides/campaign-setup">
-    Set up campaigns that generate webhook events
+  <Card title="Webhook Events Reference" icon="bell" href="/api-reference/webhooks/events">
+    See all event types with complete payload structures
   </Card>
-  <Card title="Error Handling Guide" icon="shield" href="/guides/error-handling">
-    Handle API errors and webhook failures gracefully
+  <Card title="Create Webhook API" icon="plus" href="/api-reference/webhooks/create">
+    API reference for creating webhooks
+  </Card>
+  <Card title="Webhook Summary" icon="chart-bar" href="/api-reference/campaigns/get-webhook-summary">
+    Monitor webhook delivery statistics
+  </Card>
+  <Card title="Retrigger Webhooks" icon="rotate" href="/api-reference/campaigns/retrigger-webhooks">
+    Manually retry failed webhook deliveries
   </Card>
 </CardGroup>
