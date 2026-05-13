@@ -323,7 +323,6 @@
     {
       "group": "Utilities",
       "pages": [
-        "api-reference/utilities/verify-email",
         "api-reference/utilities/send-single-email",
         "api-reference/utilities/domain-block-list"
       ]
