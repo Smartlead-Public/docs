@@ -34,8 +34,8 @@ Updates campaign configuration including: tracking settings (enable/disable open
   Campaign name
 </ParamField>
 
-<ParamField body="track_settings" type="string">
-  Email tracking configuration. Allowed values: `DONT_TRACK_EMAIL_OPEN`, `DONT_TRACK_LINK_CLICK`, `DONT_TRACK_REPLY_TO_AN_EMAIL`
+<ParamField body="track_settings" type="array">
+  Email tracking configuration. Pass an array of string values to disable specific tracking. Allowed values: `DONT_TRACK_EMAIL_OPEN`, `DONT_TRACK_LINK_CLICK`, `DONT_TRACK_REPLY_TO_AN_EMAIL`. Pass an empty array `[]` to enable all tracking.
 </ParamField>
 
 <ParamField body="stop_lead_settings" type="string">
@@ -84,6 +84,25 @@ Updates campaign configuration including: tracking settings (enable/disable open
 
 <ParamField body="out_of_office_detection_settings" type="object">
   Out of office detection configuration
+
+  <Expandable title="out_of_office_detection_settings properties">
+    <ParamField body="ignoreOOOasReply" type="boolean">
+      When true, out-of-office responses are not counted as replies and will not stop the sequence
+    </ParamField>
+    <ParamField body="autoReactivateOOO" type="boolean">
+      Automatically reactivate leads after their out-of-office period ends
+    </ParamField>
+    <ParamField body="reactivateOOOwithDelay" type="number">
+      Number of days to wait before reactivating a lead after an out-of-office response
+    </ParamField>
+    <ParamField body="autoCategorizeOOO" type="boolean">
+      Automatically categorize out-of-office replies using AI
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="add_unsubscribe_tag" type="boolean">
+  Add an unsubscribe tag to outgoing emails
 </ParamField>
 
 <ParamField body="ai_categorisation_options" type="array">
@@ -97,7 +116,7 @@ curl -X POST "https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/setting
   -H "Content-Type: application/json" \
   -d '{
     "name": "My Campaign",
-    "track_settings": "DONT_TRACK_EMAIL_OPEN",
+    "track_settings": ["DONT_TRACK_EMAIL_OPEN"],
     "stop_lead_settings": "CLICK_ON_A_LINK",
     "send_as_plain_text": false,
     "follow_up_percentage": 100,
@@ -115,7 +134,7 @@ response = requests.post(
     params={"api_key": API_KEY},
     json={
         "name": "My Campaign",
-        "track_settings": "DONT_TRACK_EMAIL_OPEN",
+        "track_settings": ["DONT_TRACK_EMAIL_OPEN"],
         "stop_lead_settings": "CLICK_ON_A_LINK",
         "send_as_plain_text": False,
         "follow_up_percentage": 100,
@@ -137,7 +156,7 @@ const response = await fetch(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: 'My Campaign',
-      track_settings: 'DONT_TRACK_EMAIL_OPEN',
+      track_settings: ['DONT_TRACK_EMAIL_OPEN'],
       stop_lead_settings: 'CLICK_ON_A_LINK',
       send_as_plain_text: false,
       follow_up_percentage: 100,
