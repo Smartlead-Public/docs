@@ -20,11 +20,11 @@ Webhooks allow you to receive real-time HTTP POST notifications when specific ev
   The URL where webhook notifications will be sent via HTTP POST
 </ParamField>
 
-<ParamField body="association_type" type="number" required>
+<ParamField body="association_type" type="string" required>
   Scope of the webhook. Valid values:
-  - `1` - User level (all campaigns)
-  - `2` - Client level (all campaigns for a client)
-  - `3` - Campaign level (single campaign)
+  - `user` - User level (all campaigns)
+  - `client` - Client level (all campaigns for a client)
+  - `campaign` - Campaign level (single campaign)
 </ParamField>
 
 <ParamField body="email_campaign_id" type="number">
@@ -36,13 +36,18 @@ Webhooks allow you to receive real-time HTTP POST notifications when specific ev
 </ParamField>
 
 <ParamField body="event_type_map" type="object">
-  Map of events to subscribe to. Common events:
-  - `SENT` - Email sent
-  - `OPENED` - Email opened
-  - `CLICKED` - Link clicked
-  - `REPLIED` - Lead replied
-  - `BOUNCED` - Email bounced
-  - `UNSUBSCRIBED` - Lead unsubscribed
+  Map of events to subscribe to. Set each event key to `true` to enable. Available events:
+  - `EMAIL_SENT` - Email sent
+  - `FIRST_EMAIL_SENT` - First email of sequence sent
+  - `EMAIL_OPEN` - Email opened
+  - `EMAIL_LINK_CLICK` - Link clicked
+  - `EMAIL_REPLY` - Lead replied
+  - `EMAIL_BOUNCE` - Email bounced
+  - `LEAD_UNSUBSCRIBED` - Lead unsubscribed
+  - `LEAD_CATEGORY_UPDATED` - Lead category changed
+  - `CAMPAIGN_STATUS_CHANGED` - Campaign status changed
+  - `UNTRACKED_REPLIES` - Untracked reply received
+  - `MANUAL_STEP_REACHED` - Manual step reached in sequence
 </ParamField>
 
 <ParamField body="category_id_map" type="object">
@@ -78,10 +83,10 @@ curl -X POST "https://server.smartlead.ai/api/v1/webhook/create?api_key=YOUR_KEY
     "name": "Reply Notifications",
     "webhook_url": "https://your-domain.com/webhook",
     "email_campaign_id": 123,
-    "association_type": 3,
+    "association_type": "campaign",
     "event_type_map": {
-      "REPLIED": true,
-      "OPENED": true
+      "EMAIL_REPLY": true,
+      "EMAIL_OPEN": true
     }
   }'
 ```
@@ -95,10 +100,10 @@ payload = {
     "name": "Reply Notifications",
     "webhook_url": "https://your-domain.com/webhook",
     "email_campaign_id": 123,
-    "association_type": 3,
+    "association_type": "campaign",
     "event_type_map": {
-        "REPLIED": True,
-        "OPENED": True
+        "EMAIL_REPLY": True,
+        "EMAIL_OPEN": True
     }
 }
 
@@ -119,10 +124,10 @@ const payload = {
   name: 'Reply Notifications',
   webhook_url: 'https://your-domain.com/webhook',
   email_campaign_id: 123,
-  association_type: 3,
+  association_type: 'campaign',
   event_type_map: {
-    REPLIED: true,
-    OPENED: true
+    EMAIL_REPLY: true,
+    EMAIL_OPEN: true
   }
 };
 
@@ -145,36 +150,40 @@ console.log(`Webhook created with ID: ${result.id}`);
 
 ## Webhook Payload
 
-When an event occurs, SmartLead sends a POST request to your webhook_url with this structure:
+When an event occurs, SmartLead sends a POST request to your `webhook_url`. The payload structure varies by event type. Here's an example for `EMAIL_REPLY`:
 
 ```json
 {
-  "event_type": "REPLIED",
+  "event_type": "EMAIL_REPLY",
+  "from_email": "sender@yourcompany.com",
+  "subject": "Re: Quick question about Acme Corp",
+  "to_email": "lead@example.com",
+  "to_name": "John Doe",
+  "time_replied": "2025-01-15T11:00:00Z",
+  "reply_body": "<html>Thanks for reaching out...</html>",
+  "preview_text": "Thanks for reaching out...",
+  "campaign_name": "Q1 Outreach",
   "campaign_id": 123,
-  "lead_email": "john@example.com",
-  "lead_first_name": "John",
-  "lead_last_name": "Doe",
-  "email_account": "sender@yourdomain.com",
-  "subject": "Re: Quick question",
-  "message": "Thanks for reaching out...",
-  "timestamp": "2025-11-26T10:30:00Z",
-  "category_id": 5
+  "client_id": 456,
+  "sequence_number": 1
 }
 ```
+
+See [Webhook Events](/api-reference/webhooks/events) for all event payloads.
 
 ## Association Types
 
 <AccordionGroup>
-<Accordion title="User Level (1)">
-  Receives events from all campaigns owned by the user. Use when you want centralized notifications.
+<Accordion title="User Level (user)">
+  Receives events from all campaigns owned by the user. Use when you want centralized notifications. If a User-level webhook exists, it takes priority over Client and Campaign-level webhooks.
 </Accordion>
 
-<Accordion title="Client Level (2)">
-  Receives events from all campaigns for a specific client. Useful for agency/white-label setups.
+<Accordion title="Client Level (client)">
+  Receives events from all campaigns for a specific client. Useful for agency/white-label setups. Requires `client_id` in the request body.
 </Accordion>
 
-<Accordion title="Campaign Level (3)">
-  Receives events only from a specific campaign. Most common use case for per-campaign tracking.
+<Accordion title="Campaign Level (campaign)">
+  Receives events only from a specific campaign. Most common use case for per-campaign tracking. Requires `email_campaign_id` in the request body.
 </Accordion>
 </AccordionGroup>
 
