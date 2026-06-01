@@ -42,8 +42,20 @@ Forwards an email to specified recipients. Useful for collaboration, escalation,
 </ParamField>
 
 <ParamField body="to_emails" type="string" required>
-  Comma-separated recipient email addresses
+  Comma-separated recipient email addresses.
 </ParamField>
+
+<ParamField body="forward_email_body" type="string">
+  Custom HTML or plain-text body prepended above the auto-generated forwarded message chain. Mirrors the "compose" textbox in the Global Inbox UI when forwarding from the app. When omitted, only the auto-generated forwarded chain is sent.
+</ParamField>
+
+<ParamField body="forward_email_subject" type="string">
+  Custom subject line for the forwarded email. Overrides the original campaign's subject when provided. When omitted, the original campaign subject is used.
+</ParamField>
+
+<Note>
+  Both `forward_email_body` and `forward_email_subject` are optional. Existing integrations that send only `message_id`, `stats_id`, and `to_emails` are fully backwards-compatible — behaviour is unchanged when these fields are omitted.
+</Note>
 
 <RequestExample>
 
@@ -53,7 +65,9 @@ curl -X POST "https://server.smartlead.ai/api/v1/campaigns/12345/forward-email?a
   -d '{
     "message_id": "msg-abc-123",
     "stats_id": "stats-abc-123",
-    "to_emails": "manager@company.com,sales@company.com"
+    "to_emails": "manager@company.com,sales@company.com",
+    "forward_email_subject": "FYI – please review",
+    "forward_email_body": "<p>Sharing this thread for your visibility.</p>"
   }'
 ```
 
@@ -62,68 +76,83 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 
-def forward_email(campaign_id, message_id, stats_id, to_emails):
+def forward_email(
+    campaign_id,
+    message_id,
+    stats_id,
+    to_emails,
+    forward_email_body=None,
+    forward_email_subject=None,
+):
     """Forward an email to other recipients"""
     payload = {
         "message_id": message_id,
         "stats_id": stats_id,
-        "to_emails": to_emails
+        "to_emails": to_emails,
     }
+    if forward_email_body is not None:
+        payload["forward_email_body"] = forward_email_body
+    if forward_email_subject is not None:
+        payload["forward_email_subject"] = forward_email_subject
 
     response = requests.post(
         f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/forward-email",
         params={"api_key": API_KEY},
-        json=payload
+        json=payload,
     )
 
     return response.json()
 
-# Forward to manager
+# Forward with default subject and body (backwards-compatible)
 forward_email(
     campaign_id=12345,
     message_id="msg-abc-123",
     stats_id="stats-abc-123",
-    to_emails="manager@company.com"
+    to_emails="manager@company.com",
 )
 
-# Forward to multiple recipients
+# Forward with custom subject and body
 forward_email(
     campaign_id=12345,
     message_id="msg-abc-124",
     stats_id="stats-abc-124",
-    to_emails="sales@company.com,support@company.com"
+    to_emails="sales@company.com,support@company.com",
+    forward_email_subject="FYI – please review",
+    forward_email_body="<p>Sharing this thread for your visibility.</p>",
 )
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
-async function forwardEmail(campaignId, messageId, statsId, toEmails) {
-  const payload = {
-    message_id: messageId,
-    stats_id: statsId,
-    to_emails: toEmails
-  };
-
+async function forwardEmail(campaignId, body) {
   const response = await fetch(
     `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/forward-email?api_key=${API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(body),
     }
   );
 
   return response.json();
 }
 
-// Forward to manager
-await forwardEmail(
-  12345,
-  'msg-abc-123',
-  'stats-abc-123',
-  'manager@company.com'
-);
+// Forward with default subject and body (backwards-compatible)
+await forwardEmail(12345, {
+  message_id: 'msg-abc-123',
+  stats_id: 'stats-abc-123',
+  to_emails: 'manager@company.com',
+});
+
+// Forward with custom subject and body
+await forwardEmail(12345, {
+  message_id: 'msg-abc-124',
+  stats_id: 'stats-abc-124',
+  to_emails: 'sales@company.com,support@company.com',
+  forward_email_subject: 'FYI – please review',
+  forward_email_body: '<p>Sharing this thread for your visibility.</p>',
+});
 ```
 
 </RequestExample>
@@ -135,13 +164,24 @@ await forwardEmail(
 ```json 200 - Success
 {
   "ok": true,
-  "message": "Email forwarded successfully"
+  "messageId": "<generated-message-id@smartlead.ai>",
+  "status": "success"
 }
 ```
 
-```json 422 - Validation Error
+```json 400 - Validation Error
 {
-  "error": "to_emails is required"
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "\"forward_email_body\" must be a string"
+}
+```
+
+```json 500 - Internal Server Error
+{
+  "ok": false,
+  "error": "Email account not found!",
+  "status": "error"
 }
 ```
 
