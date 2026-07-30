@@ -17,8 +17,12 @@ Attaches every server belonging to a SmartInfra to the campaigns you list, so a 
 - Enables sender auto-rotation automatically when the SmartInfra holds more than one server
 - Propagates the campaign's client to the SmartInfra and its servers
 
+<Note>
+One SmartInfra can serve as many campaigns as you like — that is the normal way to use it, and there is no limit. The restriction runs the other way: a single campaign can only belong to one SmartInfra, because its SmartInfra determines both the pool of IPs it rotates through and which client owns it.
+</Note>
+
 <Warning>
-This endpoint only creates new assignments. A campaign that already belongs to another SmartInfra is rejected with `409`, and a campaign already attached to this SmartInfra is rejected with `208` — neither is silently overwritten. Move an existing assignment from the SmartInfra page in the dashboard.
+This endpoint only creates new assignments. A campaign that already belongs to a different SmartInfra is rejected with `409`, and a campaign already attached to this SmartInfra is rejected with `208` — neither is silently overwritten. To move a campaign between SmartInfras, use the SmartInfra page in the dashboard.
 </Warning>
 
 <Warning>
