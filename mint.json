@@ -286,6 +286,12 @@
       ]
     },
     {
+      "group": "Smart Servers",
+      "pages": [
+        "api-reference/smart-servers/assign-campaigns"
+      ]
+    },
+    {
       "group": "Webhooks",
       "pages": [
         "api-reference/webhooks/create",

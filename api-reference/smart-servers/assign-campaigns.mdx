@@ -1,0 +1,218 @@
+---
+title: "Assign SmartInfra to Campaigns"
+api: "POST https://smartservers.smartlead.ai/api/v1/smart-infra/mapping"
+description: "Attach a SmartInfra (dedicated IP) to many campaigns in a single request"
+---
+
+<Note>
+  **SmartServers API**: Dedicated IP infrastructure feature. Contact support@smartlead.ai for access.
+</Note>
+
+## Overview
+
+Attaches every server belonging to a SmartInfra to the campaigns you list, so a dedicated IP can be rolled out across a large batch of campaigns in one call instead of one campaign at a time in the dashboard.
+
+**Key Features**:
+- Assigns hundreds of campaigns per request
+- Enables sender auto-rotation automatically when the SmartInfra holds more than one server
+- Propagates the campaign's client to the SmartInfra and its servers
+
+<Warning>
+This endpoint only creates new assignments. A campaign that already belongs to another SmartInfra is rejected with `409`, and a campaign already attached to this SmartInfra is rejected with `208` — neither is silently overwritten. Move an existing assignment from the SmartInfra page in the dashboard.
+</Warning>
+
+<Info>
+`infra_id` is not currently available from the public API. Open the SmartInfra page in the dashboard and read the ID from the URL of the infrastructure you want to assign.
+</Info>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+Supply either `campaign_ids` or `client_id`. At least one is required.
+
+<ParamField body="infra_id" type="number" required>
+  The SmartInfra to assign. Must belong to the authenticated user.
+</ParamField>
+
+<ParamField body="campaign_ids" type="array">
+  Campaign IDs to attach the SmartInfra to.
+
+  Example: `[5614, 5615, 5616]`
+</ParamField>
+
+<ParamField body="client_id" type="number">
+  Assign the SmartInfra to every campaign belonging to this client instead of naming campaigns individually. When the client has no campaigns yet, the SmartInfra is still reserved for that client.
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://smartservers.smartlead.ai/api/v1/smart-infra/mapping?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"infra_id": 42, "campaign_ids": [5614, 5615, 5616]}'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://smartservers.smartlead.ai"
+
+payload = {
+    "infra_id": 42,
+    "campaign_ids": [5614, 5615, 5616]
+}
+
+response = requests.post(
+    f"{BASE_URL}/api/v1/smart-infra/mapping",
+    params={"api_key": API_KEY},
+    json=payload
+)
+
+print(response.status_code, response.json())
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = 'https://smartservers.smartlead.ai';
+
+const response = await fetch(
+  `${BASE_URL}/api/v1/smart-infra/mapping?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      infra_id: 42,
+      campaign_ids: [5614, 5615, 5616]
+    })
+  }
+);
+
+console.log(response.status, await response.json());
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="201" type="Created">
+  All campaigns were assigned to the SmartInfra
+</ResponseField>
+
+<ResponseField name="200" type="Success">
+  `client_id` was supplied and the SmartInfra is now reserved for that client, which currently has no campaigns to assign
+</ResponseField>
+
+<ResponseField name="208" type="Already Reported">
+  At least one campaign is already assigned to this SmartInfra
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request body, the SmartInfra has no servers, or the SmartInfra belongs to a client that the listed campaigns do not
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key. Check your authentication.
+</ResponseField>
+
+<ResponseField name="403" type="Forbidden">
+  The SmartInfra, one of its servers, or the client does not belong to you
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  No SmartInfra exists for the given `infra_id`
+</ResponseField>
+
+<ResponseField name="409" type="Conflict">
+  At least one campaign is already assigned to a different SmartInfra
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred. Please try again or contact support if the issue persists.
+</ResponseField>
+
+<ResponseExample>
+
+```json 201 - Created
+{
+  "statusCode": 201,
+  "success": true,
+  "message": "Smart infra campaign mapping created successfully"
+}
+```
+
+```json 200 - Client Reserved
+{
+  "statusCode": 200,
+  "success": false,
+  "message": "Client mapped with the server(s)"
+}
+```
+
+```json 208 - Already Assigned
+{
+  "statusCode": 208,
+  "success": false,
+  "message": "Method Not Allowed",
+  "error": "Smart server campaign mapping is already exists"
+}
+```
+
+```json 401 - Unauthorized
+{
+  "statusCode": 401,
+  "success": false,
+  "message": "Unauthorized",
+  "error": "Invalid API Key"
+}
+```
+
+```json 409 - Conflict
+{
+  "statusCode": 409,
+  "success": false,
+  "message": "Method Not Allowed",
+  "error": "Campaign is already mapped to another infra. One campaign can only be mapped to one infra (max 4 servers)."
+}
+```
+
+</ResponseExample>
+
+## Best Practices
+
+<Tip>
+  **Assign Before Launch**: Attach the SmartInfra while campaigns are still drafts, so the dedicated IP is in place before the first email sends
+</Tip>
+
+<Tip>
+  **Send Only Unassigned Campaigns**: The request is rejected as a whole if any campaign is already assigned, so filter your list down to campaigns that need the SmartInfra
+</Tip>
+
+<Tip>
+  **Batch In Chunks**: Split very large rollouts into batches of a few hundred campaigns to keep each request comfortably inside the request timeout
+</Tip>
+
+## Validation Rules
+
+A campaign can hold one SmartInfra at a time, alongside any standalone smart servers it already has. A single SmartInfra can serve any number of campaigns.
+
+Requests are validated in full before anything is written, so a rejected request leaves no partial assignment behind.
+
+## Implementation Details
+
+One mapping is created per server in the SmartInfra for each campaign, so a SmartInfra holding four servers and a list of ten campaigns produces forty mappings. `auto_rotate_servers` is turned on for those campaigns whenever the SmartInfra holds more than one server, letting SmartLead rotate sends across the dedicated IPs.
+
+When a listed campaign belongs to a client, that client is also applied to the SmartInfra and to each of its servers.
+
+**Response Format**: object
+
+## Related Endpoints
+
+- [Get All Campaigns](/api-reference/campaigns/get-all)
+- [Get Campaign by ID](/api-reference/campaigns/get-by-id)
+- [Add Email Accounts to Campaign](/api-reference/campaigns/add-email-accounts)
