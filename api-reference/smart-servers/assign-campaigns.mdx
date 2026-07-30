@@ -1,7 +1,7 @@
 ---
 title: "Assign SmartInfra to Campaigns"
 api: "POST https://smartservers.smartlead.ai/api/v1/smart-infra/mapping"
-description: "Attach a SmartInfra (dedicated IP) to many campaigns in a single request"
+description: "Attach a Multi or Single SmartInfra (dedicated IPs) to many campaigns in a single request"
 ---
 
 <Note>
@@ -10,7 +10,14 @@ description: "Attach a SmartInfra (dedicated IP) to many campaigns in a single r
 
 ## Overview
 
-Attaches every server belonging to a SmartInfra to the campaigns you list, so a dedicated IP can be rolled out across a large batch of campaigns in one call instead of one campaign at a time in the dashboard.
+Attaches your dedicated sending infrastructure to the campaigns you list, so a dedicated IP can be rolled out across a large batch of campaigns in one call instead of one campaign at a time in the dashboard.
+
+Both kinds of infrastructure on the SmartInfra page are supported, and you pick between them by which ID you send:
+
+| Dashboard tab | Send | What gets attached |
+| --- | --- | --- |
+| Multi SmartInfra | `infra_id` | Every dedicated IP in that SmartInfra, with auto-rotation between them |
+| Single SmartInfra | `server_id` | That one dedicated IP |
 
 **Key Features**:
 - Assigns hundreds of campaigns per request
@@ -18,11 +25,11 @@ Attaches every server belonging to a SmartInfra to the campaigns you list, so a 
 - Propagates the campaign's client to the SmartInfra and its servers
 
 <Note>
-One SmartInfra can serve as many campaigns as you like — that is the normal way to use it, and there is no limit. The restriction runs the other way: a single campaign can only belong to one SmartInfra, because its SmartInfra determines both the pool of IPs it rotates through and which client owns it.
+One SmartInfra can serve as many campaigns as you like — that is the normal way to use it, and there is no limit. The restriction runs the other way: a single campaign can only belong to one Multi SmartInfra, because that SmartInfra determines both the pool of IPs it rotates through and which client owns it. A campaign may instead hold up to four Single SmartInfra servers.
 </Note>
 
 <Warning>
-This endpoint only creates new assignments. A campaign that already belongs to a different SmartInfra is rejected with `409`, and a campaign already attached to this SmartInfra is rejected with `208` — neither is silently overwritten. To move a campaign between SmartInfras, use the SmartInfra page in the dashboard.
+This endpoint only creates new assignments. A campaign that already belongs to a different SmartInfra is rejected with `409`, and a campaign already attached to the SmartInfra you named is rejected with `208` — neither is silently overwritten. To move a campaign between SmartInfras, or to swap a Multi SmartInfra for a Single one, use the SmartInfra page in the dashboard.
 </Warning>
 
 <Warning>
@@ -34,7 +41,7 @@ Requests are all-or-nothing. Every campaign is validated before anything is writ
 </Note>
 
 <Info>
-`infra_id` is not currently available from the public API. Open the SmartInfra page in the dashboard and read the ID from the URL of the infrastructure you want to assign.
+Neither ID is available from the public API yet. Open the SmartInfra page in the dashboard and read the ID from the URL of the row you want to assign — from the **Multi SmartInfra** tab for `infra_id`, or the **Single SmartInfra** tab for `server_id`.
 </Info>
 
 ## Query Parameters
@@ -45,28 +52,38 @@ Requests are all-or-nothing. Every campaign is validated before anything is writ
 
 ## Request Body
 
-Supply either `campaign_ids` or `client_id`. At least one is required.
+Send exactly one of `infra_id` or `server_id`, plus `campaign_ids`.
 
-<ParamField body="infra_id" type="number" required>
-  The SmartInfra to assign. Must belong to the authenticated user.
+<ParamField body="infra_id" type="number">
+  The Multi SmartInfra to assign, which attaches all of its dedicated IPs. Must belong to the authenticated user. Cannot be combined with `server_id`.
+</ParamField>
+
+<ParamField body="server_id" type="number">
+  The Single SmartInfra to assign, which attaches that one dedicated IP. Must belong to the authenticated user and must not be part of a Multi SmartInfra — use `infra_id` for those. Cannot be combined with `infra_id`.
 </ParamField>
 
 <ParamField body="campaign_ids" type="array">
-  Campaign IDs to attach the SmartInfra to.
+  Campaign IDs to attach the infrastructure to. Every campaign must belong to the authenticated user.
 
   Example: `[5614, 5615, 5616]`
 </ParamField>
 
 <ParamField body="client_id" type="number">
-  Assign the SmartInfra to every campaign belonging to this client instead of naming campaigns individually. When the client has no campaigns yet, the SmartInfra is still reserved for that client.
+  Assign the SmartInfra to every campaign belonging to this client instead of naming campaigns individually. When the client has no campaigns yet, the SmartInfra is still reserved for that client. Supported with `infra_id` only; supply `campaign_ids` when using `server_id`.
 </ParamField>
 
 <RequestExample>
 
 ```bash cURL
+# Multi SmartInfra — attaches every dedicated IP in the SmartInfra
 curl -X POST "https://smartservers.smartlead.ai/api/v1/smart-infra/mapping?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"infra_id": 42, "campaign_ids": [5614, 5615, 5616]}'
+
+# Single SmartInfra — attaches one dedicated IP
+curl -X POST "https://smartservers.smartlead.ai/api/v1/smart-infra/mapping?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"server_id": 907, "campaign_ids": [5614, 5615, 5616]}'
 ```
 
 ```python Python
@@ -125,7 +142,7 @@ console.log(response.status, await response.json());
 </ResponseField>
 
 <ResponseField name="400" type="Bad Request">
-  Invalid request body, the SmartInfra has no servers, or the SmartInfra belongs to a client that the listed campaigns do not
+  Invalid request body, neither or both of `infra_id` and `server_id` were sent, the SmartInfra has no servers, the `server_id` belongs to a Multi SmartInfra, or the SmartInfra belongs to a client that the listed campaigns do not
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
@@ -137,11 +154,11 @@ console.log(response.status, await response.json());
 </ResponseField>
 
 <ResponseField name="404" type="Not Found">
-  No SmartInfra exists for the given `infra_id`
+  No SmartInfra exists for the given `infra_id`, no server exists for the given `server_id`, or at least one campaign does not exist. Campaigns belonging to another account are reported the same way.
 </ResponseField>
 
 <ResponseField name="409" type="Conflict">
-  At least one campaign is already assigned to a different SmartInfra
+  At least one campaign is already assigned to a different SmartInfra, or would exceed the limit of four Single SmartInfra servers
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
@@ -211,13 +228,13 @@ console.log(response.status, await response.json());
 
 ## Validation Rules
 
-A campaign can hold one SmartInfra at a time, alongside any standalone smart servers it already has. A single SmartInfra can serve any number of campaigns.
+A campaign can hold either one Multi SmartInfra or up to four Single SmartInfra servers. Any SmartInfra can serve any number of campaigns. Every campaign you list must belong to your account.
 
 Requests are validated in full before anything is written, so a rejected request leaves no partial assignment behind.
 
 ## Implementation Details
 
-One mapping is created per server in the SmartInfra for each campaign, so a SmartInfra holding four servers and a list of ten campaigns produces forty mappings. `auto_rotate_servers` is turned on for those campaigns whenever the SmartInfra holds more than one server, letting SmartLead rotate sends across the dedicated IPs.
+One mapping is created per dedicated IP for each campaign, so a Multi SmartInfra holding three IPs and a list of ten campaigns produces thirty mappings, while a Single SmartInfra produces ten. `auto_rotate_servers` is turned on for those campaigns whenever the SmartInfra holds more than one IP, letting SmartLead rotate sends across them.
 
 When a listed campaign belongs to a client, that client is also applied to the SmartInfra and to each of its servers.
 
