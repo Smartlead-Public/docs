@@ -21,6 +21,14 @@ Attaches every server belonging to a SmartInfra to the campaigns you list, so a 
 This endpoint only creates new assignments. A campaign that already belongs to another SmartInfra is rejected with `409`, and a campaign already attached to this SmartInfra is rejected with `208` — neither is silently overwritten. Move an existing assignment from the SmartInfra page in the dashboard.
 </Warning>
 
+<Warning>
+All campaigns in one request must belong to the same client. Because assigning campaigns also transfers client ownership of the SmartInfra and its servers, a request mixing campaigns from two different clients is rejected with `400` and nothing is written. Campaigns that are not assigned to any client can be included freely. If your campaigns span several clients, send one request per client.
+</Warning>
+
+<Note>
+Requests are all-or-nothing. Every campaign is validated before anything is written, so a single invalid or already-assigned campaign causes the whole request to fail without assigning any of the others.
+</Note>
+
 <Info>
 `infra_id` is not currently available from the public API. Open the SmartInfra page in the dashboard and read the ID from the URL of the infrastructure you want to assign.
 </Info>
