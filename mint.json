@@ -189,6 +189,7 @@
       "pages": [
         "api-reference/email-accounts/get-all",
         "api-reference/email-accounts/get-by-id",
+        "api-reference/email-accounts/get-by-email",
         "api-reference/email-accounts/add-smtp",
         "api-reference/email-accounts/add-oauth",
         "api-reference/email-accounts/update",
