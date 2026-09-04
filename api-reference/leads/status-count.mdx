@@ -1,0 +1,206 @@
+---
+title: "Get Leads Status Count"
+api: "GET https://server.smartlead.ai/api/v1/leads/status-count"
+description: "Get per-campaign lead counts by status across all active campaigns"
+---
+
+<Note>
+Returns the number of leads in a given status (default `STARTED` — not yet contacted) broken down by campaign. Only campaigns with status `ACTIVE` are included.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="status" type="string" default="STARTED">
+  Lead status to count. If omitted, defaults to `STARTED`.
+
+  Valid values:
+  - `STARTED` — Not yet contacted
+  - `INPROGRESS` — Currently being emailed
+  - `STOPPED` — Stopped
+  - `PAUSED` — Paused
+  - `BLOCKED` — Blocked
+  - `COMPLETED` — Completed the sequence
+</ParamField>
+
+<ParamField query="client_id" type="number">
+  Scope results to a specific client (for agency/white-label accounts). If the API key belongs to a client, this is applied automatically.
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -G "https://server.smartlead.ai/api/v1/leads/status-count" \
+  --data-urlencode "api_key=YOUR_API_KEY" \
+  --data-urlencode "status=STARTED"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+response = requests.get(
+    "https://server.smartlead.ai/api/v1/leads/status-count",
+    params={
+        "api_key": API_KEY,
+        "status": "STARTED"
+    }
+)
+
+data = response.json()
+print(f"Total leads: {data['total_leads']} across {data['total_campaigns']} campaigns")
+for campaign in data["campaigns"]:
+    print(f"  {campaign['campaign_name']}: {campaign['leads_count']} leads")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const params = new URLSearchParams({
+  api_key: API_KEY,
+  status: 'STARTED'
+});
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/leads/status-count?${params}`
+);
+
+const data = await response.json();
+console.log(`Total leads: ${data.total_leads} across ${data.total_campaigns} campaigns`);
+data.campaigns.forEach(c =>
+  console.log(`  ${c.campaign_name}: ${c.leads_count} leads`)
+);
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="lead_status" type="string">
+  The lead status that was counted (echoes the `status` query parameter or `"STARTED"` by default)
+</ResponseField>
+
+<ResponseField name="campaign_status" type="string">
+  Always `"ACTIVE"` — only active campaigns are included
+</ResponseField>
+
+<ResponseField name="client_id" type="number | null">
+  The client ID filter applied, or `null` if not scoped to a client
+</ResponseField>
+
+<ResponseField name="total_leads" type="number">
+  Sum of matching leads across all active campaigns
+</ResponseField>
+
+<ResponseField name="total_campaigns" type="number">
+  Number of active campaigns returned
+</ResponseField>
+
+<ResponseField name="campaigns" type="array">
+  Per-campaign breakdown
+
+  <Expandable title="Campaign object properties">
+    <ResponseField name="campaigns[].campaign_id" type="number">
+      Campaign ID
+    </ResponseField>
+
+    <ResponseField name="campaigns[].campaign_name" type="string">
+      Campaign name
+    </ResponseField>
+
+    <ResponseField name="campaigns[].leads_count" type="number">
+      Number of leads in the requested status for this campaign
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Lead status counts returned successfully
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid query parameters (e.g. invalid `status` value)
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and values.
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "lead_status": "STARTED",
+  "campaign_status": "ACTIVE",
+  "client_id": null,
+  "total_leads": 245,
+  "total_campaigns": 3,
+  "campaigns": [
+    {
+      "campaign_id": 101,
+      "campaign_name": "Q3 SaaS Founders Outreach",
+      "leads_count": 120
+    },
+    {
+      "campaign_id": 204,
+      "campaign_name": "Enterprise Decision Makers",
+      "leads_count": 85
+    },
+    {
+      "campaign_id": 310,
+      "campaign_name": "Product Launch Sequence",
+      "leads_count": 40
+    }
+  ]
+}
+```
+
+```json 200 - With client_id filter
+{
+  "lead_status": "INPROGRESS",
+  "campaign_status": "ACTIVE",
+  "client_id": 42,
+  "total_leads": 67,
+  "total_campaigns": 2,
+  "campaigns": [
+    {
+      "campaign_id": 101,
+      "campaign_name": "Q3 SaaS Founders Outreach",
+      "leads_count": 35
+    },
+    {
+      "campaign_id": 204,
+      "campaign_name": "Enterprise Decision Makers",
+      "leads_count": 32
+    }
+  ]
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Get All Leads](/api-reference/leads/get-by-email)
+- [Get Leads by Campaign](/api-reference/leads/get-by-campaign)
+- [Get Campaign Statistics](/api-reference/campaigns/get-statistics)

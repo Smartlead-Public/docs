@@ -144,7 +144,8 @@
         "api-reference/leads/unsubscribe",
         "api-reference/leads/categories",
         "api-reference/leads/activities",
-        "api-reference/leads/export"
+        "api-reference/leads/export",
+        "api-reference/leads/status-count"
       ]
     },
     {
