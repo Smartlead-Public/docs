@@ -128,7 +128,7 @@ All count fields are returned as strings.
 
 ## Separating out-of-office replies
 
-Out-of-office auto-replies inflate reply counts. Two fields let you separate them:
+Automated out-of-office replies are counted as replies. Two fields let you separate them from genuine ones:
 
 | Field | What it counts |
 |---|---|
@@ -157,10 +157,10 @@ A campaign receives 6 replies. The *ignore out-of-office* toggle is **off**, whi
 
 Reading it:
 
-- `reply_count` is **5**, but 3 of those are auto-replies. That is the inflation customers complain about.
-- `non_ooo_reply_count` is **3** — the replies actually worth looking at.
+- `reply_count` is **5**, but 3 of those are automated out-of-office replies.
+- `non_ooo_reply_count` is **3**, so you can report on genuine replies without the auto-replies skewing the number.
 - Out-of-office replies are `6 - 3 = 3`.
-- Row 6 is counted in `non_ooo_reply_count` but not in `reply_count`, because it was flagged as ignored for a reason that has nothing to do with out-of-office.
+- Row 6 counts towards `non_ooo_reply_count` but not `reply_count`, because it was flagged as ignored for a reason unrelated to out-of-office.
 
 ### When the toggle is already on
 
