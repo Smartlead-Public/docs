@@ -28,7 +28,27 @@ description: "Fetch campaign statistics using the campaign's ID filtered by date
   IANA timezone string (e.g. "America/New_York")
 </ParamField>
 
+<Warning>
+The range between `start_date` and `end_date` must be **30 days or less**. A wider range returns `400 Bad Request`.
+</Warning>
 
+## Reply Fields
+
+| Field | What it counts |
+|---|---|
+| `total_reply_count` | Every reply, with no exclusions |
+| `non_ooo_reply_count` | Replies from leads not categorised as out-of-office |
+| `reply_count` | Replies excluding any flagged as ignored |
+
+Out-of-office replies are `total_reply_count - non_ooo_reply_count`.
+
+`non_ooo_reply_count` comes from reply categorisation alone, so it does **not** depend on the per-campaign *ignore out-of-office* setting.
+
+<Warning>
+`non_ooo_reply_count` can be higher than `reply_count`. `reply_count` also drops manually-ignored replies and replies whose sender is not the lead, neither of which is out-of-office. Compare `non_ooo_reply_count` against `total_reply_count`.
+</Warning>
+
+See [Get Campaign Analytics by Date Range](/api-reference/campaigns/get-analytics-by-date) for the full field list.
 
 <RequestExample>
 
@@ -93,8 +113,27 @@ console.log(result);
 
 ```json 200 - Success
 {
-  "ok": true,
-  "data": []
+  "id": 123,
+  "user_id": 456,
+  "created_at": "2025-01-04T08:32:34.138Z",
+  "status": "ACTIVE",
+  "name": "Q1 Outbound",
+  "start_date": "2025-01-01",
+  "end_date": "2025-01-31",
+  "sent_count": "23918",
+  "unique_sent_count": "18262",
+  "open_count": "7420",
+  "unique_open_count": "5133",
+  "click_count": "612",
+  "unique_click_count": "489",
+  "reply_count": "3929",
+  "total_reply_count": "3929",
+  "non_ooo_reply_count": "1502",
+  "block_count": "0",
+  "bounce_count": "1234",
+  "unsubscribed_count": "18",
+  "total_count": "122108",
+  "drafted_count": "96904"
 }
 ```
 
