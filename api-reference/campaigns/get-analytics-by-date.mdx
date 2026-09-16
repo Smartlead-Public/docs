@@ -139,22 +139,61 @@ Out-of-office auto-replies inflate reply counts. Two fields let you separate the
 ooo_replies = total_reply_count - non_ooo_reply_count
 ```
 
-Both are derived from reply categorisation alone, so they do **not** depend on the per-campaign *ignore out-of-office* setting. You get the split whether or not that toggle is enabled, which matters because enabling it is not retroactive.
+Both come from reply categorisation alone, so they do **not** depend on the per-campaign *ignore out-of-office* setting. You get the split whether or not that toggle is on — which matters, because turning it on is not retroactive.
 
-If reply categorisation has not run for a campaign, leads stay uncategorised and `non_ooo_reply_count` equals `total_reply_count`.
+### Worked example
+
+A campaign receives 6 replies. The *ignore out-of-office* toggle is **off**, which is the default.
+
+| # | What arrived | Category | Flagged ignored | `total_reply_count` | `reply_count` | `non_ooo_reply_count` |
+|---|---|---|---|:---:|:---:|:---:|
+| 1 | "Sounds interesting" | Interested | no | ✅ | ✅ | ✅ |
+| 2 | "Not for us" | Not interested | no | ✅ | ✅ | ✅ |
+| 3 | Auto-reply, back Monday | Out of office | no | ✅ | ✅ | — |
+| 4 | Auto-reply, on leave | Out of office | no | ✅ | ✅ | — |
+| 5 | Auto-reply, parental leave | Out of office | no | ✅ | ✅ | — |
+| 6 | Forwarded by a colleague | Interested | yes, sender is not the lead | ✅ | — | ✅ |
+| | | | **Total** | **6** | **5** | **3** |
+
+Reading it:
+
+- `reply_count` is **5**, but 3 of those are auto-replies. That is the inflation customers complain about.
+- `non_ooo_reply_count` is **3** — the replies actually worth looking at.
+- Out-of-office replies are `6 - 3 = 3`.
+- Row 6 is counted in `non_ooo_reply_count` but not in `reply_count`, because it was flagged as ignored for a reason that has nothing to do with out-of-office.
+
+### When the toggle is already on
+
+Same idea, but out-of-office replies are also flagged as ignored, so they drop out of `reply_count` too.
+
+| # | What arrived | Category | Flagged ignored | `total_reply_count` | `reply_count` | `non_ooo_reply_count` |
+|---|---|---|---|:---:|:---:|:---:|
+| 1 | "Happy to chat" | Interested | no | ✅ | ✅ | ✅ |
+| 2 | Auto-reply, back Monday | Out of office | yes, by the toggle | ✅ | — | — |
+| 3 | Forwarded by a colleague | Interested | yes, sender is not the lead | ✅ | — | ✅ |
+| 4 | Spam you ignored by hand | uncategorised | yes, manually | ✅ | — | ✅ |
+| | | | **Total** | **4** | **1** | **3** |
+
+Here `non_ooo_reply_count` (3) is **higher** than `reply_count` (1). That is correct — see the warning below.
 
 <Warning>
 **`non_ooo_reply_count` can be higher than `reply_count`.** This is expected, not a bug.
 
-`reply_count` excludes every reply flagged as ignored. That flag is set by three separate things: out-of-office replies when the *ignore out-of-office* toggle is on, replies whose sender does not match the lead (forwards and self-sends), and replies you manually ignore in the master inbox.
+`reply_count` drops every reply flagged as ignored, and that flag is set by three separate things:
 
-`non_ooo_reply_count` only excludes out-of-office. Manually-ignored replies and non-lead senders are **not** out-of-office, so they are counted here while `reply_count` drops them.
+1. Out-of-office replies, but only when the *ignore out-of-office* toggle is on
+2. Replies whose sender is not the lead — forwards and self-sends
+3. Replies you ignore by hand in the master inbox
 
-Compare `non_ooo_reply_count` against `total_reply_count`, not against `reply_count`.
+`non_ooo_reply_count` only excludes out-of-office. Causes 2 and 3 are not out-of-office, so those replies are counted here while `reply_count` drops them.
+
+**Compare `non_ooo_reply_count` against `total_reply_count`, never against `reply_count`.**
 </Warning>
 
 <Note>
-Reply categorisation is stored per lead and reflects that lead's most recently categorised reply. A lead that sends an out-of-office reply and later a genuine reply is counted as non-OOO for both.
+If reply categorisation has not run for a campaign, leads stay uncategorised and `non_ooo_reply_count` equals `total_reply_count`.
+
+Categorisation is stored per lead and reflects that lead's most recently categorised reply. A lead that sends an out-of-office reply and later a genuine reply is counted as non-OOO for both.
 </Note>
 
 <RequestExample>
