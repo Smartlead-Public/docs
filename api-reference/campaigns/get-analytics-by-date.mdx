@@ -99,7 +99,7 @@ The range between `start_date` and `end_date` must be **30 days or less**. A wid
 </ResponseField>
 
 <ResponseField name="human_reply_count" type="string">
-  Replies in the date range from leads that are **not** categorised as out-of-office. See [Human vs total replies](#human-vs-total-replies).
+  Replies in the date range that are neither marked as ignored nor from a lead categorised as out-of-office. See [Human vs total replies](#human-vs-total-replies).
 </ResponseField>
 
 <ResponseField name="block_count" type="string">
@@ -128,22 +128,31 @@ All count fields are returned as strings.
 
 ## Human vs total replies
 
-Out-of-office auto-replies inflate reply counts. Two fields let you separate them:
+Out-of-office auto-replies inflate reply counts. Three fields let you separate them:
 
 | Field | What it counts |
 |---|---|
-| `total_reply_count` | Every reply, out-of-office included |
-| `human_reply_count` | Replies from leads not categorised as out-of-office |
+| `total_reply_count` | Every reply, with no exclusions |
+| `reply_count` | Replies excluding any marked as ignored |
+| `human_reply_count` | Replies excluding ignored **and** out-of-office |
 
-Out-of-office replies are the difference between the two:
+The three always nest:
 
 ```
-ooo_replies = total_reply_count - human_reply_count
+human_reply_count <= reply_count <= total_reply_count
 ```
 
-Both fields are derived from SmartLead's reply categorisation, so they do **not** depend on the per-campaign *ignore out-of-office* setting. You get the split whether or not that toggle is enabled.
+To get the out-of-office replies still inflating your reply count:
 
-If reply categorisation has not run for a campaign, leads stay uncategorised and `human_reply_count` equals `total_reply_count`.
+```
+ooo_replies = reply_count - human_reply_count
+```
+
+`human_reply_count` is derived from SmartLead's reply categorisation, so the out-of-office split does **not** depend on the per-campaign *ignore out-of-office* setting. You get it whether or not that toggle is enabled.
+
+If that toggle **is** enabled, out-of-office replies are already excluded from `reply_count`, so `reply_count - human_reply_count` is 0 and `human_reply_count` equals `reply_count`. That is correct: your reply count was never inflated in the first place.
+
+If reply categorisation has not run for a campaign, leads stay uncategorised and `human_reply_count` equals `reply_count`.
 
 <Note>
 Reply categorisation is stored per lead and reflects that lead's most recently categorised reply. A lead that sends an out-of-office reply and later a genuine reply is counted as human for both.
@@ -176,11 +185,13 @@ response = requests.get(
 analytics = response.json()
 
 total = int(analytics["total_reply_count"])
+replies = int(analytics["reply_count"])
 human = int(analytics["human_reply_count"])
 
 print(f"Total replies: {total}")
+print(f"Reply count:   {replies}")
 print(f"Human replies: {human}")
-print(f"Out-of-office:  {total - human}")
+print(f"Out-of-office: {replies - human}")
 ```
 
 ```javascript JavaScript
@@ -200,11 +211,13 @@ const response = await fetch(
 const analytics = await response.json();
 
 const total = Number(analytics.total_reply_count);
+const replies = Number(analytics.reply_count);
 const human = Number(analytics.human_reply_count);
 
 console.log(`Total replies: ${total}`);
+console.log(`Reply count:   ${replies}`);
 console.log(`Human replies: ${human}`);
-console.log(`Out-of-office:  ${total - human}`);
+console.log(`Out-of-office: ${replies - human}`);
 ```
 
 </RequestExample>

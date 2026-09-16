@@ -38,17 +38,17 @@ Out-of-office auto-replies inflate reply counts. Three fields let you separate t
 
 | Field | What it counts |
 |---|---|
-| `reply_count` | Replies excluding any reply explicitly marked as ignored |
-| `total_reply_count` | Every reply, out-of-office included |
-| `human_reply_count` | Replies from leads not categorised as out-of-office |
+| `total_reply_count` | Every reply, with no exclusions |
+| `reply_count` | Replies excluding any marked as ignored |
+| `human_reply_count` | Replies excluding ignored **and** out-of-office |
 
-Out-of-office replies are `total_reply_count - human_reply_count`.
+The three always nest: `human_reply_count <= reply_count <= total_reply_count`.
 
-`total_reply_count` and `human_reply_count` come from SmartLead's reply categorisation, so they do **not** depend on the per-campaign *ignore out-of-office* setting. If categorisation has not run for a campaign, `human_reply_count` equals `total_reply_count`.
+Out-of-office replies still inflating your reply count are `reply_count - human_reply_count`.
+
+`human_reply_count` comes from SmartLead's reply categorisation, so it does **not** depend on the per-campaign *ignore out-of-office* setting. If categorisation has not run, `human_reply_count` equals `reply_count`.
 
 See [Get Campaign Analytics by Date Range](/api-reference/campaigns/get-analytics-by-date) for the full field list.
-
-
 
 <RequestExample>
 
