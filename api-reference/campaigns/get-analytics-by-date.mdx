@@ -21,57 +21,176 @@ Analyze campaign performance over a specific time period. Essential for tracking
 </ParamField>
 
 <ParamField query="start_date" type="string" required>
-  Start date (ISO 8601 format)
+  Start date in `YYYY-MM-DD` format. Interpreted as the start of that day.
 </ParamField>
 
 <ParamField query="end_date" type="string" required>
-  End date (ISO 8601 format)
+  End date in `YYYY-MM-DD` format. Interpreted as the end of that day.
 </ParamField>
+
+<ParamField query="time_zone" type="string" default="UTC">
+  IANA time zone used to resolve the start and end of each day, for example `America/New_York`. Defaults to `UTC`.
+</ParamField>
+
+<Warning>
+The range between `start_date` and `end_date` must be **30 days or less**. A wider range returns `400 Bad Request`.
+</Warning>
+
+## Response Fields
+
+<ResponseField name="id" type="number">
+  Campaign ID
+</ResponseField>
+
+<ResponseField name="user_id" type="number">
+  ID of the user who owns the campaign
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Campaign creation timestamp
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Campaign status, for example `ACTIVE`, `PAUSED`, `COMPLETED`, `ARCHIVED`
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Campaign name
+</ResponseField>
+
+<ResponseField name="start_date" type="string">
+  The `start_date` you supplied, echoed back
+</ResponseField>
+
+<ResponseField name="end_date" type="string">
+  The `end_date` you supplied, echoed back
+</ResponseField>
+
+<ResponseField name="sent_count" type="string">
+  Emails sent in the date range
+</ResponseField>
+
+<ResponseField name="unique_sent_count" type="string">
+  Leads that received a first-sequence email in the date range
+</ResponseField>
+
+<ResponseField name="open_count" type="string">
+  Opens in the date range
+</ResponseField>
+
+<ResponseField name="unique_open_count" type="string">
+  Distinct leads who opened in the date range
+</ResponseField>
+
+<ResponseField name="click_count" type="string">
+  Clicks in the date range
+</ResponseField>
+
+<ResponseField name="unique_click_count" type="string">
+  Distinct leads who clicked in the date range
+</ResponseField>
+
+<ResponseField name="reply_count" type="string">
+  Replies in the date range, excluding any reply explicitly marked as ignored
+</ResponseField>
+
+<ResponseField name="total_reply_count" type="string">
+  Every reply received in the date range, with no exclusions. See [Human vs total replies](#human-vs-total-replies).
+</ResponseField>
+
+<ResponseField name="human_reply_count" type="string">
+  Replies in the date range from leads that are **not** categorised as out-of-office. See [Human vs total replies](#human-vs-total-replies).
+</ResponseField>
+
+<ResponseField name="block_count" type="string">
+  Emails blocked in the date range
+</ResponseField>
+
+<ResponseField name="bounce_count" type="string">
+  Bounced emails in the date range
+</ResponseField>
+
+<ResponseField name="unsubscribed_count" type="string">
+  Unsubscribes in the date range
+</ResponseField>
+
+<ResponseField name="total_count" type="string">
+  Total campaign records not in a `STOPPED` state. This is a campaign-lifetime figure and is **not** limited to the date range.
+</ResponseField>
+
+<ResponseField name="drafted_count" type="string">
+  Campaign records in a `DRAFTED` state. This is a campaign-lifetime figure and is **not** limited to the date range.
+</ResponseField>
+
+<Note>
+All count fields are returned as strings.
+</Note>
+
+## Human vs total replies
+
+Out-of-office auto-replies inflate reply counts. Two fields let you separate them:
+
+| Field | What it counts |
+|---|---|
+| `total_reply_count` | Every reply, out-of-office included |
+| `human_reply_count` | Replies from leads not categorised as out-of-office |
+
+Out-of-office replies are the difference between the two:
+
+```
+ooo_replies = total_reply_count - human_reply_count
+```
+
+Both fields are derived from SmartLead's reply categorisation, so they do **not** depend on the per-campaign *ignore out-of-office* setting. You get the split whether or not that toggle is enabled.
+
+If reply categorisation has not run for a campaign, leads stay uncategorised and `human_reply_count` equals `total_reply_count`.
+
+<Note>
+Reply categorisation is stored per lead and reflects that lead's most recently categorised reply. A lead that sends an out-of-office reply and later a genuine reply is counted as human for both.
+</Note>
 
 <RequestExample>
 
 ```bash cURL
-curl "https://server.smartlead.ai/api/v1/campaigns/123/analytics-by-date?api_key=YOUR_KEY&start_date=2025-01-01T00:00:00Z&end_date=2025-01-31T23:59:59Z"
+curl "https://server.smartlead.ai/api/v1/campaigns/123/analytics-by-date?api_key=YOUR_KEY&start_date=2025-01-01&end_date=2025-01-31"
 ```
 
 ```python Python
 import requests
-from datetime import datetime, timedelta
 
 API_KEY = "YOUR_API_KEY"
 campaign_id = 123
 
-# Get this month's analytics
-start = datetime.now().replace(day=1, hour=0, minute=0).isoformat() + 'Z'
-end = datetime.now().isoformat() + 'Z'
-
 params = {
     "api_key": API_KEY,
-    "start_date": start,
-    "end_date": end
+    "start_date": "2025-01-01",
+    "end_date": "2025-01-31",
+    "time_zone": "America/New_York",
 }
 
 response = requests.get(
     f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/analytics-by-date",
-    params=params
+    params=params,
 )
 
 analytics = response.json()
-print(f"This month reply rate: {analytics['reply_rate']}%")
+
+total = int(analytics["total_reply_count"])
+human = int(analytics["human_reply_count"])
+
+print(f"Total replies: {total}")
+print(f"Human replies: {human}")
+print(f"Out-of-office:  {total - human}")
 ```
 
 ```javascript JavaScript
 const API_KEY = 'YOUR_API_KEY';
 
-// Get last 30 days analytics
-const end = new Date();
-const start = new Date();
-start.setDate(start.getDate() - 30);
-
 const params = new URLSearchParams({
   api_key: API_KEY,
-  start_date: start.toISOString(),
-  end_date: end.toISOString()
+  start_date: '2025-01-01',
+  end_date: '2025-01-31',
+  time_zone: 'America/New_York',
 });
 
 const response = await fetch(
@@ -79,7 +198,13 @@ const response = await fetch(
 );
 
 const analytics = await response.json();
-console.log(`30-day reply rate: ${analytics.reply_rate}%`);
+
+const total = Number(analytics.total_reply_count);
+const human = Number(analytics.human_reply_count);
+
+console.log(`Total replies: ${total}`);
+console.log(`Human replies: ${human}`);
+console.log(`Out-of-office:  ${total - human}`);
 ```
 
 </RequestExample>
@@ -90,13 +215,27 @@ console.log(`30-day reply rate: ${analytics.reply_rate}%`);
 
 ```json 200
 {
-  "campaign_id": 123,
-  "start_date": "2025-01-01T00:00:00Z",
-  "end_date": "2025-01-31T23:59:59Z",
-  "total_sent": 500,
-  "open_rate": 48.0,
-  "click_rate": 13.0,
-  "reply_rate": 9.0
+  "id": 123,
+  "user_id": 456,
+  "created_at": "2025-01-04T08:32:34.138Z",
+  "status": "ACTIVE",
+  "name": "Q1 Outbound",
+  "start_date": "2025-01-01",
+  "end_date": "2025-01-31",
+  "sent_count": "23918",
+  "unique_sent_count": "18262",
+  "open_count": "7420",
+  "unique_open_count": "5133",
+  "click_count": "612",
+  "unique_click_count": "489",
+  "reply_count": "3929",
+  "total_reply_count": "3929",
+  "human_reply_count": "1502",
+  "block_count": "0",
+  "bounce_count": "1234",
+  "unsubscribed_count": "18",
+  "total_count": "122108",
+  "drafted_count": "96904"
 }
 ```
 
@@ -106,4 +245,3 @@ console.log(`30-day reply rate: ${analytics.reply_rate}%`);
 
 - [Get Campaign Analytics](/api-reference/campaigns/get-analytics)
 - [Get Top Level Analytics](/api-reference/campaigns/get-top-level-analytics)
-
