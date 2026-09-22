@@ -18,8 +18,38 @@ SmartLead enforces rate limits on a per-API-key basis:
 | Enterprise | Custom | Custom | Custom |
 
 <Note>
-  Rate limits apply to your API key across all endpoints combined. A mix of campaign, lead, and analytics requests all count toward the same limit.
+  This plan-wide limit applies to your API key across all endpoints combined. A mix of campaign, lead, and analytics requests all count toward the same limit.
 </Note>
+
+## Endpoint-Specific Rate Limits
+
+A small number of endpoints are expensive enough to serve that they carry their **own dedicated rate limit, independent of the plan-wide limit above**.
+
+| Endpoint | Limit | Window | Scope |
+|---|---|---|---|
+| `GET /campaigns/{campaign_id}/leads-statistics` | 10 requests | 60 seconds | Per account, across all campaigns |
+| `GET /campaigns/all-leads-activities` | 10 requests | 60 seconds | Per account |
+| `GET /analytics/mailbox/domain-wise-health-metrics` | 10 requests | 60 seconds | Per account |
+
+These limits **stack on top of** the plan-wide limit rather than replacing it:
+
+- Requests to these endpoints still count toward your plan-wide quota.
+- Having plan-wide quota remaining does **not** let you exceed the endpoint's own limit.
+- Each endpoint has its own counter, so they do not consume each other's budget.
+
+The window starts on your first request to that endpoint and resets 60 seconds later. Exceeding it returns `429 Too Many Requests` with a plain-text body rather than the JSON error shape shown below:
+
+```text 429 - Too Many Requests
+You have exceeded the 10 requests in 60 sec limit for this endpoint!
+```
+
+<Warning>
+  Endpoint-specific 429s do **not** include `Retry-After` or `X-RateLimit-*` headers, so the backoff helpers on this page cannot read a retry delay from them. Fall back to a fixed wait of up to 60 seconds for these endpoints.
+</Warning>
+
+<Tip>
+  If you are polling these endpoints for changes, use their time-filter parameters (`event_time_gt` on `leads-statistics`, `event_time_from` / `event_time_to` on `all-leads-activities`, `start_date` / `end_date` on `domain-wise-health-metrics`) to fetch only what changed since your last call, and request the maximum page size so each of your 10 requests does as much work as possible.
+</Tip>
 
 ## Detecting Rate Limits
 
