@@ -78,6 +78,7 @@
         "api-reference/campaigns/update-sequences",
         "api-reference/campaigns/get-email-accounts",
         "api-reference/campaigns/add-email-accounts",
+        "api-reference/campaigns/add-email-accounts-by-tag",
         "api-reference/campaigns/remove-email-accounts",
         "api-reference/campaigns/add-tags",
         "api-reference/campaigns/remove-tags",

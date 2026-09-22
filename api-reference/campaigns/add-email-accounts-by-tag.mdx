@@ -1,0 +1,241 @@
+---
+title: "Add Email Accounts to Campaign by Tag"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/email-accounts/by-tag"
+description: "Attach every mailbox carrying a given tag to a campaign in a single call."
+---
+
+<Note>
+  Attaches every mailbox on your account carrying the given tags to a campaign, resolving the tags server-side. Use this instead of paging through [Get All Email Accounts](/api-reference/email-accounts/get-all) and filtering on the embedded `tags` array yourself.
+</Note>
+
+## Overview
+
+If you organise senders by tag - per client, per domain pool, per reputation tier - this attaches a whole group in one request.
+
+Without it you would have to:
+
+1. Page through `GET /email-accounts/` at 100 mailboxes per page.
+2. Filter client-side on each account's embedded `tags` array.
+3. POST the resulting IDs to [Add Email Accounts](/api-reference/campaigns/add-email-accounts).
+
+Use [Get All Tags](/api-reference/email-accounts/tags) to look up the tag IDs to pass here.
+
+<Note>
+  This endpoint **adds** mailboxes only. To detach them, use [Remove Email Accounts](/api-reference/campaigns/remove-email-accounts). It is additive to [Add Email Accounts](/api-reference/campaigns/add-email-accounts), which is unchanged - keep using that one when you already have mailbox IDs.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  The campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="max_limit" type="boolean">
+  Raises the per-campaign mailbox cap from 2,500 to 5,000.
+</ParamField>
+
+## Request Body
+
+<ParamField body="tag_ids" type="array" required>
+  Tag IDs to expand. Every mailbox on your account carrying any of these tags is attached.
+
+  Only tags you own are accepted - passing a tag ID belonging to another account returns `400`.
+
+  Example: `[485775]`
+</ParamField>
+
+<ParamField body="only_connected" type="boolean" default="false">
+  When `true`, tagged mailboxes that are not fully connected (`is_smtp_success` and `is_imap_success` both true) are skipped instead of attached. The number skipped is returned as `tag_resolution.skipped_disconnected_count`.
+
+  The default is `false` so that attaching by tag behaves exactly like posting the same mailbox IDs to [Add Email Accounts](/api-reference/campaigns/add-email-accounts), which does not filter on connection health either.
+</ParamField>
+
+<ParamField body="auto_adjust_warmup" type="boolean">
+  When `true`, enables warmup auto-adjust on the mailboxes that were attached.
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/email-accounts/by-tag?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"tag_ids": [485775], "only_connected": true}'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+
+# Look the tag id up once via GET /api/v1/email-accounts/tags
+payload = {
+    "tag_ids": [485775],
+    "only_connected": True
+}
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/email-accounts/by-tag",
+    params={"api_key": API_KEY},
+    json=payload
+)
+response.raise_for_status()
+result = response.json()
+
+resolution = result["tag_resolution"]
+print(f"attached {result['added_count']} mailbox(es)")
+print(f"already on the campaign: {result['already_associated_count']}")
+print(f"tag matched {resolution['resolved_account_count']}, "
+      f"skipped {resolution['skipped_disconnected_count']} disconnected")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/email-accounts/by-tag?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tag_ids: [485775],
+      only_connected: true
+    })
+  }
+);
+
+const result = await response.json();
+console.log(`attached ${result.added_count}, already associated ${result.already_associated_count}`);
+console.log(result.tag_resolution);
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="added_count" type="number">
+  How many mailboxes this call newly attached.
+</ResponseField>
+
+<ResponseField name="already_associated_count" type="number">
+  How many of the resolved mailboxes were already on the campaign and so were left alone.
+</ResponseField>
+
+<ResponseField name="tag_resolution" type="object">
+  What the tags expanded to.
+
+  <Expandable title="properties">
+    <ResponseField name="matched_tags" type="array">
+      The tags that resolved, each as `{ id, name }`.
+    </ResponseField>
+    <ResponseField name="resolved_account_count" type="number">
+      How many of your mailboxes carry those tags.
+    </ResponseField>
+    <ResponseField name="disconnected_account_count" type="number">
+      How many of those mailboxes are not fully connected. Reported whether or not `only_connected` was set, so you can spot dead senders you just attached.
+    </ResponseField>
+    <ResponseField name="skipped_disconnected_count" type="number">
+      How many were actually skipped for being disconnected. Always `0` unless `only_connected` was `true`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Request successful. Also returned when the tags matched no mailboxes - check `added_count` and `message`.
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  A `tag_ids` entry does not belong to your account, `tag_ids` is missing or empty, or the campaign is already at its mailbox cap.
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key.
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  The campaign does not exist or you don't have access to it.
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred. Please try again or contact support if the issue persists.
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Attached
+{
+  "ok": true,
+  "result": [
+    { "id": 99101, "email_campaign_id": 123, "email_account_id": 456 },
+    { "id": 99102, "email_campaign_id": 123, "email_account_id": 457 }
+  ],
+  "added_count": 2,
+  "already_associated_count": 0,
+  "tag_resolution": {
+    "matched_tags": [{ "id": 485775, "name": "smartservices" }],
+    "resolved_account_count": 3,
+    "disconnected_account_count": 1,
+    "skipped_disconnected_count": 1
+  }
+}
+```
+
+```json 200 - Tag matched no mailboxes
+{
+  "ok": true,
+  "result": [],
+  "added_count": 0,
+  "already_associated_count": 0,
+  "tag_resolution": {
+    "matched_tags": [{ "id": 485775, "name": "smartservices" }],
+    "resolved_account_count": 0,
+    "disconnected_account_count": 0,
+    "skipped_disconnected_count": 0
+  },
+  "message": "No mailboxes carry the requested tag(s)."
+}
+```
+
+```json 400 - Tag not yours
+{
+  "error": "Tag id - 999 not allowed. Permission Error."
+}
+```
+
+```json 404 - Campaign not found
+{
+  "error": "Campaign not found - Invalid campaign_id."
+}
+```
+
+</ResponseExample>
+
+## Best Practices
+
+<Tip>
+  **Pair with `only_connected`**: by default a disconnected mailbox carrying the tag is still attached, matching the explicit-ID endpoint. On a large tag, `only_connected: true` keeps dead senders out of the rotation and tells you how many were left behind.
+</Tip>
+
+<Tip>
+  **Tags are resolved at call time**: adding a mailbox to the tag later does **not** backfill campaigns you already created. Re-issue the call to pick it up.
+</Tip>
+
+<Tip>
+  **Re-running is safe**: mailboxes already on the campaign are counted in `already_associated_count` and not duplicated.
+</Tip>
+
+## Related Endpoints
+
+- [Add Email Accounts](/api-reference/campaigns/add-email-accounts) - attach by explicit mailbox ID
+- [Get All Tags](/api-reference/email-accounts/tags) - look up the `tag_ids` to pass here
+- [Get Campaign Email Accounts](/api-reference/campaigns/get-email-accounts)
+- [Remove Email Accounts](/api-reference/campaigns/remove-email-accounts)

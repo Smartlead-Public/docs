@@ -12,11 +12,15 @@ Associates one or more email accounts with a campaign for automatic sender rotat
 Associates one or more email accounts with a campaign for automatic sender rotation
 
 **Key Features**:
-- Validates account ownership and connection status before adding
+- Validates account ownership before adding
 
 <Warning>
-Accounts must be successfully connected (is_smtp_success=true, is_imap_success=true) and not suspended
+  This endpoint validates that you own each mailbox, but does **not** check connection health. A mailbox is added whether or not `is_smtp_success` and `is_imap_success` are true.
 </Warning>
+
+<Note>
+  To attach mailboxes by tag instead of by ID, use [Add Email Accounts by Tag](/api-reference/campaigns/add-email-accounts-by-tag).
+</Note>
 
 
 
