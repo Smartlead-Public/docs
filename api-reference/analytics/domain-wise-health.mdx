@@ -42,6 +42,34 @@ description: "Get performance metrics aggregated by email domain for domain anal
   Pagination offset
 </ParamField>
 
+## Rate Limit
+
+<Warning>
+  This endpoint has its **own dedicated rate limit of 10 requests per minute**, which is separate from your plan's overall API rate limit.
+</Warning>
+
+| Scope | Limit | Window |
+|---|---|---|
+| `GET /analytics/mailbox/domain-wise-health-metrics` | 10 requests | 60 seconds |
+
+The limit is counted per SmartLead account (or per API key if you authenticate with a client key), and applies regardless of the `client_ids`, `campaign_ids` or date range you request — every call spends one of the 10.
+
+This limit **stacks on top of** your plan-wide limit rather than replacing it. Requests here still count toward the account-wide quota described in the [Rate Limits guide](/guides/rate-limits), so staying under 10/min does not exempt you from that limit, and remaining plan-wide quota does not let you exceed 10/min here.
+
+The window starts on your first request and resets 60 seconds later. Exceeding it returns `429 Too Many Requests` with a plain-text body:
+
+```text 429 - Too Many Requests
+You have exceeded the 10 requests in 60 sec limit for this endpoint!
+```
+
+<Note>
+  This 429 does not include `Retry-After` or `X-RateLimit-*` headers. Wait up to 60 seconds before retrying.
+</Note>
+
+<Tip>
+  `full_data=true` is the expensive mode — it runs a separate bucketed unique-count query per domain, so a large account can make a single call costly. Request it only when you need the full breakdown, keep `start_date`/`end_date` as narrow as your use case allows, and cache the result rather than re-requesting it inside a polling loop.
+</Tip>
+
 <RequestExample>
 
 ```bash cURL
@@ -100,7 +128,7 @@ console.log(result);
 </ResponseField>
 
 <ResponseField name="429" type="Rate Limit Exceeded">
-  Too many requests. Please slow down and retry after the rate limit resets.
+  You exceeded this endpoint's dedicated limit of 10 requests per minute, or your plan-wide API rate limit. Wait up to 60 seconds and retry.
 </ResponseField>
 
 <ResponseField name="500" type="Internal Server Error">
@@ -146,6 +174,10 @@ console.log(result);
 {
   "error": "Invalid parameters provided"
 }
+```
+
+```text 429 - Too Many Requests
+You have exceeded the 10 requests in 60 sec limit for this endpoint!
 ```
 
 </ResponseExample>
