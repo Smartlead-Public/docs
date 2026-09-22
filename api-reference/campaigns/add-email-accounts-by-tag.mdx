@@ -36,8 +36,10 @@ Use [Get All Tags](/api-reference/email-accounts/tags) to look up the tag IDs to
   Your SmartLead API key
 </ParamField>
 
-<ParamField query="max_limit" type="boolean">
-  Raises the per-campaign mailbox cap from 2,500 to 5,000.
+<ParamField query="max_limit" type="boolean" default="false">
+  Raises the maximum number of mailboxes a single campaign may hold from **2,500** to **5,000**. It does not change how many tags or mailboxes this call may reference - it only raises the ceiling the campaign is checked against.
+
+  Same flag, same meaning, as on [Add Email Accounts](/api-reference/campaigns/add-email-accounts). If the campaign is already at the cap the request returns `400`; if the tag resolves to more mailboxes than the remaining headroom, the extras are not added and the response `message` says how many were left out.
 </ParamField>
 
 ## Request Body
@@ -45,7 +47,7 @@ Use [Get All Tags](/api-reference/email-accounts/tags) to look up the tag IDs to
 <ParamField body="tag_ids" type="array" required>
   Tag IDs to expand. Every mailbox on your account carrying any of these tags is attached.
 
-  Only tags you own are accepted - passing a tag ID belonging to another account returns `400`.
+  **Between 1 and 5 tags per call.** Only tags you own are accepted - passing a tag ID belonging to another account returns `400`. A tag you own that has no mailboxes is not an error: it returns `200` with `added_count: 0`.
 
   Example: `[485775]`
 </ParamField>
@@ -154,7 +156,7 @@ console.log(result.tag_resolution);
 </ResponseField>
 
 <ResponseField name="400" type="Bad Request">
-  A `tag_ids` entry does not belong to your account, `tag_ids` is missing or empty, or the campaign is already at its mailbox cap.
+  A `tag_ids` entry does not belong to your account, `tag_ids` is missing, empty or longer than 5, or the campaign is already at its mailbox cap.
 </ResponseField>
 
 <ResponseField name="401" type="Unauthorized">
