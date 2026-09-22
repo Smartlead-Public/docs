@@ -1,0 +1,178 @@
+---
+title: "Remove Tags from Campaigns"
+api: "DELETE https://server.smartlead.ai/api/v1/campaigns/tags"
+description: "Detach one or more tags from one or more campaigns in a single request"
+---
+
+<Note>
+Detaches every tag in `tagIds` from every campaign in `campaignIds` (the full cartesian product). The operation is idempotent — pairs that aren't currently tagged are simply skipped rather than causing an error.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="campaignIds" type="number[]" required>
+  Campaign IDs to untag. 1–100 positive integers.
+</ParamField>
+
+<ParamField body="tagIds" type="number[]" required>
+  Tag IDs to detach. 1–100 positive integers.
+</ParamField>
+
+<Info>
+All campaigns and tags must belong to the authenticated account (or the client scoped to the API key). Validation is all-or-nothing — if any `campaignIds` or `tagIds` value doesn't belong to the caller, the entire request is rejected and nothing is applied.
+</Info>
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://server.smartlead.ai/api/v1/campaigns/tags?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "campaignIds": [101, 204],
+    "tagIds": [6, 9]
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+response = requests.delete(
+    "https://server.smartlead.ai/api/v1/campaigns/tags",
+    params={"api_key": API_KEY},
+    json={
+        "campaignIds": [101, 204],
+        "tagIds": [6, 9]
+    }
+)
+
+result = response.json()
+print(f"Removed {result['removed']} of {result['requested']} tag-campaign pairs")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/campaigns/tags?api_key=${API_KEY}`,
+  {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      campaignIds: [101, 204],
+      tagIds: [6, 9]
+    })
+  }
+);
+
+const result = await response.json();
+console.log(`Removed ${result.removed} of ${result.requested} tag-campaign pairs`);
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="ok" type="boolean">
+  `true` on success
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  `"Tags removed from campaigns successfully!"`
+</ResponseField>
+
+<ResponseField name="campaign_ids" type="number[]">
+  Deduplicated list of campaign IDs the request was applied to
+</ResponseField>
+
+<ResponseField name="tag_ids" type="number[]">
+  Deduplicated list of tag IDs the request was applied to
+</ResponseField>
+
+<ResponseField name="requested" type="number">
+  Total number of campaign/tag pairs requested (`campaign_ids.length × tag_ids.length`)
+</ResponseField>
+
+<ResponseField name="removed" type="number">
+  Number of pairs actually removed
+</ResponseField>
+
+<ResponseField name="not_present" type="number">
+  Number of pairs that weren't tagged in the first place and were skipped
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Tags processed successfully (see `removed` / `not_present` for the outcome)
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  Invalid request parameters or malformed request body
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  One or more `campaignIds` or `tagIds` don't exist or don't belong to the authenticated account
+</ResponseField>
+
+<ResponseField name="422" type="Validation Error">
+  Request validation failed. Check parameter types and constraints (array length 1–100, positive integers).
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "ok": true,
+  "message": "Tags removed from campaigns successfully!",
+  "campaign_ids": [101, 204],
+  "tag_ids": [6, 9],
+  "requested": 4,
+  "removed": 3,
+  "not_present": 1
+}
+```
+
+```json 404 - Campaigns not found
+{
+  "ok": false,
+  "error": "Campaigns not found - one or more campaignIds are invalid.",
+  "not_found_campaign_ids": [204]
+}
+```
+
+```json 404 - Tags not found
+{
+  "ok": false,
+  "error": "Tags not found - one or more tagIds are invalid.",
+  "not_found_tag_ids": [9]
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Add Tags to Campaigns](/api-reference/campaigns/add-tags)
+- [Get All Campaigns](/api-reference/campaigns/get-all)
