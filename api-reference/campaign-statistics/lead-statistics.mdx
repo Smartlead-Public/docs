@@ -30,6 +30,34 @@ description: "Fetch campaign lead statistics using the campaign's ID"
 
 
 
+## Rate Limit
+
+<Warning>
+  This endpoint has its **own dedicated rate limit of 10 requests per minute**, which is separate from your plan's overall API rate limit.
+</Warning>
+
+| Scope | Limit | Window |
+|---|---|---|
+| `GET /campaigns/{campaign_id}/leads-statistics` | 10 requests | 60 seconds |
+
+The limit is counted per SmartLead account across all campaigns — hitting a different `campaign_id` uses the same 10-request budget. If you authenticate with a client API key, the count is scoped to that key instead.
+
+This limit **stacks on top of** your plan-wide limit rather than replacing it. Requests to this endpoint still count toward the account-wide quota described in the [Rate Limits guide](/guides/rate-limits), so staying under 10/min here does not exempt you from that limit, and having plan-wide quota left does not let you exceed 10/min here.
+
+The window starts on your first request and resets 60 seconds later. Exceeding it returns `429 Too Many Requests` with a plain-text body:
+
+```text 429 - Too Many Requests
+You have exceeded the 10 requests in 60 sec limit for this endpoint!
+```
+
+<Note>
+  This 429 does not include `Retry-After` or `X-RateLimit-*` headers. Wait up to 60 seconds before retrying.
+</Note>
+
+<Tip>
+  This endpoint aggregates the full send and reply history for every lead in the page, so each call is expensive to serve — which is why it is capped more tightly than most endpoints. When polling for changes, pass `event_time_gt` to fetch only leads with activity since your last poll instead of re-reading the whole campaign, and page with `limit=100` to get the most out of each of your 10 requests.
+</Tip>
+
 <RequestExample>
 
 ```bash cURL
@@ -89,6 +117,10 @@ console.log(result);
   The requested resource does not exist or you don't have access to it
 </ResponseField>
 
+<ResponseField name="429" type="Too Many Requests">
+  You exceeded this endpoint's dedicated limit of 10 requests per minute, or your plan-wide API rate limit. Wait up to 60 seconds and retry.
+</ResponseField>
+
 <ResponseExample>
 
 ```json 200 - Success
@@ -102,6 +134,10 @@ console.log(result);
 {
   "message": "Invalid API Key"
 }
+```
+
+```text 429 - Too Many Requests
+You have exceeded the 10 requests in 60 sec limit for this endpoint!
 ```
 
 </ResponseExample>

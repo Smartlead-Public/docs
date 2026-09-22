@@ -30,6 +30,24 @@ Returns detailed activity data including sent emails, opens, clicks, replies, an
   Filter activities until this date/time. Accepts ISO 8601 format or `YYYY-MM-DD` format. Must be used with `event_time_from`
 </ParamField>
 
+## Rate Limit
+
+<Warning>
+  This endpoint has its **own dedicated rate limit of 10 requests per minute**, which is separate from your plan's overall API rate limit.
+</Warning>
+
+| Scope | Limit | Window |
+|---|---|---|
+| `GET /campaigns/all-leads-activities` | 10 requests | 60 seconds |
+
+The limit is counted per SmartLead account (or per API key if you authenticate with a client key). It **stacks on top of** your plan-wide limit rather than replacing it — requests here still count toward the account-wide quota described in the [Rate Limits guide](/guides/rate-limits), and remaining plan-wide quota does not let you exceed 10/min on this endpoint.
+
+The window starts on your first request and resets 60 seconds later. Exceeding it returns `429 Too Many Requests` with a plain-text body, and without `Retry-After` or `X-RateLimit-*` headers:
+
+```text 429 - Too Many Requests
+You have exceeded the 10 requests in 60 sec limit for this endpoint!
+```
+
 <RequestExample>
 
 ```bash cURL
