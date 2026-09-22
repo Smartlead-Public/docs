@@ -21,6 +21,10 @@ Without it you would have to:
 Use [Get All Tags](/api-reference/email-accounts/tags) to look up the tag IDs to pass here.
 
 <Note>
+  A campaign can hold at most **2,500** mailboxes. If the tags resolve to more than the remaining headroom, the extras are not attached and the response `message` says how many were left out; if the campaign is already full the request returns `400`. (The explicit-ID endpoint accepts a `max_limit` flag to raise this to 5,000. This endpoint does not - it always uses the 2,500 default.)
+</Note>
+
+<Note>
   This endpoint **adds** mailboxes only. To detach them, use [Remove Email Accounts](/api-reference/campaigns/remove-email-accounts). It is additive to [Add Email Accounts](/api-reference/campaigns/add-email-accounts), which is unchanged - keep using that one when you already have mailbox IDs.
 </Note>
 
@@ -34,12 +38,6 @@ Use [Get All Tags](/api-reference/email-accounts/tags) to look up the tag IDs to
 
 <ParamField query="api_key" type="string" required>
   Your SmartLead API key
-</ParamField>
-
-<ParamField query="max_limit" type="boolean" default="false">
-  Raises the maximum number of mailboxes a single campaign may hold from **2,500** to **5,000**. It does not change how many tags or mailboxes this call may reference - it only raises the ceiling the campaign is checked against.
-
-  Same flag, same meaning, as on [Add Email Accounts](/api-reference/campaigns/add-email-accounts). If the campaign is already at the cap the request returns `400`; if the tag resolves to more mailboxes than the remaining headroom, the extras are not added and the response `message` says how many were left out.
 </ParamField>
 
 ## Request Body
