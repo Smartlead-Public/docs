@@ -124,6 +124,7 @@
       "pages": [
         "api-reference/campaigns/statistics",
         "api-reference/campaign-statistics/get-by-id",
+        "api-reference/campaign-statistics/sequence-analytics",
         "api-reference/campaign-statistics/get-by-date-range",
         "api-reference/campaign-statistics/top-level",
         "api-reference/campaign-statistics/top-level-by-date",
