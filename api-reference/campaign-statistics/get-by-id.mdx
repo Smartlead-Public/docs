@@ -101,69 +101,35 @@ console.log(result);
   The requested resource does not exist or you don't have access to it
 </ResponseField>
 
-## Response Fields
-
-<ResponseField name="hasMore" type="boolean">
-  Whether more leads exist beyond this page. Advance with `offset`.
-</ResponseField>
-
-<ResponseField name="data" type="array">
-  One entry per lead, each with the send and reply `history` for that lead.
-
-  <Expandable title="properties">
-    <ResponseField name="sender_bounce" type="boolean">
-      Whether this lead is categorised as a **sender-originated bounce** — a bounce caused by the sending mailbox rather than the recipient address. Always a boolean; `false` when the lead has no category.
-    </ResponseField>
-    <ResponseField name="last_seq_num" type="number">
-      The sequence step the lead has reached.
-    </ResponseField>
-    <ResponseField name="history" type="array">
-      Chronological `SENT` and `REPLY` events for the lead.
-    </ResponseField>
-  </Expandable>
-</ResponseField>
-
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "hasMore": true,
-  "skip": 0,
-  "limit": 100,
+  "ok": true,
   "data": [
     {
-      "lead_id": 98765,
-      "email_lead_map_id": 55501,
-      "from": "sender@yourdomain.com",
-      "to": "lead@example.com",
-      "status": "INPROGRESS",
-      "created_at": "2026-09-02T09:14:22.000Z",
-      "last_seq_num": 2,
-      "sender_bounce": false,
-      "history": [
-        {
-          "stats_id": 771001,
-          "type": "SENT",
-          "message_id": "<abc@mail.example>",
-          "time": "2026-09-02T09:15:00.000Z",
-          "subject": "Quick question",
-          "email_body": "<p>Hi there</p>",
-          "email_seq_number": "1",
-          "open_count": 2,
-          "click_count": 0,
-          "click_details": null
-        },
-        {
-          "stats_id": 771001,
-          "type": "REPLY",
-          "message_id": "<def@mail.example>",
-          "time": "2026-09-03T11:02:10.000Z",
-          "email_body": "<p>Sure, tell me more</p>",
-          "email_seq_number": "1"
-        }
-      ]
+      "campaign_id": 123,
+      "sequence_number": 1,
+      "sent": 1240,
+      "opened": 372,
+      "clicked": 89,
+      "replied": 23,
+      "unsubscribed": 4,
+      "bounced": 18
+    },
+    {
+      "campaign_id": 123,
+      "sequence_number": 2,
+      "sent": 892,
+      "opened": 267,
+      "clicked": 54,
+      "replied": 12,
+      "unsubscribed": 2,
+      "bounced": 9
     }
-  ]
+  ],
+  "offset": 0,
+  "limit": 100
 }
 ```
 
