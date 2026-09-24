@@ -85,6 +85,12 @@ console.log(result);
   The requested resource does not exist or you don't have access to it
 </ResponseField>
 
+## Response Fields
+
+<ResponseField name="sender_bounce_count" type="string">
+  Number of bounces in the date range caused by the sending mailbox rather than the recipient address. Always less than or equal to `bounce_count`.
+</ResponseField>
+
 <ResponseExample>
 
 ```json 200 - Success
