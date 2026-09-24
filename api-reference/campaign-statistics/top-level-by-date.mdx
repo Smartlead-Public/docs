@@ -85,12 +85,44 @@ console.log(result);
   The requested resource does not exist or you don't have access to it
 </ResponseField>
 
+## Response Fields
+
+Counts are returned as strings.
+
+<ResponseField name="bounce_count" type="string">
+  Sends in the date range that bounced, for any reason.
+</ResponseField>
+
+<ResponseField name="sender_bounce_count" type="string">
+  The subset of `bounce_count` caused by the **sending** mailbox rather than the recipient address, counted for leads categorised as Sender Originated Bounce. Always less than or equal to `bounce_count`.
+</ResponseField>
+
 <ResponseExample>
 
 ```json 200 - Success
 {
-  "ok": true,
-  "data": []
+  "id": 123,
+  "user_id": 4567,
+  "created_at": "2026-09-01T10:15:00.000Z",
+  "status": "ACTIVE",
+  "name": "Q3 Outbound",
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-30",
+  "total_count": "1300",
+  "sent_count": "1240",
+  "skipped_count": "12",
+  "open_count": "372",
+  "click_count": "89",
+  "reply_count": "23",
+  "bounce_count": "18",
+  "sender_bounce_count": "3",
+  "failed_count": "2",
+  "stopped_count": "0",
+  "unsubscribed_count": "4",
+  "ln_connection_req_pending_count": "0",
+  "ln_connection_req_accepted_count": "0",
+  "ln_connection_req_skipped_sent_msg_count": "0",
+  "positive_reply_count": "9"
 }
 ```
 
