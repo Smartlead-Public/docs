@@ -1,0 +1,93 @@
+---
+title: "Associate Untracked Reply to Lead"
+api: "POST https://server.smartlead.ai/api/v1/master-inbox/untracked-replies/associate-to-lead"
+description: "Link an untracked reply to a campaign lead so it shows as that lead's reply in the Master Inbox"
+---
+
+<Note>
+Get `untrackedReplyId` from [Get Untracked Replies](/api-reference/inbox/get-untracked), and `leadMapId` (the lead's campaign mapping ID) from the campaign's leads. Once linked, the untracked reply is processed as the lead's reply and removed from untracked replies.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="emailCampaignId" type="number" required>
+  Campaign ID (minimum: 1)
+</ParamField>
+
+<ParamField body="leadMapId" type="number" required>
+  The lead's campaign mapping ID in that campaign (minimum: 1)
+</ParamField>
+
+<ParamField body="untrackedReplyId" type="string" required>
+  Untracked reply ID
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/untracked-replies/associate-to-lead?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"emailCampaignId": 123, "leadMapId": 987654, "untrackedReplyId": "3f1c2d4e-5a6b-7c8d-9e0f-112233445566"}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/master-inbox/untracked-replies/associate-to-lead",
+    params={"api_key": "YOUR_API_KEY"},
+    json={
+        "emailCampaignId": 123,
+        "leadMapId": 987654,
+        "untrackedReplyId": "3f1c2d4e-5a6b-7c8d-9e0f-112233445566"
+    }
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "sucess": true,
+  "message": "Untracked reply associated to lead successfully",
+  "data": {
+    "leadMapId": 987654,
+    "swMessageId": "<abc123@mail.yourdomain.com>"
+  }
+}
+```
+
+```json 404 - Campaign not found
+{
+  "error": "Campaign not found - Invalid emailCampaignId."
+}
+```
+
+```json 404 - Lead not in campaign
+{
+  "error": "Lead not found in campaign - Invalid leadMapId."
+}
+```
+
+```json 404 - Reply not found
+{
+  "error": "Untracked reply not found - Invalid untrackedReplyId."
+}
+```
+
+</ResponseExample>
+
+<Note>
+The success response spells the flag `sucess`.
+</Note>

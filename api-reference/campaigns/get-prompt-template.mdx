@@ -1,0 +1,85 @@
+---
+title: "Get Campaign AI Prompt Template"
+api: "GET https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/prompt-template"
+description: "Fetch the AI reply-categorisation prompt and lead categories configured on a campaign"
+---
+
+<Note>
+Use this to check whether a campaign already has an AI prompt: `data.template` is `null` when none is configured.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/campaigns/123/prompt-template?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://server.smartlead.ai/api/v1/campaigns/123/prompt-template",
+    params={"api_key": "YOUR_API_KEY"}
+)
+template = response.json()["data"]["template"]
+print("Has AI prompt" if template else "No AI prompt")
+```
+
+</RequestExample>
+
+## Response
+
+<ResponseField name="data.template" type="object | null">
+  The campaign's latest prompt template, or `null` when none is configured
+  <Expandable title="properties">
+    <ResponseField name="id" type="number">Template ID (use it to update the template)</ResponseField>
+    <ResponseField name="categories" type="number[]">Lead category IDs the AI can assign</ResponseField>
+    <ResponseField name="prompt_content" type="string">The categorisation prompt</ResponseField>
+    <ResponseField name="is_active" type="boolean">Whether the template is active</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "data": {
+    "template": {
+      "id": 789,
+      "categories": [1, 2, 3, 6],
+      "prompt_content": "Categorise the reply into one of the following categories...",
+      "is_active": true
+    }
+  }
+}
+```
+
+```json 200 - No template
+{
+  "success": true,
+  "data": {
+    "template": null
+  }
+}
+```
+
+```json 404
+{
+  "error": "Campaign not found - Invalid campaign_id."
+}
+```
+
+</ResponseExample>

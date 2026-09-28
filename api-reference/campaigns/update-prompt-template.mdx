@@ -1,0 +1,87 @@
+---
+title: "Update Campaign AI Prompt Template"
+api: "PATCH https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/prompt-template/{template_id}"
+description: "Update the AI reply-categorisation prompt, lead categories or active state of a campaign's template"
+---
+
+<Note>
+Send at least one field. Only the fields you send are changed. Get `template_id` from [Get Campaign AI Prompt Template](/api-reference/campaigns/get-prompt-template).
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField path="template_id" type="number" required>
+  Prompt template ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="prompt_content" type="string">
+  The categorisation prompt (at least 1 character)
+</ParamField>
+
+<ParamField body="categories" type="number[]">
+  Lead category IDs the AI can assign to replies (replaces the current list)
+</ParamField>
+
+<ParamField body="is_active" type="boolean">
+  Whether the template is active
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X PATCH "https://server.smartlead.ai/api/v1/campaigns/123/prompt-template/789?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"categories": [1, 2, 3, 6, 7]}'
+```
+
+```python Python
+import requests
+
+response = requests.patch(
+    "https://server.smartlead.ai/api/v1/campaigns/123/prompt-template/789",
+    params={"api_key": "YOUR_API_KEY"},
+    json={"categories": [1, 2, 3, 6, 7]}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "success": true,
+  "data": {
+    "id": 789
+  }
+}
+```
+
+```json 404 - Campaign not found
+{
+  "error": "Campaign not found - Invalid campaign_id."
+}
+```
+
+```json 404 - Template not found
+{
+  "error": "Prompt template not found - Invalid template_id."
+}
+```
+
+</ResponseExample>

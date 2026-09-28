@@ -1,0 +1,72 @@
+---
+title: "Update Spintax Distribution Mode"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/spintax-distribution-mode"
+description: "Set how spintax variations are distributed across a campaign's leads (incremental or random)"
+---
+
+<Note>
+Only campaigns in `DRAFTED` status can be changed. Setting the mode also re-applies it to the campaign's existing leads.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="campaignId" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField body="spintaxDistributionMode" type="number" required>
+  Spintax distribution mode. Valid values:
+  - `1` - Incremental
+  - `2` - Random
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/spintax-distribution-mode?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"campaignId": 123, "spintaxDistributionMode": 2}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/campaigns/spintax-distribution-mode",
+    params={"api_key": "YOUR_API_KEY"},
+    json={"campaignId": 123, "spintaxDistributionMode": 2}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true
+}
+```
+
+```json 400 - Campaign not drafted
+{
+  "error": "Campaign is not in draft mode."
+}
+```
+
+```json 404 - Campaign not found
+{
+  "error": "Campaign not found - Invalid campaign_id."
+}
+```
+
+</ResponseExample>

@@ -1,0 +1,204 @@
+---
+title: "Search Campaign Leads"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaignId}/leads/filter"
+description: "Search and filter a campaign's leads by name/email text, status, category, sequence and more"
+---
+
+<Note>
+Results are ordered by lead map ID (ascending) and paginated with a cursor. To fetch the next page, send the `lastSeenEclmId` from the previous response as `lastSeenLeadId`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaignId" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+All fields are optional.
+
+<ParamField body="searchText" type="string">
+  Text search on the lead's email, first name and last name. The text is split on spaces, and every word must match (case-insensitive, partial match) at least one of those fields. For example, `"Doe John"` matches first name John and last name Doe.
+</ParamField>
+
+<ParamField body="limit" type="number" default="25">
+  Number of leads to return (minimum: 1, maximum: 100)
+</ParamField>
+
+<ParamField body="lastSeenLeadId" type="number">
+  Cursor: the `lastSeenEclmId` from the previous page
+</ParamField>
+
+<ParamField body="lastSeenReplyTime" type="string">
+  ISO date. Second half of the cursor, used with `lastSeenLeadId` when `fieldSet` is `active_table` and `statusFilter` is `replied` (those results are sorted by latest reply time)
+</ParamField>
+
+<ParamField body="leadStatuses" type="string[]">
+  Lead statuses. Valid values: `STARTED`, `INPROGRESS`, `COMPLETED`, `STOPPED`, `PAUSED`, `BLOCKED`
+</ParamField>
+
+<ParamField body="emailStatuses" type="string[]">
+  Email statuses. Valid values: `is_opened`, `is_clicked`, `is_bounced`, `is_replied`, `is_unsubscribed`, `is_accepted`, `not_replied`, `is_sender_bounced`, `got_reply`
+</ParamField>
+
+<ParamField body="leadCategoryIds" type="number[]">
+  Lead category IDs. Include `-1` to also match leads with no category.
+</ParamField>
+
+<ParamField body="leadCategoryIsNull" type="boolean">
+  Only leads with no lead category
+</ParamField>
+
+<ParamField body="emailAccountIds" type="number[]">
+  Email account IDs the leads are assigned to
+</ParamField>
+
+<ParamField body="espDomainTypes" type="number[]">
+  ESP domain types (integers 0–2)
+</ParamField>
+
+<ParamField body="segTypes" type="number[]">
+  Segment types (integers 0–10)
+</ParamField>
+
+<ParamField body="sequenceNumbers" type="number[]">
+  Sequence step numbers (1–999)
+</ParamField>
+
+<ParamField body="sequenceIds" type="number[]">
+  Sequence IDs
+</ParamField>
+
+<ParamField body="seqVariantIds" type="number[]">
+  Sequence variant IDs
+</ParamField>
+
+<ParamField body="seqScheduleType" type="string">
+  `MANUAL` or `AUTO`
+</ParamField>
+
+<ParamField body="statusFilter" type="string">
+  Status tab, matching the keys returned by `GET /campaigns/{campaign_id}/lead-status-summary`: `all`, `active`, `replied`, `failed`, `scheduled`, `manual_followups`, `completed`, `paused`
+</ParamField>
+
+<ParamField body="fieldSet" type="string" default="drafted_table">
+  Fields returned per lead: `drafted_table` (compact) or `active_table` (full, including category, stats and `mappingExists`)
+</ParamField>
+
+<ParamField body="deletedEmailAddresses" type="string[]">
+  Email addresses (max 320 characters each)
+</ParamField>
+
+<ParamField body="filterLeadsForManualCompletion" type="boolean">
+  Filter leads for manual completion
+</ParamField>
+
+<ParamField body="filterManualSeqIds" type="number[]">
+  Manual sequence IDs, used with `filterLeadsForManualCompletion`
+</ParamField>
+
+<ParamField body="includeSenderBounce" type="boolean">
+  Include sender-bounced leads
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/leads/filter?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"searchText": "john", "limit": 25}'
+```
+
+```python Python
+import requests
+
+def search_campaign_leads(campaign_id, text):
+    leads, cursor = [], None
+    while True:
+        body = {"searchText": text, "limit": 100}
+        if cursor:
+            body["lastSeenLeadId"] = cursor
+        data = requests.post(
+            f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/leads/filter",
+            params={"api_key": "YOUR_API_KEY"},
+            json=body
+        ).json()
+        leads.extend(data["leads"])
+        if len(data["leads"]) < 100:
+            return leads
+        cursor = data["lastSeenEclmId"]
+
+print(search_campaign_leads(123, "john"))
+```
+
+</RequestExample>
+
+## Response
+
+<ResponseField name="leads" type="array">
+  Matching leads. With `fieldSet: "drafted_table"` each item has `id` (lead map ID), `current_seq_num`, `status`, `email_account_id`, `spintax_modulo_index`, `email_lead` (`id`, `email`, `first_name`, `last_name`, `company_name`, `phone_number`, `company_url`, `website`, `linkedin_profile`, `location`, `custom_fields`, `esp_domain_type`) and `email_account` (`username`, or `null`).
+
+  With `fieldSet: "active_table"` each item also has `next_timestamp_to_reach`, `last_sent_time`, `latest_reply_time`, `email_campaign_seq_id`, `lead_category_id`, `lead_category` (`id`, `name`, or `null`), `latest_email_stats`, `latest_reply_stats`, `matched_status_stats`. `email_lead` also includes `seg_type`, and `email_account` also includes `mappingExists`: the list of `{ id }` mappings of that email account to this campaign (empty when the account is no longer attached to the campaign).
+</ResponseField>
+
+<ResponseField name="lastSeenEclmId" type="number">
+  Lead map ID of the last lead in `leads`. Pass it as `lastSeenLeadId` for the next page.
+</ResponseField>
+
+<ResponseField name="lastSeenReplyTime" type="string">
+  `latest_reply_time` of the last lead (only set with `active_table`)
+</ResponseField>
+
+<ResponseField name="count" type="number">
+  Total number of leads matching the filters
+</ResponseField>
+
+<ResponseExample>
+
+```json 200
+{
+  "leads": [
+    {
+      "id": 987654,
+      "current_seq_num": 1,
+      "status": "INPROGRESS",
+      "email_account_id": 321,
+      "spintax_modulo_index": 0,
+      "email_lead": {
+        "id": 55501,
+        "email": "john.doe@acme.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "company_name": "Acme",
+        "phone_number": null,
+        "company_url": "acme.com",
+        "website": "https://acme.com",
+        "linkedin_profile": null,
+        "location": null,
+        "custom_fields": {},
+        "esp_domain_type": 1
+      },
+      "email_account": {
+        "username": "sender@yourdomain.com"
+      }
+    }
+  ],
+  "lastSeenEclmId": 987654,
+  "count": 1
+}
+```
+
+```json 500
+{
+  "message": "Error fetching campaign leads with multi-select filters"
+}
+```
+
+</ResponseExample>

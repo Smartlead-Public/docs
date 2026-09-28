@@ -50,6 +50,22 @@ Email warmup helps establish sender reputation by gradually increasing daily ema
   Whether to enable gradual rampup of warmup volume
 </ParamField>
 
+<ParamField body="warmup_min_count" type="number">
+  Minimum warmup emails per day (integer, minimum: 1, maximum: 50). Cannot exceed the resolved `warmup_max_count`. When omitted, it is set to `warmup_max_count - 5` (or `warmup_max_count` if that is 5 or less). Applied only when `warmup_enabled` is `true`.
+</ParamField>
+
+<ParamField body="warmup_max_count" type="number">
+  Maximum warmup emails per day (integer, minimum: 1, maximum: 50). Cannot exceed the daily warmup cap set by `total_warmup_per_day`. When omitted, it is set to that cap. Applied only when `warmup_enabled` is `true`.
+</ParamField>
+
+<ParamField body="send_warmups_only_on_weekdays" type="boolean">
+  Send warmup emails only on weekdays. When omitted, the account's current value is kept. Applied only when `warmup_enabled` is `true`.
+</ParamField>
+
+<ParamField body="use_custom_domain" type="boolean">
+  Warm up the account's custom domain tracking link. When omitted, the account's current value is kept. Applied only when `warmup_enabled` is `true`.
+</ParamField>
+
 <RequestExample>
 
 ```bash cURL

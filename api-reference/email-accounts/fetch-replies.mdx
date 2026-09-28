@@ -1,0 +1,66 @@
+---
+title: "Fetch Replies Now"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/fetch-account-reply"
+description: "Queue an immediate reply fetch for all of your connected email accounts"
+---
+
+<Note>
+Queues every email account with a working IMAP connection (`is_imap_success`) for an immediate reply fetch. The response returns as soon as the accounts are queued. A new fetch cannot start while one started in the last 30 minutes is still in progress.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+No body is required. Send an empty JSON object.
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/fetch-account-reply?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/email-accounts/fetch-account-reply",
+    params={"api_key": "YOUR_API_KEY"},
+    json={}
+)
+print(response.status_code, response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "message": "25 Email account(s) are added to the queue to fetch live reply."
+}
+```
+
+```json 200 - No accounts
+{
+  "ok": true,
+  "message": "No email account found!"
+}
+```
+
+```json 406 - Fetch in progress
+{
+  "message": "Live fetch is already in-progress. Please try later."
+}
+```
+
+</ResponseExample>

@@ -1,0 +1,74 @@
+---
+title: "Reconnect Failed Email Accounts"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/reconnect-failed-email-accounts"
+description: "Queue a reconnect of all email accounts whose SMTP or IMAP connection has failed"
+---
+
+<Note>
+Can be used up to 3 times a day, with at least 30 minutes between requests. This limit is shared with the bulk reconnect in the app. When reconnection finishes, a results email is sent to your account email.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+No body is required. Send an empty JSON object.
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/reconnect-failed-email-accounts?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/email-accounts/reconnect-failed-email-accounts",
+    params={"api_key": "YOUR_API_KEY"},
+    json={}
+)
+print(response.status_code, response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "message": "Email account(s) added to the queue to reconnect. We will send you an email once completed."
+}
+```
+
+```json 200 - Nothing to reconnect
+{
+  "ok": true,
+  "message": "No failed email account found!"
+}
+```
+
+```json 406 - Daily limit reached
+{
+  "ok": true,
+  "message": "Bulk reconnect cannot be consumed more than 3 times a day."
+}
+```
+
+```json 406 - Too soon
+{
+  "ok": true,
+  "message": "You need to wait atleast 30 minutes before requesting a bulk reconnect, again."
+}
+```
+
+</ResponseExample>

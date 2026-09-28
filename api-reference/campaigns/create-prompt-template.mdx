@@ -1,0 +1,84 @@
+---
+title: "Create Campaign AI Prompt Template"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/prompt-template"
+description: "Add an AI reply-categorisation prompt and lead categories to a campaign"
+---
+
+<Note>
+The new template is created active (`is_active: true`). To change an existing template, use [Update Campaign AI Prompt Template](/api-reference/campaigns/update-prompt-template).
+</Note>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="prompt_content" type="string" required>
+  The categorisation prompt (at least 1 character)
+</ParamField>
+
+<ParamField body="categories" type="number[]" required>
+  Lead category IDs the AI can assign to replies. Get IDs from [Get Lead Categories](/api-reference/leads/categories).
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/prompt-template?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt_content": "Categorise the reply into one of the following categories...",
+    "categories": [1, 2, 3, 6]
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/campaigns/123/prompt-template",
+    params={"api_key": "YOUR_API_KEY"},
+    json={
+        "prompt_content": "Categorise the reply into one of the following categories...",
+        "categories": [1, 2, 3, 6]
+    }
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 201
+{
+  "success": true,
+  "data": {
+    "template": {
+      "id": 789,
+      "categories": [1, 2, 3, 6],
+      "prompt_content": "Categorise the reply into one of the following categories...",
+      "is_active": true
+    }
+  }
+}
+```
+
+```json 404
+{
+  "error": "Campaign not found - Invalid campaign_id."
+}
+```
+
+</ResponseExample>

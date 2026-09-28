@@ -1,0 +1,79 @@
+---
+title: "Verify Warmup Unblock OTP"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/{account_id}/verify-otp"
+description: "Submit the warmup unblock OTP to unblock and re-activate warmup for an email account"
+---
+
+<Note>
+On a correct OTP, the account's warmup is unblocked and set to `ACTIVE`. Request an OTP first with [Send Warmup Unblock OTP](/api-reference/email-accounts/send-warmup-unblock-otp).
+</Note>
+
+## Path Parameters
+
+<ParamField path="account_id" type="number" required>
+  Email account ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="otp" type="string" required>
+  The OTP from the unblock email
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/101/verify-otp?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"otp": "123456"}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/email-accounts/101/verify-otp",
+    params={"api_key": "YOUR_API_KEY"},
+    json={"otp": "123456"}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "data": "OTP verification completed successfully; your warmup account is now unblocked."
+}
+```
+
+```json 500 - Wrong OTP
+{
+  "message": "The OTP entered is incorrect. Please attempt again."
+}
+```
+
+```json 500 - No valid OTP
+{
+  "message": "No valid OTP exists for this email account."
+}
+```
+
+```json 500 - Account not found
+{
+  "message": "Invalid email account id!"
+}
+```
+
+</ResponseExample>

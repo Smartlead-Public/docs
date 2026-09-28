@@ -86,7 +86,13 @@
         "api-reference/campaigns/forward-email",
         "api-reference/campaigns/reply-email-thread",
         "api-reference/campaigns/send-test-email",
-        "api-reference/campaigns/update-team-member"
+        "api-reference/campaigns/update-team-member",
+        "api-reference/campaigns/update-folder",
+        "api-reference/campaigns/assign-client",
+        "api-reference/campaigns/update-spintax-distribution",
+        "api-reference/campaigns/get-prompt-template",
+        "api-reference/campaigns/create-prompt-template",
+        "api-reference/campaigns/update-prompt-template"
       ]
     },
     {
@@ -106,7 +112,8 @@
         "api-reference/campaigns/mark-lead-complete",
         "api-reference/campaigns/unsubscribe-lead",
         "api-reference/campaigns/delete-lead",
-        "api-reference/campaigns/export-leads"
+        "api-reference/campaigns/export-leads",
+        "api-reference/campaigns/search-leads"
       ]
     },
     {
@@ -148,7 +155,9 @@
         "api-reference/leads/unsubscribe",
         "api-reference/leads/categories",
         "api-reference/leads/activities",
-        "api-reference/leads/export"
+        "api-reference/leads/export",
+        "api-reference/leads/campaign-overview",
+        "api-reference/leads/sequence-details"
       ]
     },
     {
@@ -201,7 +210,12 @@
         "api-reference/email-accounts/warmup-settings",
         "api-reference/email-accounts/warmup-stats",
         "api-reference/email-accounts/suspend",
-        "api-reference/email-accounts/unsuspend"
+        "api-reference/email-accounts/unsuspend",
+        "api-reference/email-accounts/bulk-update-config",
+        "api-reference/email-accounts/reconnect-failed",
+        "api-reference/email-accounts/fetch-replies",
+        "api-reference/email-accounts/send-warmup-unblock-otp",
+        "api-reference/email-accounts/verify-warmup-unblock-otp"
       ]
     },
     {
@@ -242,7 +256,10 @@
         "api-reference/inbox/block-domains",
         "api-reference/inbox/resume-lead",
         "api-reference/inbox/set-reminder",
-        "api-reference/inbox/push-to-subsequence"
+        "api-reference/inbox/push-to-subsequence",
+        "api-reference/inbox/create-saved-view",
+        "api-reference/inbox/ignore-reply",
+        "api-reference/inbox/associate-untracked-reply"
       ]
     },
     {
@@ -293,7 +310,8 @@
     {
       "group": "Smart Servers",
       "pages": [
-        "api-reference/smart-servers/assign-campaigns"
+        "api-reference/smart-servers/assign-campaigns",
+        "api-reference/smart-servers/unassign-campaign"
       ]
     },
     {
@@ -347,7 +365,10 @@
         "api-reference/clients/create",
         "api-reference/clients/get-all",
         "api-reference/clients/update",
-        "api-reference/clients/api-keys"
+        "api-reference/clients/api-keys",
+        "api-reference/clients/get-by-id",
+        "api-reference/clients/create-code-integration",
+        "api-reference/clients/update-code-integration"
       ]
     },
     {

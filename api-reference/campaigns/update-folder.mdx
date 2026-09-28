@@ -1,0 +1,78 @@
+---
+title: "Move Campaigns to Folder"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/update-folder"
+description: "Move one or more campaigns into a folder, or remove them from their folder"
+---
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="campaign_ids" type="number[]" required>
+  Campaign IDs to move (1–200 positive integers)
+</ParamField>
+
+<ParamField body="folder_id" type="number | null" required>
+  Target folder ID. Use `null` to remove the campaigns from their current folder.
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/update-folder?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"campaign_ids": [123, 124], "folder_id": 17412}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/campaigns/update-folder",
+    params={"api_key": "YOUR_API_KEY"},
+    json={"campaign_ids": [123, 124], "folder_id": 17412}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response
+
+<ResponseField name="requested" type="number">Number of campaign IDs sent</ResponseField>
+<ResponseField name="updated" type="number">Number of campaigns moved</ResponseField>
+<ResponseField name="updated_campaign_ids" type="number[]">Campaign IDs that were moved</ResponseField>
+<ResponseField name="not_found_campaign_ids" type="number[]">Campaign IDs that were not found in your account</ResponseField>
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "requested": 2,
+  "updated": 2,
+  "updated_campaign_ids": [123, 124],
+  "not_found_campaign_ids": []
+}
+```
+
+```json 404 - Folder not found
+{
+  "ok": false,
+  "error": "Folder not found - Invalid folder_id."
+}
+```
+
+```json 404 - No campaigns found
+{
+  "ok": false,
+  "error": "No accessible campaigns for the provided campaign_ids.",
+  "not_found_campaign_ids": [123, 124]
+}
+```
+
+</ResponseExample>
