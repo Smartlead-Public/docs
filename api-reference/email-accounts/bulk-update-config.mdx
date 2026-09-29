@@ -32,7 +32,7 @@ Only the fields you send in `updateData` are changed. IDs that are not email acc
   <Expandable title="Warmup settings">
     <ParamField body="status" type="string">Warmup status: `ACTIVE` or `INACTIVE`. Accounts whose warmup is blocked are set back to `INACTIVE` when `ACTIVE` is sent.</ParamField>
     <ParamField body="maxEmailPerDay" type="number">Warmup emails per day (1–250). When `warmupMinCount` / `warmupMaxCount` are not sent, they are set to `maxEmailPerDay - 5` (or `maxEmailPerDay` if that is 5 or less) and `maxEmailPerDay`.</ParamField>
-    <ParamField body="warmupMinCount" type="number">Minimum warmup emails per day (1–50)</ParamField>
+    <ParamField body="warmupMinCount" type="number">Minimum warmup emails per day (1–50). When `warmupMaxCount` is also sent, it can't be greater than `warmupMaxCount`.</ParamField>
     <ParamField body="warmupMaxCount" type="number">Maximum warmup emails per day (1–250)</ParamField>
     <ParamField body="replyRate" type="number">Warmup reply rate percentage (1–100)</ParamField>
     <ParamField body="isRampupEnabled" type="boolean">Enable warmup ramp-up</ParamField>
@@ -41,11 +41,10 @@ Only the fields you send in `updateData` are changed. IDs that are not email acc
     <ParamField body="autoAdjustWarmup" type="boolean">Automatically adjust warmup volume</ParamField>
     <ParamField body="useCustomDomain" type="boolean">Warm up the custom domain tracking link</ParamField>
     <ParamField body="warmupTagIdentifier" type="string">Warmup key ID (letters, numbers, `_` and `-` only)</ParamField>
-    <ParamField body="dailyReplyLimit" type="number">Daily warmup reply limit (8–80, and at least `dailySentLimit`)</ParamField>
-    <ParamField body="dailySentLimit" type="number" default="5">Only used to validate `dailyReplyLimit` (minimum: 1)</ParamField>
+    <ParamField body="dailyReplyLimit" type="number">Daily warmup reply limit (8–80)</ParamField>
   </Expandable>
   <Expandable title="Tags and client">
-    <ParamField body="tags" type="number[]">Tag IDs. Replaces each account's current tags with this list.</ParamField>
+    <ParamField body="tags" type="number[]">Tag IDs (at least one). Replaces each account's current tags with this list. To remove tags, use [Remove Tags from Email Accounts](/api-reference/email-account-tags/remove).</ParamField>
     <ParamField body="clientId" type="number">Client ID to assign the accounts to</ParamField>
   </Expandable>
 </ParamField>

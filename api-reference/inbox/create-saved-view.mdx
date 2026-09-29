@@ -21,7 +21,7 @@ With your own API key, the view is created in your account. With a client API ke
 </ParamField>
 
 <ParamField body="filters" type="object" required>
-  The view's filters (at most 40 keys). Use the same `filters` object as [Get Custom View Emails](/api-reference/inbox/get-views), for example `leadCategories`, `emailStatus`, `campaignId`, `campaignClientId`, `replyTimeBetween`.
+  The view's filters. Accepts exactly the same `filters` object as [Get Custom View Emails](/api-reference/inbox/get-views): `search`, `leadCategories`, `emailStatus`, `campaignId`, `emailAccountId`, `campaignTeamMemberId`, `campaignTagId`, `campaignClientId`, `replyTimeBetween`, `subSequenceId`. Any other key is rejected with `400`.
 </ParamField>
 
 <ParamField body="limitedAccess" type="boolean" default="true">
