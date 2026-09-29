@@ -213,7 +213,6 @@
         "api-reference/email-accounts/unsuspend",
         "api-reference/email-accounts/bulk-update-config",
         "api-reference/email-accounts/reconnect-failed",
-        "api-reference/email-accounts/fetch-replies",
         "api-reference/email-accounts/send-warmup-unblock-otp",
         "api-reference/email-accounts/verify-warmup-unblock-otp"
       ]
@@ -367,8 +366,7 @@
         "api-reference/clients/update",
         "api-reference/clients/api-keys",
         "api-reference/clients/get-by-id",
-        "api-reference/clients/create-code-integration",
-        "api-reference/clients/update-code-integration"
+        "api-reference/clients/create-code-integration"
       ]
     },
     {
