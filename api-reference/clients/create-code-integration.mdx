@@ -1,0 +1,79 @@
+---
+title: "Add Client Code Snippet"
+api: "POST https://server.smartlead.ai/api/v1/client/{client_id}/code-integrations"
+description: "Add a code snippet (whitelabel code integration) to a client"
+---
+
+<Note>
+Code snippets are added to the client's whitelabel app. List a client's snippets with [Get Client by ID](/api-reference/clients/get-by-id) and `includeCodeIntegrations=true`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="client_id" type="number" required>
+  Client ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key (client API keys are not allowed)
+</ParamField>
+
+## Request Body
+
+<ParamField body="snippet_name" type="string" required>
+  Snippet name (1–255 characters)
+</ParamField>
+
+<ParamField body="snippet_code" type="string" required>
+  Snippet code (at least 1 character)
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/client/456/code-integrations?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"snippet_name": "LinkedIn Outreach", "snippet_code": "<script>/* ... */</script>"}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/client/456/code-integrations",
+    params={"api_key": "YOUR_API_KEY"},
+    json={"snippet_name": "LinkedIn Outreach", "snippet_code": "<script>/* ... */</script>"}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 201
+{
+  "success": true,
+  "data": {
+    "id": 12
+  }
+}
+```
+
+```json 404
+{
+  "error": "Client not found - Invalid client_id."
+}
+```
+
+```json 401 - Client API key
+{
+  "message": "Not authorized"
+}
+```
+
+</ResponseExample>

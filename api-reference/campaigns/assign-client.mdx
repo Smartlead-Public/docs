@@ -1,0 +1,88 @@
+---
+title: "Assign Client to Campaign"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/assign-client"
+description: "Assign a campaign to a client (or remove its client), optionally applying the client's DNC list"
+---
+
+<Note>
+Assigning a client also:
+- replaces the campaign's SmartServer assignments with the new client's SmartServers
+- sets the client on the campaign and its subsequences
+- shares the campaign's leads with the new client
+
+Sub-sequence campaigns cannot be assigned directly. Assign the parent campaign instead.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="campaignId" type="number" required>
+  Campaign ID
+</ParamField>
+
+<ParamField body="clientId" type="number | null">
+  Client ID to assign. Use `null` to remove the campaign's client.
+</ParamField>
+
+<ParamField body="applyClientDNC" type="boolean | null">
+  When `true` and `clientId` is set, the client's DNC (block list) is applied to the campaign
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/assign-client?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"campaignId": 123, "clientId": 456, "applyClientDNC": true}'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/campaigns/assign-client",
+    params={"api_key": "YOUR_API_KEY"},
+    json={"campaignId": 123, "clientId": 456, "applyClientDNC": True}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "message": "success",
+  "client": {
+    "id": 456,
+    "email": "client@example.com"
+  }
+}
+```
+
+```json 200 - Client removed (clientId null)
+{
+  "ok": true,
+  "message": "success",
+  "client": null
+}
+```
+
+```json 500 - Error
+{
+  "message": "Invalid client Id!"
+}
+```
+
+</ResponseExample>
+
+Possible `message` values on error: `Invalid campaign Id!`, `Cannot assign client to a sub sequence!`, `Cannot assign the same client to the campaign`, `Invalid client Id!`.

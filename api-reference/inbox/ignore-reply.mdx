@@ -1,0 +1,66 @@
+---
+title: "Ignore Reply"
+api: "PATCH https://server.smartlead.ai/api/v1/master-inbox/ignore-reply"
+description: "Mark a reply as ignored (not counted as a reply), or count it again"
+---
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="id" type="string" required>
+  The reply's email stats ID (UUID), for example the `stats_id` from [Get Lead Message History](/api-reference/campaigns/get-lead-history)
+</ParamField>
+
+<ParamField body="ignore_reply" type="boolean" required>
+  `true` to ignore the reply, `false` to count it again
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X PATCH "https://server.smartlead.ai/api/v1/master-inbox/ignore-reply?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"id": "a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6", "ignore_reply": true}'
+```
+
+```python Python
+import requests
+
+response = requests.patch(
+    "https://server.smartlead.ai/api/v1/master-inbox/ignore-reply",
+    params={"api_key": "YOUR_API_KEY"},
+    json={"id": "a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6", "ignore_reply": True}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "message": "Reply ignored successfully",
+  "data": {
+    "success": true,
+    "updated": 1
+  }
+}
+```
+
+```json 400 - Not found
+{
+  "ok": false,
+  "message": "Email stat not found or access denied"
+}
+```
+
+</ResponseExample>

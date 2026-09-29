@@ -1,0 +1,58 @@
+---
+title: "Send Warmup Unblock OTP"
+api: "POST https://server.smartlead.ai/api/v1/email-accounts/{account_id}/send-otp-email"
+description: "Email a one-time password to a warmup-blocked email account so its warmup can be unblocked"
+---
+
+<Note>
+The OTP is emailed to the account's own address (`from_email`). It is valid for 10 minutes and can be used once. Submit it with [Verify Warmup Unblock OTP](/api-reference/email-accounts/verify-warmup-unblock-otp).
+</Note>
+
+## Path Parameters
+
+<ParamField path="account_id" type="number" required>
+  Email account ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/email-accounts/101/send-otp-email?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/email-accounts/101/send-otp-email",
+    params={"api_key": "YOUR_API_KEY"}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "data": "OTP has been sent successfully."
+}
+```
+
+```json 500 - Account not found
+{
+  "message": "Invalid email account id!"
+}
+```
+
+</ResponseExample>

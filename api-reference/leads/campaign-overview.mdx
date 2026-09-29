@@ -1,0 +1,109 @@
+---
+title: "Get Lead Campaign Overview"
+api: "GET https://server.smartlead.ai/api/v1/leads/{leadId}/campaign-overview"
+description: "Get a lead's details and every campaign it is in, with its status and current sequence step in each"
+---
+
+<Note>
+Get `leadId` from [Get Lead by Email](/api-reference/leads/get-by-email). Each item in `email_campaign_leads_mappings` is one campaign the lead is in. Its `id` is the lead map ID used by [Get Lead Sequence Details](/api-reference/leads/sequence-details). For inactive mappings (`is_active: false`), `status`, `revenue`, `current_seq_num`, `next_timestamp_to_reach`, `email_campaign_id` and `email_account_id` are returned as `"XXX"`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="leadId" type="number" required>
+  Lead ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key (client API keys are not allowed)
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl "https://server.smartlead.ai/api/v1/leads/55501/campaign-overview?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://server.smartlead.ai/api/v1/leads/55501/campaign-overview",
+    params={"api_key": "YOUR_API_KEY"}
+)
+for mapping in response.json()["data"]["email_campaign_leads_mappings"]:
+    print(mapping["email_campaign"]["name"], mapping["status"], mapping["current_seq_num"])
+```
+
+</RequestExample>
+
+## Response
+
+<ResponseField name="data" type="object">
+  The lead (`id`, `email`, `first_name`, `last_name`, `phone_number`, `company_name`, `website`, `company_url`, `location`, `custom_fields`, `linkedin_profile`, `esp_domain_type`) and `email_campaign_leads_mappings`.
+  <Expandable title="email_campaign_leads_mappings items">
+    <ResponseField name="id" type="string">Lead map ID</ResponseField>
+    <ResponseField name="status" type="string">Lead status in the campaign</ResponseField>
+    <ResponseField name="lead_category_id" type="number | null">Lead category ID</ResponseField>
+    <ResponseField name="revenue" type="string | null">Revenue</ResponseField>
+    <ResponseField name="current_seq_num" type="string">Current sequence step number</ResponseField>
+    <ResponseField name="next_timestamp_to_reach" type="string | null">Next scheduled send time</ResponseField>
+    <ResponseField name="email_campaign_id" type="string">Campaign ID</ResponseField>
+    <ResponseField name="email_account_id" type="string | null">Assigned email account ID</ResponseField>
+    <ResponseField name="is_active" type="boolean">Whether the mapping is active</ResponseField>
+    <ResponseField name="email_campaign" type="object">`id` (string), `name`, `status`, `sequence_count` (number of sequence steps)</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "message": "Campaign lead overview fetched successfully",
+  "data": {
+    "id": 55501,
+    "email": "john.doe@acme.com",
+    "last_name": "Doe",
+    "first_name": "John",
+    "phone_number": null,
+    "company_name": "Acme",
+    "website": "https://acme.com",
+    "company_url": "acme.com",
+    "location": null,
+    "custom_fields": {},
+    "linkedin_profile": null,
+    "esp_domain_type": 1,
+    "email_campaign_leads_mappings": [
+      {
+        "id": "987654",
+        "status": "INPROGRESS",
+        "lead_category_id": null,
+        "revenue": null,
+        "current_seq_num": "2",
+        "next_timestamp_to_reach": "2026-09-30T09:00:00+00:00",
+        "email_campaign_id": "123",
+        "email_account_id": "321",
+        "is_active": true,
+        "email_campaign": {
+          "id": "123",
+          "name": "Q4 Outreach",
+          "status": "ACTIVE",
+          "sequence_count": 3
+        }
+      }
+    ]
+  }
+}
+```
+
+```json 500
+{
+  "ok": false,
+  "message": "Error fetching campaign lead overview"
+}
+```
+
+</ResponseExample>

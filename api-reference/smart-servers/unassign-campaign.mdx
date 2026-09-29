@@ -1,0 +1,68 @@
+---
+title: "Unassign SmartServers from Campaign"
+api: "DELETE https://smartservers.smartlead.ai/api/v1/smart-server/mapping/campaign/{campaign_id}"
+description: "Remove SmartServer (dedicated IP) assignments from a campaign"
+---
+
+<Note>
+  **SmartServers API**: Dedicated IP infrastructure feature. Contact support@smartlead.ai for access.
+</Note>
+
+Without `server_id`, every SmartServer assigned to the campaign is removed and SmartServer auto-rotation is turned off for the campaign. With `server_id`, only that server is removed.
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="string" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="server_id" type="string">
+  Remove only this SmartServer from the campaign
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://smartservers.smartlead.ai/api/v1/smart-server/mapping/campaign/123?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.delete(
+    "https://smartservers.smartlead.ai/api/v1/smart-server/mapping/campaign/123",
+    params={"api_key": "YOUR_API_KEY"}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 200
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Smart server campaign mapping updated successfully"
+}
+```
+
+```json 404 - No assignment found
+{
+  "statusCode": 404,
+  "success": false,
+  "message": "Not Found",
+  "error": "Smart server campaign mapping not found"
+}
+```
+
+</ResponseExample>

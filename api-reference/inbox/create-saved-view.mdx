@@ -1,0 +1,90 @@
+---
+title: "Create Saved View"
+api: "POST https://server.smartlead.ai/api/v1/master-inbox/saved-views"
+description: "Create a saved Master Inbox view (a named set of filters)"
+---
+
+<Note>
+With your own API key, the view is created in your account. With a client API key (see [Client API Keys](/api-reference/clients/api-keys)), the view is created in that client's account. This requires the client to have the `full_access` permission.
+</Note>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key, or a client API key
+</ParamField>
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+  View name (1–255 characters)
+</ParamField>
+
+<ParamField body="filters" type="object" required>
+  The view's filters. Accepts exactly the same `filters` object as [Get Custom View Emails](/api-reference/inbox/get-views): `search`, `leadCategories`, `emailStatus`, `campaignId`, `emailAccountId`, `campaignTeamMemberId`, `campaignTagId`, `campaignClientId`, `replyTimeBetween`, `subSequenceId`. Any other key is rejected with `400`.
+</ParamField>
+
+<ParamField body="limitedAccess" type="boolean" default="true">
+  Limited access flag stored on the view
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/master-inbox/saved-views?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Needs Followup",
+    "filters": {
+      "emailStatus": "Replied",
+      "leadCategories": { "categoryIdsIn": [1, 2] }
+    }
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://server.smartlead.ai/api/v1/master-inbox/saved-views",
+    params={"api_key": "CLIENT_API_KEY"},
+    json={
+        "name": "All Replies",
+        "filters": {"emailStatus": "Replied"}
+    }
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response Example
+
+<ResponseExample>
+
+```json 201
+{
+  "success": true,
+  "data": {
+    "id": 321,
+    "name": "Needs Followup",
+    "filters": {
+      "emailStatus": "Replied",
+      "leadCategories": { "categoryIdsIn": [1, 2] }
+    },
+    "limitedAccess": true,
+    "teamMemberId": null,
+    "clientId": null,
+    "createdAt": "2026-09-29T10:00:00.000Z",
+    "updatedAt": "2026-09-29T10:00:00.000Z"
+  }
+}
+```
+
+```json 403 - Client without full access
+{
+  "error": "Client does not have permission to modify saved views"
+}
+```
+
+</ResponseExample>

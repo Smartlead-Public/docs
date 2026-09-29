@@ -48,6 +48,10 @@ To update a client, include the `id` field in the request body along with the fi
   Array of permission strings
 </ParamField>
 
+<ParamField body="restrictedCategory" type="number[]">
+  Lead category IDs hidden from the client. The saved list is replaced with the value sent; omitting it clears the client's hidden categories (`[]`).
+</ParamField>
+
 <ParamField body="is_credit_assigned" type="boolean">
   Whether credits are assigned to this client
 </ParamField>

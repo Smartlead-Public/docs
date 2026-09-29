@@ -44,6 +44,10 @@ Creates a new client sub-account under your main SmartLead account. Clients are 
   Array of permission strings defining what the client can access. Controls feature visibility and access.
 </ParamField>
 
+<ParamField body="restrictedCategory" type="number[]">
+  Lead category IDs hidden from the client. Defaults to `[]` (no hidden categories).
+</ParamField>
+
 <ParamField body="is_credit_assigned" type="boolean">
   Whether email/lead credits are specifically assigned to this client
 </ParamField>
