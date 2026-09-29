@@ -5,6 +5,8 @@ description: "Search and filter a campaign's leads by name/email text, status, c
 ---
 
 <Note>
+Requires your own API key. Client API keys get `401`.
+
 Results are ordered by lead map ID (ascending) and paginated with a cursor. To fetch the next page, send the `lastSeenEclmId` from the previous response as `lastSeenLeadId`.
 </Note>
 
