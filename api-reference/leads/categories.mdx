@@ -5,7 +5,7 @@ description: "Retrieve all available lead categories including global and user-s
 ---
 
 <Note>
-Returns both global categories (available to all users) and categories you've created. Categories are used to organize and filter leads based on their engagement or status.
+Returns both global categories (available to all users) and custom categories you've created. Global categories are read-only; manage custom ones with [Create](/api-reference/leads/create-category), [Update](/api-reference/leads/update-category), and [Delete](/api-reference/leads/delete-category) Lead Category. Categories are used to organize and filter leads based on their engagement or status.
 </Note>
 
 ## Query Parameters
@@ -67,8 +67,8 @@ The response is an array of category objects, each containing:
   Category name (e.g., "Interested", "Not Interested", "Meeting Booked")
 </ResponseField>
 
-<ResponseField name="sentiment_type" type="string">
-  Sentiment classification of the category. Values: `positive`, `negative`, `neutral`
+<ResponseField name="sentiment_type" type="string | null">
+  Sentiment classification of the category. Values: `positive`, `negative`, or `null` (neutral)
 </ResponseField>
 
 <ResponseField name="created_at" type="timestamp">
@@ -114,7 +114,7 @@ The response is an array of category objects, each containing:
   {
     "id": 789,
     "name": "Follow Up Later",
-    "sentiment_type": "neutral",
+    "sentiment_type": null,
     "created_at": "2025-11-20T14:22:00.000Z"
 }
 ]
@@ -142,3 +142,6 @@ Use the category ID when updating a lead's category via the Update Lead Category
 
 - [Get Campaign Leads](/api-reference/leads/get-by-campaign) - Filter leads by category
 - [Get Lead by Email](/api-reference/leads/get-by-email) - View lead's assigned category
+- [Create Lead Category](/api-reference/leads/create-category) - Add a custom category
+- [Update Lead Category](/api-reference/leads/update-category) - Rename or recolour a custom category
+- [Delete Lead Category](/api-reference/leads/delete-category) - Remove a custom category
