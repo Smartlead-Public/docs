@@ -153,11 +153,19 @@
         "api-reference/leads/pause",
         "api-reference/leads/resume",
         "api-reference/leads/unsubscribe",
-        "api-reference/leads/categories",
         "api-reference/leads/activities",
         "api-reference/leads/export",
         "api-reference/leads/campaign-overview",
         "api-reference/leads/sequence-details"
+      ]
+    },
+    {
+      "group": "Lead Categories",
+      "pages": [
+        "api-reference/leads/categories",
+        "api-reference/leads/create-category",
+        "api-reference/leads/update-category",
+        "api-reference/leads/delete-category"
       ]
     },
     {

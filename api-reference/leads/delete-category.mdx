@@ -1,0 +1,138 @@
+---
+title: "Delete Lead Category"
+api: "DELETE https://server.smartlead.ai/api/v1/leads/categories/{category_id}"
+description: "Delete a custom lead category that is not assigned to any lead"
+---
+
+<Warning>
+A category can only be deleted when no lead in any campaign is assigned to it. If it is still in use, the request returns `409` and nothing is deleted. Global (system) categories can never be deleted.
+</Warning>
+
+## Path Parameters
+
+<ParamField path="category_id" type="number" required>
+  The ID of the custom category to delete
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://server.smartlead.ai/api/v1/leads/categories/789?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+category_id = 789
+
+response = requests.delete(
+    f"https://server.smartlead.ai/api/v1/leads/categories/{category_id}",
+    params={"api_key": API_KEY}
+)
+
+result = response.json()
+if result.get('ok'):
+    print(f"Category {category_id} deleted")
+elif response.status_code == 409:
+    print("Category is still assigned to leads - unassign it first")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const categoryId = 789;
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/leads/categories/${categoryId}?api_key=${API_KEY}`,
+  { method: 'DELETE' }
+);
+
+const result = await response.json();
+if (result.ok) {
+  console.log(`Category ${categoryId} deleted`);
+} else if (response.status === 409) {
+  console.log('Category is still assigned to leads - unassign it first');
+}
+```
+
+</RequestExample>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Category deleted successfully
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key, or the key belongs to a client account
+</ResponseField>
+
+<ResponseField name="403" type="Forbidden">
+  The category is a global (system) category and cannot be deleted
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  No custom category with this ID exists in your account
+</ResponseField>
+
+<ResponseField name="409" type="Conflict">
+  The category is assigned to one or more leads
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "ok": true,
+  "message": "Lead category deleted successfully"
+}
+```
+
+```json 409 - Category In Use
+{
+  "ok": false,
+  "message": "This category is assigned to some of the leads. Please unassign the category from those leads first and then delete it."
+}
+```
+
+```json 403 - Global Category
+{
+  "ok": false,
+  "message": "Default categories cannot be modified or deleted"
+}
+```
+
+```json 404 - Not Found
+{
+  "ok": false,
+  "message": "Lead category not found"
+}
+```
+
+</ResponseExample>
+
+## Usage Notes
+
+<Tip>
+To free a category for deletion, set `category_id` to `null` on each lead that uses it with [Update Lead Category in Campaign](/api-reference/campaigns/update-lead-category). This only removes the category from the lead; the category itself stays until you delete it.
+</Tip>
+
+<Info>
+Deleting a category also removes any webhook triggers and CRM category mappings configured for it.
+</Info>
+
+## Related Endpoints
+
+- [Get Lead Categories](/api-reference/leads/categories) - Find category IDs
+- [Create Lead Category](/api-reference/leads/create-category) - Add a custom category
+- [Update Lead Category](/api-reference/leads/update-category) - Rename or recolour a custom category

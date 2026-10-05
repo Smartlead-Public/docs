@@ -59,6 +59,10 @@ Pass your API key as a query parameter: `?api_key=YOUR_API_KEY`
 - GET /campaigns/{id}/leads - Get leads by campaign
 - PATCH /campaigns/{id}/leads/{lead_id}/status - Update lead status
 - GET /leads/by-email - Search lead by email
+- GET /leads/fetch-categories - List global and custom lead categories
+- POST /leads/categories - Create custom lead category
+- PATCH /leads/categories/{id} - Update custom lead category
+- DELETE /leads/categories/{id} - Delete custom lead category (only if not assigned to any lead)
 
 ### Webhooks
 - POST /webhooks - Create webhook
