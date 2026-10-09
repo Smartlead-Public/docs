@@ -80,6 +80,7 @@
         "api-reference/campaigns/add-email-accounts",
         "api-reference/campaigns/add-email-accounts-by-tag",
         "api-reference/campaigns/remove-email-accounts",
+        "api-reference/campaigns/reallocate-mailboxes",
         "api-reference/campaigns/add-tags",
         "api-reference/campaigns/remove-tags",
         "api-reference/campaigns/create-subsequence",
