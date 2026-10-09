@@ -31,10 +31,10 @@ When an email account is removed from a campaign, leads already assigned to it s
   Your SmartLead API key
 </ParamField>
 
-## Body Parameters
+## Body Parameters (optional)
 
 <ParamField body="from_email_account_ids" type="number[]">
-  Only move leads that are on these email accounts. 1 to 100 unique email account IDs. Every ID must be an account that is **no longer attached** to the campaign, otherwise the request fails with `400`.
+  **Optional.** Only move leads that are on these email accounts. 1 to 100 unique email account IDs. Every ID must be an account that is **no longer attached** to the campaign, otherwise the request fails with `400`.
 
   Omit this field (or send an empty body `{}`) to move leads off **all** removed mailboxes.
 
