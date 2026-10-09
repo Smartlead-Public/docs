@@ -1,0 +1,173 @@
+---
+title: "Reallocate Mailboxes"
+api: "POST https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/reallocate-mailboxes"
+description: "Move leads off mailboxes that were removed from a campaign onto the campaign's attached mailboxes"
+---
+
+<Note>
+This is the API equivalent of the **Reallocate Mailboxes** button in the app. Use it after [removing email accounts](/api-reference/campaigns/remove-email-accounts) from a campaign so their leads keep sending from a mailbox that is still attached.
+</Note>
+
+## Overview
+
+When an email account is removed from a campaign, leads already assigned to it stay on that account. This endpoint finds those leads (and leads with no mailbox assigned) and assigns each one to a randomly chosen mailbox that is currently attached to the campaign.
+
+**Behavior**:
+- Only moves leads whose mailbox is **not** attached to the campaign, or is empty
+- Leads with status `STARTED` are not moved
+- Each moved lead gets a random attached mailbox
+- Runs synchronously: the response is sent after all leads are moved
+- Safe to repeat: a second call returns `leads_reallocated: 0` once nothing is left to move
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="number" required>
+  The campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="from_email_account_ids" type="number[]">
+  Only move leads that are on these email accounts. 1 to 100 unique email account IDs. Every ID must be an account that is **no longer attached** to the campaign, otherwise the request fails with `400`.
+
+  Omit this field (or send an empty body `{}`) to move leads off **all** removed mailboxes.
+
+  Example: `[3703387, 3703397]`
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://server.smartlead.ai/api/v1/campaigns/123/reallocate-mailboxes?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from_email_account_ids": [3703387, 3703397]
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+campaign_id = 123
+
+response = requests.post(
+    f"https://server.smartlead.ai/api/v1/campaigns/{campaign_id}/reallocate-mailboxes",
+    params={"api_key": API_KEY},
+    json={"from_email_account_ids": [3703387, 3703397]}  # or {} for all removed mailboxes
+)
+
+result = response.json()
+if result.get('ok'):
+    print(f"Moved {result['leads_reallocated']} leads")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const campaignId = 123;
+
+const response = await fetch(
+  `https://server.smartlead.ai/api/v1/campaigns/${campaignId}/reallocate-mailboxes?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from_email_account_ids: [3703387, 3703397] }) // or {} for all removed mailboxes
+  }
+);
+
+const result = await response.json();
+if (result.ok) {
+  console.log(`Moved ${result.leads_reallocated} leads`);
+}
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="ok" type="boolean">
+  `true` when the request completed
+</ResponseField>
+
+<ResponseField name="leads_reallocated" type="number">
+  Number of leads moved to an attached mailbox. `0` when there was nothing to move.
+</ResponseField>
+
+<ResponseField name="to_email_account_ids" type="number[]">
+  All email accounts currently attached to the campaign, i.e. the pool leads were distributed across. A given account may not have received any leads.
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Leads reallocated (or nothing to reallocate)
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  The campaign has no email accounts attached, an ID in `from_email_account_ids` is still attached to the campaign, or the request failed validation (unknown body field, duplicate or non-integer IDs, more than 100 IDs)
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  Campaign not found or does not belong to your account
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Server error occurred. Please try again or contact support if the issue persists.
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "ok": true,
+  "leads_reallocated": 5,
+  "to_email_account_ids": [2568043]
+}
+```
+
+```json 400 - No Mailboxes Attached
+{
+  "error": "No email accounts are attached to this campaign."
+}
+```
+
+```json 400 - Mailbox Still Attached
+{
+  "error": "Email account(s) 2568043 still attached to this campaign. Only leads on mailboxes removed from the campaign can be reallocated."
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Campaign not found - Invalid campaign_id."
+}
+```
+
+```json 500 - Server Error
+{
+  "error": "Failed to reallocate mailboxes. Please try again later."
+}
+```
+
+</ResponseExample>
+
+<Warning>
+  Attach at least one replacement mailbox with [Add Email Accounts](/api-reference/campaigns/add-email-accounts) before calling this endpoint. Mailboxes that are disconnected but still attached to the campaign are not affected; remove them from the campaign first.
+</Warning>
+
+## Related Endpoints
+
+- [Get Campaign Email Accounts](/api-reference/campaigns/get-email-accounts) - See which mailboxes are attached
+- [Add Email Accounts](/api-reference/campaigns/add-email-accounts) - Attach replacement mailboxes
+- [Remove Email Accounts](/api-reference/campaigns/remove-email-accounts) - Detach mailboxes from the campaign
+- [Update Lead Email Account](/api-reference/campaigns/update-lead-email-account) - Move a single lead to a specific mailbox

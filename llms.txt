@@ -46,6 +46,7 @@ Pass your API key as a query parameter: `?api_key=YOUR_API_KEY`
 - POST /campaigns/{id}/schedule - Set sending schedule
 - POST /campaigns/{id}/sequences - Create email sequences
 - POST /campaigns/{id}/email-accounts - Link email accounts
+- POST /campaigns/{id}/reallocate-mailboxes - Move leads off removed mailboxes onto attached ones
 - POST /campaigns/{id}/leads - Import leads (max 400 per request)
 
 ### Email Accounts
