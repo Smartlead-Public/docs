@@ -375,7 +375,8 @@
         "api-reference/clients/update",
         "api-reference/clients/api-keys",
         "api-reference/clients/get-by-id",
-        "api-reference/clients/create-code-integration"
+        "api-reference/clients/create-code-integration",
+        "api-reference/clients/delete"
       ]
     },
     {

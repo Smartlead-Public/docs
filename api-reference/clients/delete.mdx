@@ -1,0 +1,127 @@
+---
+title: "Delete Client"
+api: "DELETE https://server.smartlead.ai/api/v1/client/{id}"
+description: "Permanently delete a client from your account"
+---
+
+<Warning>
+Deletion is permanent and cannot be undone. The client can no longer log in, **all of its API keys are revoked immediately**, and it is unlinked from any SmartServers, servers and infrastructure it was assigned to. Clients with no API keys are deleted the same way.
+</Warning>
+
+<Note>
+This endpoint is limited to **5 requests per minute** per account. Requests over the limit return `429`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="id" type="number" required>
+  ID of the client to delete. Must belong to your account.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key (client API keys are not allowed)
+</ParamField>
+
+<ParamField query="confirm_email" type="string" required>
+  Email address of the client you are deleting. It must match the email of the client with this `id` on your account (case-insensitive). This guards against deleting the wrong client: on a mismatch the request returns `400` and nothing is deleted.
+</ParamField>
+
+<ParamField query="downgradeClientAddOn" type="boolean" default="false">
+  Also reduce your paid client add-on subscription by one seat. Ignored for accounts with grandfathered whitelabel pricing. Rejected with `406` if it would take you below the clients included free in your plan.
+</ParamField>
+
+## Rate Limit
+
+| Limit | Scope | Window |
+|---|---|---|
+| 5 requests | Per account (all API keys of the account share it) | 60 seconds |
+
+- Every request counts, including ones rejected for invalid parameters.
+- Requests over the limit return `429` until the window resets; retry after 60 seconds.
+- Your account's general API rate limit still applies on top of this.
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://server.smartlead.ai/api/v1/client/456?api_key=YOUR_KEY&confirm_email=client@acme.com"
+```
+
+```bash cURL (with add-on downgrade)
+curl -X DELETE "https://server.smartlead.ai/api/v1/client/456?api_key=YOUR_KEY&confirm_email=client@acme.com&downgradeClientAddOn=true"
+```
+
+```python Python
+import requests
+
+response = requests.delete(
+    "https://server.smartlead.ai/api/v1/client/456",
+    params={"api_key": "YOUR_API_KEY", "confirm_email": "client@acme.com"}
+)
+print(response.json())
+```
+
+</RequestExample>
+
+## Response
+
+<ResponseField name="ok" type="boolean">
+  `true` when the client was deleted
+</ResponseField>
+
+<ResponseField name="clientId" type="number">
+  ID of the deleted client
+</ResponseField>
+
+<ResponseField name="apiKeysRevoked" type="number">
+  Number of the client's active API keys that were revoked (`0` if it had none)
+</ResponseField>
+
+<ResponseExample>
+
+```json 200
+{
+  "ok": true,
+  "clientId": 456,
+  "apiKeysRevoked": 1
+}
+```
+
+```json 400
+{
+  "message": "confirm_email does not match the client's email. Nothing was deleted."
+}
+```
+
+```json 401
+{
+  "message": "Not authorized"
+}
+```
+
+```json 403
+{
+  "message": "Invalid client id!"
+}
+```
+
+```json 406
+{
+  "message": "You can't delete more clients subscription than the number of clients subscription you have as free in your plan."
+}
+```
+
+```text 429
+You have exceeded the 5 requests in 60 sec limit for this endpoint!
+```
+
+```json 500
+{
+  "ok": false,
+  "message": "An internal server error occurred while deleting the client. Please retry after some time. If the issue persists, please contact support.",
+  "clientId": 456
+}
+```
+
+</ResponseExample>
