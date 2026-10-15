@@ -24,6 +24,10 @@ This endpoint is limited to **5 requests per minute** per account. Requests over
   Your SmartLead API key (client API keys are not allowed)
 </ParamField>
 
+<ParamField query="confirm_email" type="string" required>
+  Email address of the client you are deleting. It must match the email of the client with this `id` on your account (case-insensitive). This guards against deleting the wrong client: on a mismatch the request returns `400` and nothing is deleted.
+</ParamField>
+
 <ParamField query="downgradeClientAddOn" type="boolean" default="false">
   Also reduce your paid client add-on subscription by one seat. Ignored for accounts with grandfathered whitelabel pricing. Rejected with `406` if it would take you below the clients included free in your plan.
 </ParamField>
@@ -41,11 +45,11 @@ This endpoint is limited to **5 requests per minute** per account. Requests over
 <RequestExample>
 
 ```bash cURL
-curl -X DELETE "https://server.smartlead.ai/api/v1/client/456?api_key=YOUR_KEY"
+curl -X DELETE "https://server.smartlead.ai/api/v1/client/456?api_key=YOUR_KEY&confirm_email=client@acme.com"
 ```
 
 ```bash cURL (with add-on downgrade)
-curl -X DELETE "https://server.smartlead.ai/api/v1/client/456?api_key=YOUR_KEY&downgradeClientAddOn=true"
+curl -X DELETE "https://server.smartlead.ai/api/v1/client/456?api_key=YOUR_KEY&confirm_email=client@acme.com&downgradeClientAddOn=true"
 ```
 
 ```python Python
@@ -53,7 +57,7 @@ import requests
 
 response = requests.delete(
     "https://server.smartlead.ai/api/v1/client/456",
-    params={"api_key": "YOUR_API_KEY"}
+    params={"api_key": "YOUR_API_KEY", "confirm_email": "client@acme.com"}
 )
 print(response.json())
 ```
@@ -81,6 +85,12 @@ print(response.json())
   "ok": true,
   "clientId": 456,
   "apiKeysRevoked": 1
+}
+```
+
+```json 400
+{
+  "message": "confirm_email does not match the client's email. Nothing was deleted."
 }
 ```
 
