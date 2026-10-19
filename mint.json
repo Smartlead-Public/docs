@@ -311,6 +311,7 @@
         "api-reference/smart-senders/search-domain",
         "api-reference/smart-senders/get-vendors",
         "api-reference/smart-senders/place-order",
+        "api-reference/smart-senders/add-mailboxes",
         "api-reference/smart-senders/domain-list",
         "api-reference/smart-senders/order-details"
       ]

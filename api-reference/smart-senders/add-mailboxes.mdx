@@ -1,0 +1,418 @@
+---
+title: "Add Mailboxes to Domain"
+api: "POST https://smart-senders.smartlead.ai/api/v1/smart-senders/add-mailboxes-to-domain"
+description: "Add mailboxes to a domain you already bought through Smart Senders, billed on the domain's existing mailbox subscription"
+---
+
+<Note>
+  **Smart Senders API**: Mailbox marketplace feature. Contact support@smartlead.ai for access.
+</Note>
+
+## Overview
+
+Adds mailboxes to a domain your account already bought through Smart Senders, and bills them in the same call. This is the API equivalent of adding mailboxes to an existing domain in the app.
+
+**Behavior**:
+- **No new order.** The mailboxes join the order the domain was bought under, and the response's `order_id` is that order.
+- **Billed on the domain's mailbox subscription.** Its quantity goes up by the number of mailboxes added, at the rate the domain's existing mailboxes are on. The prorated amount for the rest of the current billing period is added to your next invoice and paid with the card on file. Nothing is charged at call time, the renewal date does not change, and the request takes no card or payment token.
+- **Delivered later.** The mailboxes are created after the call returns and are usable once delivered, as with any Smart Senders purchase.
+- **Safe to retry.** Resending the identical request never bills twice. See [Retries](#retries).
+
+## Requirements
+
+**Account.** Any API key authenticates, but only accounts enabled for purchases over the API can buy. Other accounts get `403 API_PURCHASE_NOT_ENABLED` and are not charged. To be enabled, contact support@smartlead.ai.
+
+**Domain.** The domain must be:
+- On your account, under the order you name in `order_id`
+- A ZapMail domain that is not pre-warmed. ZapMail is the only provider that can add mailboxes to a domain it already holds, and a pre-warmed domain would bill new, unwarmed mailboxes at the pre-warmed rate. ZapMail Infra domains are not supported either.
+- Live: delivered, and no longer being set up. A domain whose mailboxes were all deleted still counts, and can take new ones.
+- Still in use: not deleted, replaced, failed to set up, refunded, or scheduled for deletion as a whole domain
+- On an active mailbox subscription
+
+**Five mailboxes per domain.** A domain can have at most 5 mailboxes: the ones it already has, paid or delivered, plus the ones in the request. Mailboxes scheduled for deletion count until they are deleted. A domain usually has at least one mailbox, so one request can usually add at most four.
+
+**New addresses only.** An address must not already exist on the domain or appear twice in the request. The address of a mailbox scheduled for deletion can't be reused (restore that mailbox to keep it), and neither can the address of a deleted mailbox until the provider has finished removing it.
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  API key used to authenticate and authorise the request.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="domain" type="string" required>
+  Name of the domain to add mailboxes to, e.g. `example.com`. Case and leading or trailing spaces are ignored.
+</ParamField>
+
+<ParamField body="order_id" type="string" required>
+  ID of the order the domain was bought under: the `order_id` returned by [Place Order](/api-reference/smart-senders/place-order), also listed with each domain by [Get Purchased Domain List](/api-reference/smart-senders/domain-list). Leading and trailing spaces are ignored.
+</ParamField>
+
+<ParamField body="mailboxes" type="object[]" required>
+  Mailboxes to add. At least one, and no more than the domain has room for (see [Requirements](#requirements)). Unknown fields are ignored.
+
+  <Expandable title="Mailbox Object">
+    <ParamField body="mailbox" type="string" required>
+      The local part (`jane`) or the full address on the same domain (`jane@example.com`). Lowercased on arrival. Letters, digits, `.`, `_` and `-` only, starting and ending with a letter or digit, with no two dots in a row and at most 64 characters before the `@`.
+    </ParamField>
+
+    <ParamField body="first_name" type="string" required>
+      First name shown on the mailbox. Must not be blank.
+    </ParamField>
+
+    <ParamField body="last_name" type="string" required>
+      Last name shown on the mailbox. Must not be blank.
+    </ParamField>
+
+    <ParamField body="profile_pic" type="string">
+      Absolute `http` or `https` URL of the profile picture, at most 2,000 characters. The picture is fetched from this URL. Leave it out, or send `null` or an empty string, for no picture.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Headers
+
+<ParamField header="Content-Type" type="string" required>
+  Must be `application/json`
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://smart-senders.smartlead.ai/api/v1/smart-senders/add-mailboxes-to-domain?api_key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  --max-time 90 \
+  -d '{
+    "domain": "example.com",
+    "order_id": "SS-1712345678901-4242-1",
+    "mailboxes": [
+      { "mailbox": "jane", "first_name": "Jane", "last_name": "Doe" },
+      {
+        "mailbox": "sam@example.com",
+        "first_name": "Sam",
+        "last_name": "Lee",
+        "profile_pic": "https://example.com/sam.jpg"
+      }
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+payload = {
+    "domain": "example.com",
+    "order_id": "SS-1712345678901-4242-1",
+    "mailboxes": [
+        {"mailbox": "jane", "first_name": "Jane", "last_name": "Doe"},
+        {
+            "mailbox": "sam@example.com",
+            "first_name": "Sam",
+            "last_name": "Lee",
+            "profile_pic": "https://example.com/sam.jpg",
+        },
+    ],
+}
+
+response = requests.post(
+    "https://smart-senders.smartlead.ai/api/v1/smart-senders/add-mailboxes-to-domain",
+    params={"api_key": API_KEY},
+    json=payload,
+    timeout=90,  # allow at least 60 seconds
+)
+
+result = response.json()
+if response.status_code == 201:
+    print(f"Added {result['data']['quantity']} mailboxes: {result['data']['mailboxes']}")
+else:
+    print(f"{response.status_code} {result.get('code')}: {result.get('message')}")
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const payload = {
+  domain: 'example.com',
+  order_id: 'SS-1712345678901-4242-1',
+  mailboxes: [
+    { mailbox: 'jane', first_name: 'Jane', last_name: 'Doe' },
+    {
+      mailbox: 'sam@example.com',
+      first_name: 'Sam',
+      last_name: 'Lee',
+      profile_pic: 'https://example.com/sam.jpg'
+    }
+  ]
+};
+
+const response = await fetch(
+  `https://smart-senders.smartlead.ai/api/v1/smart-senders/add-mailboxes-to-domain?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(90000) // allow at least 60 seconds
+  }
+);
+
+const result = await response.json();
+if (response.status === 201) {
+  console.log(`Added ${result.data.quantity} mailboxes:`, result.data.mailboxes);
+} else {
+  console.log(`${response.status} ${result.code}: ${result.message}`);
+}
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="status" type="string">
+  Always `ORDER_PLACEMENT_SUCCESS` on success
+</ResponseField>
+
+<ResponseField name="order_id" type="string">
+  The order the domain was bought under. The mailboxes are added to this order.
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Data Object">
+    <ResponseField name="order_id" type="string">
+      Same as the top-level `order_id`
+    </ResponseField>
+
+    <ResponseField name="domain_id" type="number">
+      ID of the domain
+    </ResponseField>
+
+    <ResponseField name="domain_name" type="string">
+      The domain's name, lowercased
+    </ResponseField>
+
+    <ResponseField name="quantity" type="number">
+      Number of mailboxes added by this request
+    </ResponseField>
+
+    <ResponseField name="mailbox_count_after" type="number">
+      The domain's mailbox count, including the ones just added
+    </ResponseField>
+
+    <ResponseField name="mailboxes" type="string[]">
+      Full addresses of the mailboxes added, lowercased
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+A `201` means the mailboxes were billed and queued for creation; they are usable once delivered. If they don't arrive, contact support@smartlead.ai rather than resending: their addresses are now taken, so a repeat request is refused with `MAILBOX_ALREADY_EXISTS`.
+
+## Response Codes
+
+<ResponseField name="201" type="Created">
+  Mailboxes billed and queued for creation
+</ResponseField>
+
+<ResponseField name="400" type="Bad Request">
+  The request failed validation, or the domain's provider does not support adding mailboxes. See [Errors](#errors)
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Missing or invalid API key, expired plan, or API access denied for the account
+</ResponseField>
+
+<ResponseField name="403" type="Forbidden">
+  The account is not enabled for purchases over the API. Not charged
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  No domain with that name on that order on your account, or the domain's mailbox subscription can't be found. Not charged
+</ResponseField>
+
+<ResponseField name="409" type="Conflict">
+  The domain can't take these mailboxes (its state, the five-mailbox limit, or an address clash), or another request for it is running. Not charged
+</ResponseField>
+
+<ResponseField name="429" type="Too Many Requests">
+  Rate limited. Not charged; retry with backoff
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  Billing failed or its outcome is unknown (read the `code` and message), or an unexpected error occurred before billing (no `code`; not charged)
+</ResponseField>
+
+<ResponseField name="503" type="Service Unavailable">
+  Billing is temporarily unavailable. Not charged; retry with backoff
+</ResponseField>
+
+## Errors
+
+Errors have this shape:
+
+```json
+{
+  "status": "error",
+  "code": "MAILBOX_LIMIT_EXCEEDED",
+  "message": "A domain can have at most 5 mailboxes. example.com already has 4, so only 1 more can be added; 2 requested"
+}
+```
+
+Branch on `code`. The `message` is written for the end customer and can be shown as it is; for billing errors it says whether the customer was charged. API key errors are the exception: they return `401` with only a `message`. An unexpected error returns `500` without a `code`, and nothing was charged.
+
+### Before billing: nothing is charged
+
+Retrying unchanged gets the same answer, so fix the request or the account first. The exception is `ADD_MAILBOXES_IN_PROGRESS`, which clears on its own.
+
+| HTTP | `code` | When |
+| --- | --- | --- |
+| 400 | `INVALID_JSON` | The body is not valid JSON |
+| 400 | `MISSING_DOMAIN` | `domain` is missing or is not a domain name |
+| 400 | `MISSING_ORDER_ID` | `order_id` is missing |
+| 400 | `MISSING_MAILBOXES` | `mailboxes` is missing or empty |
+| 400 | `INVALID_MAILBOX` | An entry has no `mailbox`, or it is not a valid local part or address |
+| 400 | `INVALID_MAILBOX_NAME` | `first_name` or `last_name` is missing or blank |
+| 400 | `MAILBOX_DOMAIN_MISMATCH` | A full address is not on `domain` |
+| 400 | `INVALID_PROFILE_PIC` | `profile_pic` is not an absolute http(s) URL of at most 2,000 characters |
+| 404 | `DOMAIN_NOT_FOUND` | No domain with that name on that order on your account |
+| 409 | `DOMAIN_AMBIGUOUS` | The domain is recorded more than once on the order. Contact support |
+| 409 | `DOMAIN_DELETED` | The domain has been deleted |
+| 409 | `DOMAIN_REPLACED` | The domain was replaced. Add the mailboxes to the replacement domain instead |
+| 409 | `DOMAIN_FAILED` | The domain failed to set up. Contact support |
+| 409 | `DOMAIN_CREDITED` | The domain was refunded |
+| 409 | `DOMAIN_SCHEDULED_FOR_DELETION` | The whole domain is scheduled for deletion. Restore it, then try again |
+| 400 | `VENDOR_UNAVAILABLE` | The domain's provider can't be determined (contact support), or adding mailboxes is temporarily unavailable (try again later). The message says which |
+| 400 | `VENDOR_NOT_SUPPORTED` | The domain is not a ZapMail domain |
+| 400 | `VENDOR_PREWARMED` | The domain is a pre-warmed ZapMail domain |
+| 409 | `DOMAIN_NOT_LIVE` | The domain is still being set up |
+| 409 | `NO_ACTIVE_MAILBOX_SUBSCRIPTION` | The domain has no mailbox subscription to add to. Contact support |
+| 409 | `NO_PARENT_ORDER` | The domain's original order can't be found. Contact support |
+| 409 | `MAILBOX_LIMIT_EXCEEDED` | The domain would have more than 5 mailboxes |
+| 409 | `DOMAIN_FULL_PENDING_DELETION` | The mailboxes would fit once the domain's mailboxes pending deletion are gone. The body lists them in `pending_mailboxes`; permanently deleting one frees a slot |
+| 409 | `MAILBOX_ALREADY_EXISTS` | An address already exists on the domain, or appears twice in the request |
+| 409 | `MAILBOX_PENDING_DELETION` | An address belongs to a mailbox scheduled for deletion, or to a deleted mailbox the provider hasn't finished removing |
+| 409 | `ADD_MAILBOXES_IN_PROGRESS` | Another request is adding mailboxes to this domain, or to another domain on the same mailbox subscription. Retry once it finishes |
+
+When more than one of the domain conditions applies (`DOMAIN_DELETED` through `NO_PARENT_ORDER`), the first in this table is returned.
+
+### From billing
+
+| HTTP | `code` | Charged? | What to do |
+| --- | --- | --- | --- |
+| 403 | `API_PURCHASE_NOT_ENABLED` | No | Contact support to enable purchases over the API |
+| 404 | `SUBSCRIPTION_NOT_FOUND` | No | Contact support |
+| 409 | `SUBSCRIPTION_NOT_ACTIVE` | No | Renew the subscription, then retry |
+| 409 | `SUBSCRIPTION_ITEM_NOT_FOUND` | No | Contact support |
+| 401 | `UNAUTHORIZED` | No | Check the API key |
+| 429 | `RATE_LIMITED` | No | Retry the identical request with backoff |
+| 503 | `BILLING_UNAVAILABLE` | No | Retry the identical request with backoff |
+| 500 | `ADD_MAILBOXES_FAILED`, message says you have not been charged | No | Retry the identical request |
+| 500 | `ADD_MAILBOXES_FAILED`, message says to contact support | Possibly | Stop and contact support. Do not retry |
+| 500 | `ADD_MAILBOXES_STATUS_UNKNOWN` | Unknown | Wait 5 minutes, then resend the identical request (see [Retries](#retries)) |
+
+Billing can also refuse with a code of its own that is not listed here. It arrives with billing's status when that is a 4xx, and as a `500` otherwise.
+
+<Warning>
+  `ADD_MAILBOXES_FAILED` covers two outcomes, and only the message tells them apart. If it says to contact support, the charge may stand: do not retry.
+</Warning>
+
+## Retries
+
+Retrying is safe:
+- **An identical request never bills twice.** Identical means the same set of mailbox names on the same domain, in any order.
+- **A changed request is fine too.** Mailboxes left by an earlier attempt that was never charged are discarded and replaced by the new ones.
+- **Overlapping requests are refused.** Only one request per domain, and one per mailbox subscription, runs at a time. The others get `409 ADD_MAILBOXES_IN_PROGRESS` and are not billed. Domains bought together in one order share a mailbox subscription, so a request for one can hold up a request for another.
+
+**Timeouts and unknown outcomes.** Allow at least 60 seconds for a response. If the call times out, the connection drops, or you get `ADD_MAILBOXES_STATUS_UNKNOWN`, wait 5 minutes and resend the identical request:
+
+| The retry gets | Meaning |
+| --- | --- |
+| `201` | The first call did not go through; this one was billed |
+| `409 MAILBOX_ALREADY_EXISTS`, or `MAILBOX_LIMIT_EXCEEDED` when the domain is now full | The first call went through. Nothing more was billed |
+| `409 ADD_MAILBOXES_IN_PROGRESS` | The first call is still being processed. Wait, then retry |
+
+<ResponseExample>
+
+```json 201 - Success
+{
+  "status": "ORDER_PLACEMENT_SUCCESS",
+  "order_id": "SS-1712345678901-4242-1",
+  "data": {
+    "order_id": "SS-1712345678901-4242-1",
+    "domain_id": 12345,
+    "domain_name": "example.com",
+    "quantity": 2,
+    "mailbox_count_after": 4,
+    "mailboxes": ["jane@example.com", "sam@example.com"]
+  }
+}
+```
+
+```json 400 - Invalid Mailbox
+{
+  "status": "error",
+  "code": "INVALID_MAILBOX",
+  "message": "Mailbox jane..doe is not a valid email local part"
+}
+```
+
+```json 401 - Unauthorized
+{
+  "message": "Invalid API Key"
+}
+```
+
+```json 404 - Domain Not Found
+{
+  "status": "error",
+  "code": "DOMAIN_NOT_FOUND",
+  "message": "We couldn't find example.com on order SS-1712345678901-4242-1 on your account. Check the domain name and the id of the order it was bought under."
+}
+```
+
+```json 409 - Mailbox Limit Exceeded
+{
+  "status": "error",
+  "code": "MAILBOX_LIMIT_EXCEEDED",
+  "message": "A domain can have at most 5 mailboxes. example.com already has 4, so only 1 more can be added; 2 requested"
+}
+```
+
+```json 409 - Domain Full Pending Deletion
+{
+  "status": "error",
+  "code": "DOMAIN_FULL_PENDING_DELETION",
+  "message": "Domain example.com has no free mailbox slots because 1 mailbox is pending deletion. Permanently delete one to free a slot.",
+  "pending_mailboxes": [
+    {
+      "id": 987654,
+      "from_email": "old@example.com",
+      "scheduled_delete_at": "2026-11-02T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+```json 409 - In Progress
+{
+  "status": "error",
+  "code": "ADD_MAILBOXES_IN_PROGRESS",
+  "message": "Mailboxes are already being added to this domain. Wait for that request to finish before retrying."
+}
+```
+
+```json 500 - Status Unknown
+{
+  "status": "error",
+  "code": "ADD_MAILBOXES_STATUS_UNKNOWN",
+  "message": "We couldn't confirm whether these mailboxes were added. To avoid being billed twice, check order SS-1712345678901-4242-1 in a few minutes before retrying."
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Get Purchased Domain List](/api-reference/smart-senders/domain-list) - Find your domains and the orders they were bought under
+- [Place Order](/api-reference/smart-senders/place-order) - Buy new domains with mailboxes
+- [Get Order Details](/api-reference/smart-senders/order-details) - Check the status of an order
