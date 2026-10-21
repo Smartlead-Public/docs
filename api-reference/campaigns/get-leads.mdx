@@ -81,6 +81,28 @@ Retrieves all leads associated with a campaign with comprehensive filtering opti
   - `is_sender_bounced` - Sender bounce
 </ParamField>
 
+## Concurrency Limit
+
+<Warning>
+  This endpoint allows at most **10 requests in progress at the same time** per SmartLead account. This is a limit on simultaneous requests, not on requests per minute.
+</Warning>
+
+| Scope | Limit |
+|---|---|
+| `GET /campaigns/{campaign_id}/leads` | 10 concurrent requests |
+
+The limit is counted per SmartLead account across all campaigns — requests for different `campaign_id`s share the same 10 slots. If you authenticate with a client API key, the count is scoped to that key instead. Your plan-wide [rate limit](/guides/rate-limits) still applies on top of it.
+
+Requests above the limit are **not rejected immediately**. They wait for a free slot and start as soon as one of your earlier requests finishes, so the extra time shows up as a slower response rather than an error. Only if a request waits more than 30 seconds without getting a slot does it return `429 Too Many Requests` with a `Retry-After: 1` header and a plain-text body:
+
+```text 429 - Too Many Requests
+You have more than 10 requests in progress for this endpoint. Please retry shortly.
+```
+
+<Tip>
+  Running more than 10 parallel workers against this endpoint does not make an export faster — the extra requests only wait. Use up to 10 workers, and to keep a copy of a campaign in sync, pass `created_at_gt` or `event_time_gt` to fetch only leads that changed since your last call instead of re-reading the whole campaign.
+</Tip>
+
 <RequestExample>
 
 ```bash cURL
