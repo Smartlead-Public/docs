@@ -1,0 +1,134 @@
+---
+title: "List SmartServers"
+api: "GET https://smartservers.smartlead.ai/api/v1/smart-server/"
+description: "List your Single SmartInfra servers (dedicated IPs), optionally with the campaigns using each one"
+---
+
+<Note>
+  **SmartServers API**: Dedicated IP infrastructure feature. Contact support@smartlead.ai for access.
+</Note>
+
+## Overview
+
+Returns the active dedicated IPs on the **Single SmartInfra** tab of your dashboard. Use the `id` of a server as the `server_id` when [assigning it to campaigns](/api-reference/smart-servers/assign-campaigns).
+
+Pass `withCampaignData=true` to also get, for each server, how many campaigns use it, which campaigns those are, and the client it belongs to.
+
+<Info>
+Servers that belong to a **Multi SmartInfra** are not listed here. Assign those through their `infra_id` instead.
+</Info>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<ParamField query="withCampaignData" type="string">
+  Set to `true` to include `campaignCount`, `campaigns`, `client_details` and `region_name` for each server
+</ParamField>
+
+<ParamField query="unmapped" type="string">
+  Set to `true` to return only servers that are not assigned to any campaign or client. Takes precedence over `withCampaignData`.
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X GET "https://smartservers.smartlead.ai/api/v1/smart-server/?withCampaignData=true&api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://smartservers.smartlead.ai/api/v1/smart-server/",
+    params={"api_key": "YOUR_API_KEY", "withCampaignData": "true"}
+)
+
+for server in response.json()["data"]:
+    print(server["id"], server["ip"], server["campaignCount"])
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const response = await fetch(
+  `https://smartservers.smartlead.ai/api/v1/smart-server/?withCampaignData=true&api_key=${API_KEY}`
+);
+
+const { data } = await response.json();
+data.forEach((server) => console.log(server.id, server.ip, server.campaignCount));
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="data" type="array">
+  One entry per server
+
+  <Expandable title="server">
+    <ResponseField name="id" type="number">Server ID. Pass this as `server_id` when assigning campaigns.</ResponseField>
+    <ResponseField name="ip" type="string">Dedicated IP address</ResponseField>
+    <ResponseField name="alias_name" type="string">Display name of the server</ResponseField>
+    <ResponseField name="client_id" type="number | null">Client the server belongs to, if any</ResponseField>
+    <ResponseField name="createdAt" type="string">When the server was created</ResponseField>
+    <ResponseField name="campaignCount" type="number">Number of campaigns using the server. Only with `withCampaignData=true`.</ResponseField>
+    <ResponseField name="campaigns" type="array">`{ id, name }` of each campaign using the server. Only with `withCampaignData=true`.</ResponseField>
+    <ResponseField name="client_details" type="object | null">`{ id, name }` of the server's client. Only with `withCampaignData=true`.</ResponseField>
+    <ResponseField name="region_name" type="string">Region the server is hosted in. Only with `withCampaignData=true`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Servers returned. An account with no servers returns an empty `data` array.
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key. Check your authentication.
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Success
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Fetched the list of smart servers",
+  "data": [
+    {
+      "id": 907,
+      "ip": "203.0.113.24",
+      "alias_name": "outreach-us-1",
+      "client_id": 31,
+      "createdAt": "2026-08-14T09:21:07.000Z",
+      "campaignCount": 2,
+      "campaigns": [
+        { "id": 5614, "name": "Q4 Outbound - US" },
+        { "id": 5615, "name": "Q4 Outbound - EU" }
+      ],
+      "client_details": { "id": 31, "name": "Acme Corp" },
+      "region_name": "US East"
+    }
+  ]
+}
+```
+
+```json Error - Unauthorized
+{
+  "statusCode": 401,
+  "success": false,
+  "message": "Unauthorized",
+  "error": "Invalid API Key"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [Assign SmartInfra to Campaigns](/api-reference/smart-servers/assign-campaigns)
+- [Get SmartServers for a Campaign](/api-reference/smart-servers/get-campaign-servers)

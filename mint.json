@@ -319,7 +319,9 @@
     {
       "group": "Smart Servers",
       "pages": [
+        "api-reference/smart-servers/list-servers",
         "api-reference/smart-servers/assign-campaigns",
+        "api-reference/smart-servers/get-campaign-servers",
         "api-reference/smart-servers/unassign-campaign"
       ]
     },

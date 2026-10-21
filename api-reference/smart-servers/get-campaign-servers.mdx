@@ -1,0 +1,151 @@
+---
+title: "Get SmartServers for a Campaign"
+api: "GET https://smartservers.smartlead.ai/api/v1/smart-server/all/campaign/{campaign_id}"
+description: "Check which SmartServer (dedicated IP) is attached to a campaign"
+---
+
+<Note>
+  **SmartServers API**: Dedicated IP infrastructure feature. Contact support@smartlead.ai for access.
+</Note>
+
+## Overview
+
+Returns the dedicated IP attached to a campaign. Call it before starting a campaign to confirm that the right server is in place.
+
+<Warning>
+When a campaign has more than one server attached (a Multi SmartInfra, or several Single SmartInfra servers), this endpoint currently returns only one of them. Use `campaignCount` and `campaigns` from [List SmartServers](/api-reference/smart-servers/list-servers) to see every server a campaign uses.
+</Warning>
+
+## Path Parameters
+
+<ParamField path="campaign_id" type="string" required>
+  Campaign ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X GET "https://smartservers.smartlead.ai/api/v1/smart-server/all/campaign/5614?api_key=YOUR_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://smartservers.smartlead.ai/api/v1/smart-server/all/campaign/5614",
+    params={"api_key": "YOUR_API_KEY"}
+)
+
+servers = response.json()["data"]
+if not servers:
+    print("No SmartServer attached to this campaign")
+else:
+    print(servers[0]["id"], servers[0]["ip"])
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const response = await fetch(
+  `https://smartservers.smartlead.ai/api/v1/smart-server/all/campaign/5614?api_key=${API_KEY}`
+);
+
+const { data } = await response.json();
+console.log(data.length ? data[0].ip : 'No SmartServer attached to this campaign');
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="data" type="array">
+  The attached server, or an empty array when the campaign has no server or does not belong to you
+
+  <Expandable title="server">
+    <ResponseField name="id" type="number">Server ID</ResponseField>
+    <ResponseField name="ip" type="string">Dedicated IP address</ResponseField>
+    <ResponseField name="alias_name" type="string">Display name of the server</ResponseField>
+    <ResponseField name="client_id" type="number | null">Client the server belongs to, if any</ResponseField>
+    <ResponseField name="campaign_details" type="array">
+      `campaign_id`, `campaign_name`, `mapping_created_at` and `auto_rotate_servers` for the requested campaign
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="200" type="Success">
+  Server returned, or an empty `data` array when nothing is attached
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid or missing API key. Check your authentication.
+</ResponseField>
+
+<ResponseField name="403" type="Forbidden">
+  The attached server does not belong to you
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  The attached server no longer exists
+</ResponseField>
+
+<ResponseExample>
+
+```json 200 - Server Attached
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Fetched the details of the smart server",
+  "data": [
+    {
+      "id": 907,
+      "ip": "203.0.113.24",
+      "alias_name": "outreach-us-1",
+      "client_id": 31,
+      "createdAt": "2026-08-14T09:21:07.000Z",
+      "bounce_rate": null,
+      "campaign_details": [
+        {
+          "campaign_id": 5614,
+          "campaign_name": "Q4 Outbound - US",
+          "mapping_created_at": "2026-09-02T11:45:00.000Z",
+          "auto_rotate_servers": false
+        }
+      ]
+    }
+  ]
+}
+```
+
+```json 200 - Nothing Attached
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Fetched the details of the smart server",
+  "data": []
+}
+```
+
+```json Error - Unauthorized
+{
+  "statusCode": 401,
+  "success": false,
+  "message": "Unauthorized",
+  "error": "Invalid API Key"
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [List SmartServers](/api-reference/smart-servers/list-servers)
+- [Assign SmartInfra to Campaigns](/api-reference/smart-servers/assign-campaigns)
+- [Unassign SmartServers from Campaign](/api-reference/smart-servers/unassign-campaign)
