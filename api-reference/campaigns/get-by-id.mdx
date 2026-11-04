@@ -60,6 +60,10 @@ Retrieves comprehensive details for a specific campaign including all configurat
   Tracking settings (DONT_EMAIL_OPEN, DONT_LINK_CLICK)
 </ResponseField>
 
+<ResponseField name="auto_pause_domain_leads_reply_categories" type="object | null">
+  Which replies trigger company-level auto-pause: `null` (any reply) or `{ "category_ids": number[], "include_uncategorised": boolean }`. See [Update Campaign Settings](/api-reference/campaigns/update-settings).
+</ResponseField>
+
 <RequestExample>
 
 ```bash cURL
