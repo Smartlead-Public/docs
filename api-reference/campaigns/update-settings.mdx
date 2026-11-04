@@ -67,7 +67,24 @@ Updates campaign configuration including: tracking settings (enable/disable open
 </ParamField>
 
 <ParamField body="auto_pause_domain_leads_on_reply" type="boolean">
-  Pause leads from same domain after reply
+  Company-level auto-pause: when a lead replies, pause the other leads in this campaign with the same company email domain. Personal domains (gmail.com, outlook.com, yahoo.com and similar) are never matched.
+</ParamField>
+
+<ParamField body="auto_pause_domain_leads_reply_categories" type="object | null">
+  Which replies trigger company-level auto-pause. Applies only when `auto_pause_domain_leads_on_reply` is on. Send `null` to pause on any reply (except Out of Office replies, when Out of Office is one of the campaign's AI categories). This is the default.
+
+  The reply's category is its lead category at the time of the lead's first reply (set by AI categorisation, or manually before the reply). Out of Office replies never pause the company.
+
+  <Expandable title="auto_pause_domain_leads_reply_categories properties">
+    <ParamField body="category_ids" type="number[]" required>
+      Lead category ids that pause the company. Get ids from [Fetch Lead Categories](/api-reference/leads/categories). Unique positive integers, at most 100. The Out of Office category is rejected. Can be empty when `include_uncategorised` is `true`.
+    </ParamField>
+    <ParamField body="include_uncategorised" type="boolean" required>
+      Also pause when the reply has no category (for example, AI categorisation is off or the AI could not match a category).
+    </ParamField>
+  </Expandable>
+
+  Returns 400 when the Out of Office category is included, when `category_ids` is empty and `include_uncategorised` is `false` (to stop auto-pause, set `auto_pause_domain_leads_on_reply` to `false` instead), or when a category id is unknown.
 </ParamField>
 
 <ParamField body="ignore_ss_mailbox_sending_limit" type="boolean">
@@ -215,6 +232,12 @@ console.log(result);
   "data": {
     "message": "Settings updated successfully"
   }
+}
+```
+
+```json 400 - Out of Office in auto-pause categories
+{
+  "error": "auto_pause_domain_leads_reply_categories: Out of Office replies never trigger company auto-pause, remove the OOO category"
 }
 ```
 
