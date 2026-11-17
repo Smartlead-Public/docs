@@ -1,6 +1,6 @@
 ---
 title: "Update Deliverability Test"
-api: "PATCH https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/{id}"
+api: "PATCH https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/{id}"
 description: "Rename a test, move it to a folder, or change its schedule or send timing"
 ---
 
@@ -61,7 +61,7 @@ Send only the fields you want to change. At least one field is required.
 <RequestExample>
 
 ```bash cURL
-curl -X PATCH "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b?api_key=YOUR_KEY" \
+curl -X PATCH "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Q4 Outbound - step 1 (retest)", "folderId": 12}'
 ```
@@ -72,7 +72,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.patch(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b",
+    "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b",
     params={"api_key": API_KEY}, json={"name": "Q4 Outbound - step 1 (retest)", "folderId": 12}
 )
 print(response.status_code)
@@ -83,7 +83,7 @@ print(response.json())
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b?api_key=${API_KEY}`,
+  `https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b?api_key=${API_KEY}`,
   {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

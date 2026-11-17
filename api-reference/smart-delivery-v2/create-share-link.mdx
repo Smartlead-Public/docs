@@ -1,6 +1,6 @@
 ---
 title: "Create Share Link"
-api: "PUT https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/{id}/share"
+api: "PUT https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/{id}/share"
 description: "Create (or rotate) the read-only share link of a test"
 ---
 
@@ -27,7 +27,7 @@ Creates a read-only link to the test's results. Calling it again rotates the lin
 <RequestExample>
 
 ```bash cURL
-curl -X PUT "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/share?api_key=YOUR_KEY"
+curl -X PUT "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/share?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -36,7 +36,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.put(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/share",
+    "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/share",
     params={"api_key": API_KEY}
 )
 print(response.status_code)
@@ -47,7 +47,7 @@ print(response.json())
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/share?api_key=${API_KEY}`,
+  `https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/share?api_key=${API_KEY}`,
   {
     method: 'PUT'
   }

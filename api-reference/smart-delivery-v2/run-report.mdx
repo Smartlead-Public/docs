@@ -1,6 +1,6 @@
 ---
 title: "Get Run Report"
-api: "GET https://smartdelivery.smartlead.ai/api/v1/smart-delivery/runs/{id}/report"
+api: "GET https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/runs/{id}/report"
 description: "The stored deliverability report of a completed run"
 ---
 
@@ -27,7 +27,7 @@ Returns the score, placement counts, breakdowns and diagnostics (blocklists, DNS
 <RequestExample>
 
 ```bash cURL
-curl -X GET "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/runs/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/report?api_key=YOUR_KEY"
+curl -X GET "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/runs/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/report?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -36,7 +36,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/runs/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/report",
+    "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/runs/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/report",
     params={"api_key": API_KEY}
 )
 print(response.status_code)
@@ -47,7 +47,7 @@ print(response.json())
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/runs/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/report?api_key=${API_KEY}`,
+  `https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/runs/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/report?api_key=${API_KEY}`,
   {
     method: 'GET'
   }
@@ -117,7 +117,7 @@ console.log(await response.json());
     "inboxRate": 0.75
   },
   "timeToInbox": { "medianMs": 41000, "p90Ms": 118000 },
-  "byProvider": [ { "provider": "GMAIL", "counts": { "inbox": 9, "spam": 1, "inboxRate": 0.9 } } ],
+  "byProvider": [ { "provider": "GOOGLE_WORKSPACE", "counts": { "inbox": 9, "spam": 1, "inboxRate": 0.9 } } ],
   "diagnostics": { "blacklists": [], "dns": [], "content": null, "spamAssassin": null, "senders": [] }
 }
 (shortened: parts, headline, baseline, insights, bySender and matrix omitted)

@@ -1,6 +1,6 @@
 ---
 title: "Create Deliverability Test"
-api: "POST https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests"
+api: "POST https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests"
 description: "Create a manual or automated deliverability test for a campaign email"
 ---
 
@@ -95,9 +95,9 @@ Creates a Smart Delivery v2 (Deliverability Test) test: it sends the chosen sequ
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests?api_key=YOUR_KEY" \
+curl -X POST "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests?api_key=YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [1, 2], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true}'
+  -d '{"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [2, 4], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true}'
 ```
 
 ```python Python
@@ -106,8 +106,8 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.post(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests",
-    params={"api_key": API_KEY}, json={"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [1, 2], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true}
+    "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests",
+    params={"api_key": API_KEY}, json={"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [2, 4], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true}
 )
 print(response.status_code)
 print(response.json())
@@ -117,11 +117,11 @@ print(response.json())
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests?api_key=${API_KEY}`,
+  `https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests?api_key=${API_KEY}`,
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [1, 2], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true})
+    body: JSON.stringify({"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [2, 4], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true})
   }
 );
 console.log(await response.json());

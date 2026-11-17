@@ -1,6 +1,6 @@
 ---
 title: "Stop Deliverability Test"
-api: "POST https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/{id}/stop"
+api: "POST https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/{id}/stop"
 description: "Stop a test for good"
 ---
 
@@ -27,7 +27,7 @@ Ends the test: queued runs are cancelled and their credits refunded, a run that 
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/stop?api_key=YOUR_KEY"
+curl -X POST "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/stop?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -36,7 +36,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.post(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/stop",
+    "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/stop",
     params={"api_key": API_KEY}
 )
 print(response.status_code)
@@ -47,7 +47,7 @@ print(response.json())
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/stop?api_key=${API_KEY}`,
+  `https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests/3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b/stop?api_key=${API_KEY}`,
   {
     method: 'POST'
   }

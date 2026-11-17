@@ -1,6 +1,6 @@
 ---
 title: "List Seed Providers"
-api: "GET https://smartdelivery.smartlead.ai/api/v1/smart-delivery/providers"
+api: "GET https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/providers"
 description: "List the email providers a deliverability test can be sent to"
 ---
 
@@ -21,7 +21,7 @@ Returns the active seed providers. Pass their `id` values as `providerIds` when 
 <RequestExample>
 
 ```bash cURL
-curl -X GET "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/providers?api_key=YOUR_KEY"
+curl -X GET "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/providers?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -30,7 +30,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/providers",
+    "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/providers",
     params={"api_key": API_KEY}
 )
 print(response.status_code)
@@ -41,7 +41,7 @@ print(response.json())
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/providers?api_key=${API_KEY}`,
+  `https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/providers?api_key=${API_KEY}`,
   {
     method: 'GET'
   }
@@ -56,7 +56,7 @@ console.log(await response.json());
 <ResponseField name="items" type="array">
   <Expandable title="provider">
     <ResponseField name="id" type="number">Provider ID</ResponseField>
-    <ResponseField name="code" type="string">Provider code, for example `GMAIL` (also the `provider` value in reports)</ResponseField>
+    <ResponseField name="code" type="string">Provider code, for example `GOOGLE_WORKSPACE` (also the `provider` value in reports)</ResponseField>
     <ResponseField name="family" type="string">Provider family</ResponseField>
     <ResponseField name="displayName" type="string">Name to show</ResponseField>
   </Expandable>
@@ -85,8 +85,8 @@ console.log(await response.json());
 ```json 200 - Success
 {
   "items": [
-    { "id": 1, "code": "GMAIL", "family": "GOOGLE", "displayName": "Gmail" },
-    { "id": 2, "code": "OUTLOOK", "family": "MICROSOFT", "displayName": "Outlook" }
+    { "id": 2, "code": "GOOGLE_WORKSPACE", "family": "GOOGLE", "displayName": "Google Workspace" },
+    { "id": 4, "code": "MICROSOFT_365", "family": "MICROSOFT", "displayName": "Microsoft 365" }
   ]
 }
 ```

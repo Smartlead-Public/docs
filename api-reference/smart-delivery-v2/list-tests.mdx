@@ -1,6 +1,6 @@
 ---
 title: "List Deliverability Tests"
-api: "GET https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests"
+api: "GET https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests"
 description: "List your deliverability tests, newest first"
 ---
 
@@ -41,7 +41,7 @@ Each item is a test plus its `latestReport` (once a run has finished) and its `c
 <RequestExample>
 
 ```bash cURL
-curl -X GET "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests?api_key=YOUR_KEY"
+curl -X GET "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests?api_key=YOUR_KEY"
 ```
 
 ```python Python
@@ -50,7 +50,7 @@ import requests
 API_KEY = "YOUR_API_KEY"
 
 response = requests.get(
-    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests",
+    "https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests",
     params={"api_key": API_KEY}
 )
 print(response.status_code)
@@ -61,7 +61,7 @@ print(response.json())
 const API_KEY = 'YOUR_API_KEY';
 
 const response = await fetch(
-  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests?api_key=${API_KEY}`,
+  `https://sl-sd-api.smartlead.ai/api/v1/smart-delivery/tests?api_key=${API_KEY}`,
   {
     method: 'GET'
   }
