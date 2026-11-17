@@ -304,6 +304,42 @@
       ]
     },
     {
+      "group": "Smart Delivery v2 (Deliverability Test)",
+      "pages": [
+        "api-reference/smart-delivery-v2/providers",
+        "api-reference/smart-delivery-v2/limits",
+        "api-reference/smart-delivery-v2/limits-refresh",
+        "api-reference/smart-delivery-v2/list-folders",
+        "api-reference/smart-delivery-v2/create-folder",
+        "api-reference/smart-delivery-v2/rename-folder",
+        "api-reference/smart-delivery-v2/delete-folder",
+        "api-reference/smart-delivery-v2/create-test",
+        "api-reference/smart-delivery-v2/list-tests",
+        "api-reference/smart-delivery-v2/get-test",
+        "api-reference/smart-delivery-v2/update-test",
+        "api-reference/smart-delivery-v2/pause-test",
+        "api-reference/smart-delivery-v2/resume-test",
+        "api-reference/smart-delivery-v2/stop-test",
+        "api-reference/smart-delivery-v2/delete-test",
+        "api-reference/smart-delivery-v2/create-share-link",
+        "api-reference/smart-delivery-v2/revoke-share-link",
+        "api-reference/smart-delivery-v2/get-run",
+        "api-reference/smart-delivery-v2/run-placement",
+        "api-reference/smart-delivery-v2/email-trace",
+        "api-reference/smart-delivery-v2/run-report",
+        "api-reference/smart-delivery-v2/run-emails",
+        "api-reference/smart-delivery-v2/run-seeds",
+        "api-reference/smart-delivery-v2/email-headers",
+        "api-reference/smart-delivery-v2/test-history",
+        "api-reference/smart-delivery-v2/compare-runs",
+        "api-reference/smart-delivery-v2/summary",
+        "api-reference/smart-delivery-v2/mailboxes",
+        "api-reference/smart-delivery-v2/mailbox-trend",
+        "api-reference/smart-delivery-v2/domains",
+        "api-reference/smart-delivery-v2/domain-trend"
+      ]
+    },
+    {
       "group": "Smart Senders",
       "pages": [
         "api-reference/smart-senders/get-otp",
@@ -436,7 +472,7 @@
   },
   "metadata": {
     "og:site_name": "SmartLead API Documentation",
-    "og:description": "Automate cold email outreach with the SmartLead API \u2014 manage campaigns, leads, email accounts, sequences, and analytics programmatically",
+    "og:description": "Automate cold email outreach with the SmartLead API — manage campaigns, leads, email accounts, sequences, and analytics programmatically",
     "og:image": "https://api.smartlead.ai/smartleadHighResLogoSL.png",
     "twitter:site": "@smartlead_ai"
   },
