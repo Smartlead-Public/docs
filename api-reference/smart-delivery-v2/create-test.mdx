@@ -1,0 +1,264 @@
+---
+title: "Create Deliverability Test"
+api: "POST https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests"
+description: "Create a manual or automated deliverability test for a campaign email"
+---
+
+<Note>
+  **Smart Delivery v2 (Deliverability Test) API**: the deliverability (inbox placement) test that sends your campaign email to seed inboxes and reports where it landed. It is separate from the Smart Delivery spam test endpoints. Contact support@smartlead.ai for access.
+</Note>
+
+## Overview
+
+Creates a Smart Delivery v2 (Deliverability Test) test: it sends the chosen sequence email from your sender mailboxes to seed inboxes at the chosen providers, then reports whether each email landed in the inbox, a tab or spam. A `MANUAL` test starts one run immediately; an `AUTO` test starts runs on its `schedule`. Each run uses one run credit.
+
+`schedule` is one of:
+
+- `{ "frequency": "DAILY", "timeOfDay": "09:00", "timezone": "America/New_York" }`
+- `{ "frequency": "WEEKLY", "weekdays": [1, 3, 5], "timeOfDay": "09:00", "timezone": "America/New_York" }` (`weekdays` are numbers 1 to 7)
+- `{ "frequency": "EVERY_N_DAYS", "everyNDays": 3, "timeOfDay": "09:00", "timezone": "America/New_York" }` (`everyNDays` 2 to 90)
+
+`timeOfDay` is `HH:mm` (24 hours) and `timezone` an IANA timezone name.
+
+## Query Parameters
+
+<ParamField query="api_key" type="string" required>
+  Your SmartLead API key
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="type" type="string" required>
+  `MANUAL` (one run, started now) or `AUTO` (recurring runs)
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Test name, up to 200 characters
+</ParamField>
+
+<ParamField body="description" type="string">
+  Up to 2000 characters
+</ParamField>
+
+<ParamField body="folderId" type="number">
+  Folder to put the test in
+</ParamField>
+
+<ParamField body="campaignId" type="number" required>
+  Smartlead campaign whose email is tested
+</ParamField>
+
+<ParamField body="sequenceId" type="number" required>
+  Sequence step to test
+</ParamField>
+
+<ParamField body="variantId" type="number | null">
+  A/B variant to test. Leave out for a step without variants
+</ParamField>
+
+<ParamField body="providerIds" type="number[]" required>
+  1 to 20 provider IDs from [List Seed Providers](/api-reference/smart-delivery-v2/providers), no duplicates
+</ParamField>
+
+<ParamField body="emailAccountIds" type="number[]" required>
+  1 to 1000 Smartlead email account IDs to send from. They must be attached to the campaign, and your plan limits how many one test may use (see [Get Plan Limits](/api-reference/smart-delivery-v2/limits))
+</ParamField>
+
+<ParamField body="sendAllAtOnce" type="boolean">
+  `true` to send every email of a run together. Set this or `sendGap`, not both
+</ParamField>
+
+<ParamField body="sendGap" type="object">
+  Spread the emails out: `{ "amount": 10, "unit": "minutes" }` with `unit` one of `minutes`, `hours`, `days`. At least 5 minutes and at most 30 days
+</ParamField>
+
+<ParamField body="textOnly" type="boolean">
+  Send the emails as text only (no HTML). Overrides the campaign's HTML and tracking settings
+</ParamField>
+
+<ParamField body="schedule" type="object">
+  `AUTO` only, required: when runs start (see below)
+</ParamField>
+
+<ParamField body="startsAt" type="string">
+  `AUTO` only, required: first run time (ISO 8601, in the future)
+</ParamField>
+
+<ParamField body="endsAt" type="string">
+  `AUTO` only: no run starts after this time. Use this or `maxRuns`, not both
+</ParamField>
+
+<ParamField body="maxRuns" type="number">
+  `AUTO` only: stop after this many runs (1 to 1000)
+</ParamField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests?api_key=YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [1, 2], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true}'
+```
+
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+response = requests.post(
+    "https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests",
+    params={"api_key": API_KEY}, json={"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [1, 2], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true}
+)
+print(response.status_code)
+print(response.json())
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+
+const response = await fetch(
+  `https://smartdelivery.smartlead.ai/api/v1/smart-delivery/tests?api_key=${API_KEY}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({"type": "MANUAL", "name": "Q4 Outbound - sequence step 1", "campaignId": 5614, "sequenceId": 20311, "providerIds": [1, 2], "emailAccountIds": [88101, 88102], "sendAllAtOnce": true})
+  }
+);
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## Response Fields
+
+<ResponseField name="test" type="object">
+  The created test
+  <Expandable title="test">
+    <ResponseField name="id" type="string">Test ID (UUID). Use it in every `/tests/{id}` path.</ResponseField>
+    <ResponseField name="name" type="string">Test name</ResponseField>
+    <ResponseField name="description" type="string | null">Test description</ResponseField>
+    <ResponseField name="type" type="string">`MANUAL` (one run, started now) or `AUTO` (recurring runs on a schedule)</ResponseField>
+    <ResponseField name="status" type="string">`ACTIVE`, `PAUSED`, `COMPLETED` or `STOPPED`</ResponseField>
+    <ResponseField name="statusReason" type="string | null">Why the test is in this status, for example `USER_PAUSED`, `USER_STOPPED` or `SCHEDULE_ENDED`</ResponseField>
+    <ResponseField name="folderId" type="number | null">Folder the test is in</ResponseField>
+    <ResponseField name="campaignId" type="number">Smartlead campaign whose email is tested</ResponseField>
+    <ResponseField name="sequenceId" type="number">Sequence step that is tested</ResponseField>
+    <ResponseField name="variantId" type="number | null">A/B variant tested, or `null` for the step's base email</ResponseField>
+    <ResponseField name="seedsPerSenderPerProvider" type="number">Seed inboxes each sender mails per provider</ResponseField>
+    <ResponseField name="sendAllAtOnce" type="boolean">`true` when all emails of a run go out together, `false` when they are spread by `sendGapMinutes`</ResponseField>
+    <ResponseField name="sendGapMinutes" type="number | null">Minutes between emails when they are spread out</ResponseField>
+    <ResponseField name="textOnly" type="boolean">Whether the emails are sent as text only (no HTML)</ResponseField>
+    <ResponseField name="schedule" type="object | null">`AUTO` tests: the schedule (see Create Deliverability Test)</ResponseField>
+    <ResponseField name="startsAt" type="string | null">`AUTO` tests: first run time (ISO 8601)</ResponseField>
+    <ResponseField name="endsAt" type="string | null">`AUTO` tests: the date after which no run starts</ResponseField>
+    <ResponseField name="maxRuns" type="number | null">`AUTO` tests: the number of runs after which the test completes</ResponseField>
+    <ResponseField name="nextRunAt" type="string | null">`AUTO` tests: when the next run starts</ResponseField>
+    <ResponseField name="runsCreated" type="number">Runs created so far</ResponseField>
+    <ResponseField name="createdAt" type="string">Creation time (ISO 8601)</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="run" type="object | null">
+  The first run, for a `MANUAL` test. `null` for an `AUTO` test that starts later.
+  <Expandable title="run">
+    <ResponseField name="id" type="string">Run ID (UUID)</ResponseField>
+    <ResponseField name="runNo" type="number">Run number within the test, starting at 1</ResponseField>
+    <ResponseField name="status" type="string">`QUEUED`, `SENDING`, `COLLECTING`, `COMPLETED`, `FAILED`, `SKIPPED` or `CANCELLED`</ResponseField>
+    <ResponseField name="statusReason" type="string | null">Why a run failed, was skipped or cancelled</ResponseField>
+    <ResponseField name="scheduledFor" type="string">When the run was due to start</ResponseField>
+    <ResponseField name="contentSnapshot" type="object | null">The email content that was sent (subject, body and the lead used for merge tags)</ResponseField>
+    <ResponseField name="skippedSenders" type="array | null">Senders left out of the run, with the reason</ResponseField>
+    <ResponseField name="seedFallback" type="boolean">`true` when some emails went to a different seed than first planned</ResponseField>
+    <ResponseField name="completedAt" type="string | null">When the run completed</ResponseField>
+    <ResponseField name="createdAt" type="string">Creation time</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Response Codes
+
+<ResponseField name="201" type="Success">
+  Success
+</ResponseField>
+
+<ResponseField name="402" type="Error">
+  No Smart Delivery plan, or no run credits left
+</ResponseField>
+
+<ResponseField name="404" type="Error">
+  The campaign or variant does not exist (`VARIANT_NOT_FOUND`)
+</ResponseField>
+
+<ResponseField name="422" type="Error">
+  Invalid provider (`INVALID_PROVIDER`), senders not attached to the campaign (`INVALID_SENDERS`), too many senders for your plan (`SENDER_LIMIT`), `startsAt` in the past (`STARTS_AT_IN_PAST`), or a schedule with no run before `endsAt` (`SCHEDULE_HAS_NO_RUNS`)
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Missing, invalid or expired API key (`UNAUTHORIZED`)
+</ResponseField>
+
+<ResponseField name="403" type="Forbidden">
+  Client (agency) API keys are not allowed (`CLIENT_NOT_ALLOWED`), or your plan does not include API access (`API_ACCESS_RESTRICTED`)
+</ResponseField>
+
+<ResponseField name="429" type="Too Many Requests">
+  Too many requests for this API key. Wait the number of seconds in the `Retry-After` header (`RATE_LIMITED`)
+</ResponseField>
+
+<ResponseExample>
+
+```json 201 - Success
+{
+  "test": {
+    "id": "3f2b8c1e-5d4a-4e7b-9a60-1c2d3e4f5a6b",
+    "name": "Q4 Outbound - sequence step 1",
+    "description": null,
+    "type": "MANUAL",
+    "status": "ACTIVE",
+    "statusReason": null,
+    "folderId": null,
+    "campaignId": 5614,
+    "sequenceId": 20311,
+    "variantId": null,
+    "seedsPerSenderPerProvider": 4,
+    "sendAllAtOnce": true,
+    "sendGapMinutes": null,
+    "textOnly": false,
+    "schedule": null,
+    "startsAt": null,
+    "endsAt": null,
+    "maxRuns": null,
+    "nextRunAt": null,
+    "runsCreated": 1,
+    "createdAt": "2026-11-17T08:30:00.000Z"
+  },
+  "run": {
+    "id": "8a1c7e90-2b3d-4c5e-8f60-7a9b0c1d2e3f",
+    "runNo": 1,
+    "status": "QUEUED",
+    "statusReason": null,
+    "scheduledFor": "2026-11-17T08:30:00.000Z",
+    "contentSnapshot": { "subject": "Quick question, {{first_name}}", "body": "..." },
+    "skippedSenders": null,
+    "seedFallback": false,
+    "completedAt": null,
+    "createdAt": "2026-11-17T08:30:00.000Z"
+  }
+}
+```
+
+```json Error - Unauthorized
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API Key"
+  }
+}
+```
+
+</ResponseExample>
+
+## Related Endpoints
+
+- [List Seed Providers](/api-reference/smart-delivery-v2/providers)
+- [Get Plan Limits](/api-reference/smart-delivery-v2/limits)
+- [List Deliverability Tests](/api-reference/smart-delivery-v2/list-tests)
+- [Get Deliverability Test](/api-reference/smart-delivery-v2/get-test)
