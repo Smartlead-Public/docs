@@ -271,39 +271,6 @@
       ]
     },
     {
-      "group": "Smart Delivery",
-      "pages": [
-        "api-reference/smart-delivery/provider-ids",
-        "api-reference/smart-delivery/create-manual-test",
-        "api-reference/smart-delivery/create-automated-test",
-        "api-reference/smart-delivery/test-details",
-        "api-reference/smart-delivery/delete-tests-bulk",
-        "api-reference/smart-delivery/stop-automated-test",
-        "api-reference/smart-delivery/list-tests",
-        "api-reference/smart-delivery/provider-report",
-        "api-reference/smart-delivery/geo-report",
-        "api-reference/smart-delivery/sender-report",
-        "api-reference/smart-delivery/spam-filter-report",
-        "api-reference/smart-delivery/dkim-details",
-        "api-reference/smart-delivery/spf-details",
-        "api-reference/smart-delivery/rdns-report",
-        "api-reference/smart-delivery/sender-list",
-        "api-reference/smart-delivery/blacklists",
-        "api-reference/smart-delivery/domain-blacklist",
-        "api-reference/smart-delivery/test-email-content",
-        "api-reference/smart-delivery/ip-blacklist-count",
-        "api-reference/smart-delivery/reply-headers",
-        "api-reference/smart-delivery/schedule-history",
-        "api-reference/smart-delivery/ip-details",
-        "api-reference/smart-delivery/mailbox-summary",
-        "api-reference/smart-delivery/mailbox-count",
-        "api-reference/smart-delivery/get-folders",
-        "api-reference/smart-delivery/create-folder",
-        "api-reference/smart-delivery/get-folder-by-id",
-        "api-reference/smart-delivery/delete-folder"
-      ]
-    },
-    {
       "group": "Smart Delivery v2 (Deliverability Test)",
       "pages": [
         "api-reference/smart-delivery-v2/providers",
@@ -747,119 +714,119 @@
     },
     {
       "source": "/reference/region-wise-provider-ids",
-      "destination": "/api-reference/smart-delivery/provider-ids"
+      "destination": "/api-reference/smart-delivery-v2/providers"
     },
     {
       "source": "/reference/create-a-manual-placement-test",
-      "destination": "/api-reference/smart-delivery/create-manual-test"
+      "destination": "/api-reference/smart-delivery-v2/create-test"
     },
     {
       "source": "/reference/create-an-automated-placement-test",
-      "destination": "/api-reference/smart-delivery/create-automated-test"
+      "destination": "/api-reference/smart-delivery-v2/create-test"
     },
     {
       "source": "/reference/spam-test-details",
-      "destination": "/api-reference/smart-delivery/test-details"
+      "destination": "/api-reference/smart-delivery-v2/get-test"
     },
     {
       "source": "/reference/delete-smart-delivery-test-in-bulk",
-      "destination": "/api-reference/smart-delivery/delete-tests-bulk"
+      "destination": "/api-reference/smart-delivery-v2/delete-test"
     },
     {
       "source": "/reference/stop-an-automated-test",
-      "destination": "/api-reference/smart-delivery/stop-automated-test"
+      "destination": "/api-reference/smart-delivery-v2/stop-test"
     },
     {
       "source": "/reference/list-tests",
-      "destination": "/api-reference/smart-delivery/list-tests"
+      "destination": "/api-reference/smart-delivery-v2/list-tests"
     },
     {
       "source": "/reference/provider-wise-results",
-      "destination": "/api-reference/smart-delivery/provider-report"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/geo-wise-report",
-      "destination": "/api-reference/smart-delivery/geo-report"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/sender-account-wise-report",
-      "destination": "/api-reference/smart-delivery/sender-report"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/spam-filter-report",
-      "destination": "/api-reference/smart-delivery/spam-filter-report"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/dkim-details-copy",
-      "destination": "/api-reference/smart-delivery/dkim-details"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/spf-details",
-      "destination": "/api-reference/smart-delivery/spf-details"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/rdns-report",
-      "destination": "/api-reference/smart-delivery/rdns-report"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/sender-account-list",
-      "destination": "/api-reference/smart-delivery/sender-list"
+      "destination": "/api-reference/smart-delivery-v2/run-seeds"
     },
     {
       "source": "/reference/sender-account-list-copy",
-      "destination": "/api-reference/smart-delivery/sender-list"
+      "destination": "/api-reference/smart-delivery-v2/run-seeds"
     },
     {
       "source": "/reference/spam-test-seed-account-list-copy",
-      "destination": "/api-reference/smart-delivery/sender-list"
+      "destination": "/api-reference/smart-delivery-v2/run-seeds"
     },
     {
       "source": "/reference/domain-blacklist",
-      "destination": "/api-reference/smart-delivery/domain-blacklist"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/test-email-content",
-      "destination": "/api-reference/smart-delivery/test-email-content"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/ip-blacklist-count",
-      "destination": "/api-reference/smart-delivery/ip-blacklist-count"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/email-headers-per-email",
-      "destination": "/api-reference/smart-delivery/reply-headers"
+      "destination": "/api-reference/smart-delivery-v2/email-headers"
     },
     {
       "source": "/reference/schedule-history-for-automated-tests",
-      "destination": "/api-reference/smart-delivery/schedule-history"
+      "destination": "/api-reference/smart-delivery-v2/test-history"
     },
     {
       "source": "/reference/ip-details",
-      "destination": "/api-reference/smart-delivery/ip-details"
+      "destination": "/api-reference/smart-delivery-v2/run-report"
     },
     {
       "source": "/reference/mail-box-summary",
-      "destination": "/api-reference/smart-delivery/mailbox-summary"
+      "destination": "/api-reference/smart-delivery-v2/mailboxes"
     },
     {
       "source": "/reference/mailbox-count",
-      "destination": "/api-reference/smart-delivery/mailbox-count"
+      "destination": "/api-reference/smart-delivery-v2/mailboxes"
     },
     {
       "source": "/reference/get-all-folders",
-      "destination": "/api-reference/smart-delivery/get-folders"
+      "destination": "/api-reference/smart-delivery-v2/list-folders"
     },
     {
       "source": "/reference/create-folder",
-      "destination": "/api-reference/smart-delivery/create-folder"
+      "destination": "/api-reference/smart-delivery-v2/create-folder"
     },
     {
       "source": "/reference/get-folder-by-id",
-      "destination": "/api-reference/smart-delivery/get-folder-by-id"
+      "destination": "/api-reference/smart-delivery-v2/list-folders"
     },
     {
       "source": "/reference/delete-folder",
-      "destination": "/api-reference/smart-delivery/delete-folder"
+      "destination": "/api-reference/smart-delivery-v2/delete-folder"
     },
     {
       "source": "/reference/fetch-webhooks-by-campaign-id",
@@ -1111,7 +1078,7 @@
     },
     {
       "source": "/reference/create-a-manual-placement",
-      "destination": "/api-reference/smart-delivery/create-manual-test"
+      "destination": "/api-reference/smart-delivery-v2/create-test"
     },
     {
       "source": "/reference/get_v1-analytics-day-wise-stats",
