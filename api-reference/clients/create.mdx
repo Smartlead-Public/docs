@@ -28,8 +28,8 @@ Creates a new client sub-account under your main SmartLead account. Clients are 
   Client display name (company or brand name)
 </ParamField>
 
-<ParamField body="password" type="string">
-  Login password for the client. If not provided, the client will need to set one.
+<ParamField body="password" type="string" required>
+  Login password for the client. Required when creating a client; requests without it return `400`.
 </ParamField>
 
 <ParamField body="logo" type="string">
@@ -68,6 +68,7 @@ curl -X POST "https://server.smartlead.ai/api/v1/client/save?api_key=YOUR_KEY" \
   -d '{
     "email": "admin@acme.com",
     "name": "Acme Agency",
+    "password": "a-strong-password",
     "permission": ["campaigns", "email_accounts", "leads"],
     "is_credit_assigned": true,
     "email_credits": 10000,
